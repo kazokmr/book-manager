@@ -32,3 +32,5 @@ data class RentalInfo(val accountId: Long, val rentalDatetime: LocalDateTime, va
 }
 
 data class RegisterBookRequest(val id: Long, val title: String, val author: String, val releaseDate: LocalDate)
+
+data class UpdateBookRequest(val id: Long, val title: String?, val author: String?, val releaseDate: LocalDate?)

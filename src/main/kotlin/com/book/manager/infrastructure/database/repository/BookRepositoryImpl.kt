@@ -9,9 +9,11 @@ import com.book.manager.infrastructure.database.mapper.BookWithRentalMapper
 import com.book.manager.infrastructure.database.mapper.insert
 import com.book.manager.infrastructure.database.mapper.select
 import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
+import com.book.manager.infrastructure.database.mapper.updateByPrimaryKeySelective
 import com.book.manager.infrastructure.database.record.BookRecord
 import com.book.manager.infrastructure.database.record.BookWithRentalRecord
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 
 @Repository
 class BookRepositoryImpl(
@@ -28,6 +30,10 @@ class BookRepositoryImpl(
 
     override fun register(book: Book) {
         bookMapper.insert(toRecord(book))
+    }
+
+    override fun update(id: Long, title: String?, author: String?, releaseDate: LocalDate?) {
+        bookMapper.updateByPrimaryKeySelective(BookRecord(id, title, author, releaseDate))
     }
 
     private fun toRecord(model: Book): BookRecord {
