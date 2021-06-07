@@ -21,6 +21,7 @@ class BookRepositoryImpl(
     private val bookWithRentalMapper: BookWithRentalMapper,
     private val bookMapper: BookMapper
 ) : BookRepository {
+
     override fun findAllWithRental(): List<BookWithRental> {
         return bookWithRentalMapper.select().map { toModel(it) }
     }
