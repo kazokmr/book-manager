@@ -27,7 +27,7 @@ data class GetBookDetailResponse(
         { RentalInfo(model.rental) })
 }
 
-data class RentalInfo(val accountId: Long, val rentalDatetime: LocalDateTime, val returnDeadline: LocalDateTime) {
+data class RentalInfo(val userId: Long, val rentalDatetime: LocalDateTime, val returnDeadline: LocalDateTime) {
     constructor(rental: Rental) : this(rental.accountId, rental.rentalDatetime, rental.returnDeadline)
 }
 
