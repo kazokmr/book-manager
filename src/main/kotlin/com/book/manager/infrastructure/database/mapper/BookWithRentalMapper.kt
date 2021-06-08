@@ -21,7 +21,7 @@ interface BookWithRentalMapper {
             Result(column = "release_date", property = "releaseDate", jdbcType = JdbcType.DATE),
             Result(column = "account_id", property = "accountId", jdbcType = JdbcType.BIGINT),
             Result(column = "rental_datetime", property = "rentalDateTime", jdbcType = JdbcType.TIMESTAMP),
-            Result(column = "rental_deadline", property = "rentalDeadline", jdbcType = JdbcType.TIMESTAMP)
+            Result(column = "return_deadline", property = "returnDeadline", jdbcType = JdbcType.TIMESTAMP)
         ]
     )
     fun selectMany(selectStatement: SelectStatementProvider): List<BookWithRentalRecord>
