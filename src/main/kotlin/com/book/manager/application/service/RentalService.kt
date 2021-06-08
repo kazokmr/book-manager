@@ -30,4 +30,16 @@ class RentalService(
 
         rentalRepository.startRental(rental)
     }
+
+    @Transactional
+    fun endRental(bookId: Long, accountId: Long) {
+        accountRepository.find(accountId) ?: throw IllegalArgumentException("該当するユーザーが存在しません accountId:$accountId")
+        val book =
+            bookRepository.findWithRental(bookId) ?: throw IllegalArgumentException("該当する書籍が存在しません bookId:$bookId")
+
+        if (!book.isRental) throw IllegalArgumentException("未貸出の書籍です bookId:$bookId")
+        if (book.rental?.accountId != accountId) throw IllegalArgumentException("他のユーザーが貸出中の商品です accountId:$accountId bookId:$bookId")
+
+        rentalRepository.endRental(bookId)
+    }
 }
