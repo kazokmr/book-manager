@@ -6,3 +6,6 @@ spring:
     password: book_manager
   jackson:
     property-naming-strategy: SNAKE_CASE
+logging:
+  level:
+    root: info
