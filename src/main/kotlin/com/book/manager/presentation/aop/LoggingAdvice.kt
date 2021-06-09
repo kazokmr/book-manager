@@ -4,6 +4,8 @@ import com.book.manager.application.service.security.BookManagerUserDetails
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.After
+import org.aspectj.lang.annotation.AfterReturning
+import org.aspectj.lang.annotation.AfterThrowing
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
@@ -45,5 +47,15 @@ class LoggingAdvice {
         logger.info("End Proceed: ${joinPoint.signature} accountId=${account.id}")
 
         return result
+    }
+
+    @AfterReturning("execution(* com.book.manager.presentation.controller..*.*(..))", returning = "returnValue")
+    fun afterReturningLog(joinPoint: JoinPoint, returnValue: Any?) {
+        logger.info("End: ${joinPoint.signature} returnValue=$returnValue")
+    }
+
+    @AfterThrowing("execution(* com.book.manager.presentation.controller..*.*(..))", throwing = "e")
+    fun afterThrowingLog(joinPoint: JoinPoint, e: IllegalArgumentException) {
+        logger.error("Exception: ${e.javaClass} signature=${joinPoint.signature} message=${e.message}")
     }
 }
