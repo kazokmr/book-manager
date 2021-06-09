@@ -2,7 +2,9 @@ package com.book.manager.presentation.aop
 
 import com.book.manager.application.service.security.BookManagerUserDetails
 import org.aspectj.lang.JoinPoint
+import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.After
+import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
 import org.slf4j.LoggerFactory
@@ -31,5 +33,17 @@ class LoggingAdvice {
     fun afterLog(joinPoint: JoinPoint) {
         val account = SecurityContextHolder.getContext().authentication.principal as BookManagerUserDetails
         logger.info("End: ${joinPoint.signature} accountId-${account.id}")
+    }
+
+    @Around("execution(* com.book.manager.presentation.controller..*.*(..))")
+    fun aroundLog(joinPoint: ProceedingJoinPoint): Any? {
+        val account = SecurityContextHolder.getContext().authentication.principal as BookManagerUserDetails
+        logger.info("Start Proceed: ${joinPoint.signature} accountId=${account.id}")
+
+        val result = joinPoint.proceed()
+
+        logger.info("End Proceed: ${joinPoint.signature} accountId=${account.id}")
+
+        return result
     }
 }
