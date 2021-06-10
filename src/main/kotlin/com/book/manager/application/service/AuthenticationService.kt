@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service
 @Service
 class AuthenticationService(private val accountRepository: AccountRepository) {
     fun findAccount(email: String): Account? {
-        return accountRepository.find(email)
+        return accountRepository.findByEmail(email)
     }
 }

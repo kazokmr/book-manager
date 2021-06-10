@@ -38,12 +38,12 @@ internal class RentalServiceTest {
         val rental = Rental(bookId, accountId, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
         val bookWithRental = BookWithRental(book, rental)
 
-        whenever(accountRepository.find(any() as Long)).thenReturn(account)
+        whenever(accountRepository.findById(any() as Long)).thenReturn(account)
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(bookWithRental)
 
         rentalService.endRental(bookId, accountId)
 
-        verify(accountRepository).find(accountId)
+        verify(accountRepository).findById(accountId)
         verify(bookRepository).findWithRental(bookId)
         verify(rentalRepository).endRental(bookId)
     }
@@ -57,7 +57,7 @@ internal class RentalServiceTest {
         val book = Book(bookId, "Kotlin入門", "コトリン太郎", LocalDate.now())
         val bookWithRental = BookWithRental(book, null)
 
-        whenever(accountRepository.find(any() as Long)).thenReturn(account)
+        whenever(accountRepository.findById(any() as Long)).thenReturn(account)
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(bookWithRental)
 
         val exception = assertThrows(IllegalArgumentException::class.java) {
@@ -66,7 +66,7 @@ internal class RentalServiceTest {
 
         assertThat(exception.message).isEqualTo("未貸出の書籍です bookId:$bookId")
 
-        verify(accountRepository).find(accountId)
+        verify(accountRepository).findById(accountId)
         verify(bookRepository).findWithRental(bookId)
         verify(rentalRepository, times(0)).endRental(any())
     }
