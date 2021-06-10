@@ -13,14 +13,14 @@ import org.springframework.stereotype.Repository
 @Repository
 class AccountRepositoryImpl(private val mapper: AccountMapper) : AccountRepository {
 
-    override fun find(email: String): Account? {
+    override fun findByEmail(email: String): Account? {
         val record = mapper.selectOne {
             where(AccountDynamicSqlSupport.Account.email, SqlBuilder.isEqualTo(email))
         }
         return record?.let { toModel(it) }
     }
 
-    override fun find(id: Long): Account? {
+    override fun findById(id: Long): Account? {
         return mapper.selectByPrimaryKey(id)?.let { toModel(it) }
     }
 

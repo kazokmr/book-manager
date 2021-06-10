@@ -28,9 +28,14 @@ dependencies {
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.2.1")
     implementation("redis.clients:jedis")
+    implementation("org.junit.jupiter:junit-jupiter:5.7.0")
     runtimeOnly("org.postgresql:postgresql")
     mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.assertj:assertj-core")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 }
 
 configurations {
