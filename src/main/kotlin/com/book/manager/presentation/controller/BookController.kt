@@ -4,11 +4,13 @@ import com.book.manager.application.service.BookService
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("book")
@@ -21,7 +23,11 @@ class BookController(private val bookService: BookService) {
 
     @GetMapping("detail/{book_id}")
     fun getDetail(@PathVariable("book_id") bookId: Long): GetBookDetailResponse {
-        val book = bookService.getDetail(bookId)
-        return GetBookDetailResponse(book)
+        return try {
+            val book = bookService.getDetail(bookId)
+            GetBookDetailResponse(book)
+        } catch (e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        }
     }
 }
