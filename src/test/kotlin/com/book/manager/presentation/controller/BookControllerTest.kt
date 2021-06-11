@@ -26,21 +26,23 @@ import java.time.LocalDateTime
 
 internal class BookControllerTest {
 
-    private val bookService = mock<BookService>()
+    private val bookRepository = mock<BookRepository>()
+    private val bookService = BookService(bookRepository)
     private val bookController = BookController(bookService)
+    private val book = Book(100L, "Kotlin入門", "コトリン太郎", LocalDate.now())
 
     @Test
     @DisplayName("書籍リストの取得")
     fun `getList is success`() {
-        val bookId = 100L
-        val book = Book(bookId, "Kotlin入門", "コトリン太郎", LocalDate.now())
+
         val bookList = listOf(BookWithRental(book, null))
 
-        whenever(bookService.getList()).thenReturn(bookList)
+        whenever(bookRepository.findAllWithRental()).thenReturn(bookList)
 
-        val expectedResponse = GetBookListResponse(listOf(BookInfo(bookId, "Kotlin入門", "コトリン太郎", false)))
+        val expectedResponse = GetBookListResponse(listOf(BookInfo(BookWithRental(book, null))))
         val expected = ObjectMapper().registerKotlinModule().writeValueAsString(expectedResponse)
         val mockMvc = MockMvcBuilders.standaloneSetup(bookController).build()
+
         val resultResponse = mockMvc.perform(get("/book/list")).andExpect(status().isOk).andReturn().response
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
 
@@ -51,10 +53,9 @@ internal class BookControllerTest {
     @DisplayName("書籍の詳細情報の取得")
     fun `getDetail is success`() {
 
-        val book = Book(100L, "Kotlin入門", "コトリン太郎", LocalDate.now())
         val rental = Rental(book.id, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
         val bookWithRental = BookWithRental(book, rental)
-        whenever(bookService.getDetail(book.id)).thenReturn(bookWithRental)
+        whenever(bookRepository.findWithRental(book.id)).thenReturn(bookWithRental)
 
         val expectedResponse = GetBookDetailResponse(bookWithRental)
         // LocalDateTimeを利用するためにJavaTimeModuleを登録する(これはKotlinModuleだと登録できない)
@@ -72,9 +73,6 @@ internal class BookControllerTest {
     @DisplayName("書籍情報が取得できない場合")
     fun `getDetail when book is not exists then throw Exception`() {
 
-        val bookRepository = mock<BookRepository>()
-        val bookService = BookService(bookRepository)
-        val bookController = BookController(bookService)
         whenever(bookRepository.findWithRental(any())).thenReturn(null)
         val bookId = 100L
 

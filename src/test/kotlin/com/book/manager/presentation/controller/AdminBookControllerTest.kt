@@ -26,7 +26,8 @@ import java.time.LocalDate
 
 internal class AdminBookControllerTest {
 
-    private val adminBookService = mock<AdminBookService>()
+    private val bookRepository = mock<BookRepository>()
+    private val adminBookService = AdminBookService(bookRepository)
     private val adminBookController = AdminBookController(adminBookService)
     private val mockMvc = MockMvcBuilders.standaloneSetup(adminBookController).build()
 
@@ -34,33 +35,37 @@ internal class AdminBookControllerTest {
     @DisplayName("書籍を登録する")
     fun `register when book of request is not registered then the book is done`() {
 
+        // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
         val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
         val book = Book(request.id, request.title, request.author, request.releaseDate)
 
+        whenever(bookRepository.findWithRental(any())).thenReturn(null)
+
+        // When
         mockMvc.perform(post("/admin/book/register").contentType(APPLICATION_JSON).content(json))
             .andExpect(status().isOk)
 
-        verify(adminBookService).register(book)
+        // Then
+        verify(bookRepository).register(book)
     }
 
     @Test
     @DisplayName("書籍IDが登録済みなら登録しない")
     fun `register when book is exist then throw Exception`() {
-        val bookRepository = mock<BookRepository>()
-        val adminBookService = AdminBookService(bookRepository)
-        val adminBookController = AdminBookController(adminBookService)
 
+        // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
         val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
         val book = Book(request.id, request.title, request.author, request.releaseDate)
 
         whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
 
-        val mockMvc = MockMvcBuilders.standaloneSetup(adminBookController).build()
+        // When
         val response = mockMvc.perform(post("/admin/book/register").contentType(APPLICATION_JSON).content(json))
             .andExpect(status().isBadRequest).andReturn().response
 
+        // Then
         Assertions.assertThat(response.errorMessage).isEqualTo("既に存在する書籍ID: ${book.id}")
         verify(bookRepository, times(0)).register(any())
     }
@@ -69,31 +74,36 @@ internal class AdminBookControllerTest {
     @DisplayName("書籍を更新する")
     fun `update when book is exist then update book`() {
 
+        // Given
         val request = UpdateBookRequest(100L, "title", "author", LocalDate.now())
         val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
+        val book = Book(request.id, request.title!!, request.author!!, request.releaseDate!!)
 
+        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
+
+        // When
         mockMvc.perform(put("/admin/book/update").contentType(APPLICATION_JSON).content(json))
             .andExpect(status().isOk)
 
-        verify(adminBookService).update(request.id, request.title, request.author, request.releaseDate)
+        // Then
+        verify(bookRepository).update(request.id, request.title, request.author, request.releaseDate)
     }
 
     @Test
     @DisplayName("書籍IDが無ければ更新しない")
     fun `update when book is not exist then throw Exception`() {
-        val bookRepository = mock<BookRepository>()
-        val adminBookService = AdminBookService(bookRepository)
-        val adminBookController = AdminBookController(adminBookService)
 
+        // Given
         val request = UpdateBookRequest(100L, "title", "author", LocalDate.now())
         val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
 
         whenever(bookRepository.findWithRental(any())).thenReturn(null)
 
-        val mockMvc = MockMvcBuilders.standaloneSetup(adminBookController).build()
+        // When
         val response = mockMvc.perform(put("/admin/book/update").contentType(APPLICATION_JSON).content(json))
             .andExpect(status().isBadRequest).andReturn().response
 
+        // Then
         Assertions.assertThat(response.errorMessage).isEqualTo("存在しない書籍ID: ${request.id}")
         verify(bookRepository, times(0)).update(any(), any(), any(), any())
     }
@@ -101,25 +111,34 @@ internal class AdminBookControllerTest {
     @Test
     @DisplayName("書籍を削除する")
     fun `delete when book is exist then delete it`() {
+
+        // Given
         val bookId = 100L
+        val book = Book(bookId, "title", "author", LocalDate.now())
+
+        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
+
+        // When
         mockMvc.perform(delete("/admin/book/delete/$bookId")).andExpect(status().isOk)
-        verify(adminBookService).delete(bookId)
+
+        // Then
+        verify(bookRepository).delete(bookId)
     }
 
     @Test
     @DisplayName("書籍IDが無ければ削除しない")
     fun `delete when book is not exist then throw Exception`() {
-        val bookRepository = mock<BookRepository>()
-        val adminBookService = AdminBookService(bookRepository)
-        val adminBookController = AdminBookController(adminBookService)
+
+        // Given
         val bookId = 100L
 
         whenever(bookRepository.findWithRental(any())).thenReturn(null)
 
-        val mockMvc = MockMvcBuilders.standaloneSetup(adminBookController).build()
+        // When
         val response =
             mockMvc.perform(delete("/admin/book/delete/$bookId")).andExpect(status().isBadRequest).andReturn().response
 
+        // Then
         Assertions.assertThat(response.errorMessage).isEqualTo("存在しない書籍ID: $bookId")
         verify(bookRepository, times(0)).delete(bookId)
     }
