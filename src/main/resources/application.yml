@@ -9,3 +9,6 @@ spring:
 logging:
   level:
     root: info
+server:
+  error:
+    include-message: always
