@@ -22,7 +22,7 @@
     <Loggers>
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
+            <!--            <AppenderRef ref="RollingFile"/>-->
         </Root>
         <!-- 例) com.book.manager パッケージ以下で、traceレベルのログを出力するときは以下を有効にする -->
         <!--        <Logger name="com.book.manager" level="trace"/>-->
