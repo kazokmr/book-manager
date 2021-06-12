@@ -16,6 +16,7 @@ class BookManagerUserDetailsService(private val authenticationService: Authentic
     }
 }
 
+// IDを追加するためにUserDetails(User) をカスタマイズする
 data class BookManagerUserDetails(val id: Long, val email: String, val pass: String, val roleType: RoleType) :
     UserDetails {
     constructor(account: Account) : this(account.id, account.email, account.password, account.roleType)

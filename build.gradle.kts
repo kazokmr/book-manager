@@ -32,6 +32,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.assertj:assertj-core")
     testImplementation("org.mockito:mockito-core")

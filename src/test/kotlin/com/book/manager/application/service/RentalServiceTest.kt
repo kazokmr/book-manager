@@ -64,7 +64,7 @@ internal class RentalServiceTest {
             rentalService.endRental(bookId, accountId)
         }
 
-        assertThat(exception.message).isEqualTo("未貸出の書籍です bookId:$bookId")
+        assertThat(exception.message).isEqualTo("未貸出の書籍です bookId: $bookId")
 
         verify(accountRepository).findById(accountId)
         verify(bookRepository).findWithRental(bookId)
