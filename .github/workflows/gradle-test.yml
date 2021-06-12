@@ -49,6 +49,23 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
+      # 依存関係をキャッシュする
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       # Build with Gradle
       - name: Build with Gradle
         run: ./gradlew clean test
+
+      # 不要なキャッシュの削除
+      - name: Cleanup Gradle Cache
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties
