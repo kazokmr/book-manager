@@ -20,6 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig(private val authenticationService: AuthenticationService) : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         http.authorizeRequests()
+            .mvcMatchers("/greeter/**").permitAll()
             .mvcMatchers("/login").permitAll()
             .mvcMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
             .anyRequest().authenticated()
