@@ -41,6 +41,12 @@ internal class BookManagerUserDetailsServiceTest {
     }
 }
 
+/*
+認証済みテストユーザーを利用するためのカスタムMock
+各プロパティはデフォルト値なのでアノテーションパラメータで変更可能。
+FactoryクラスにWithMockCustomUserSecurityContextFactoryを指定して、カスタムAuthenticationプリンシパル(BookManagerUserDetails)を
+テスト実行時のContext領域にセットする
+ */
 @Retention(AnnotationRetention.RUNTIME)
 @WithSecurityContext(factory = WithMockCustomUserSecurityContextFactory::class)
 annotation class WithCustomMockUser(
