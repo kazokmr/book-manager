@@ -14,9 +14,11 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
@@ -26,10 +28,19 @@ import java.time.LocalDate
 
 internal class AdminBookControllerTest {
 
-    private val bookRepository = mock<BookRepository>()
-    private val adminBookService = AdminBookService(bookRepository)
-    private val adminBookController = AdminBookController(adminBookService)
-    private val mockMvc = MockMvcBuilders.standaloneSetup(adminBookController).build()
+    private lateinit var mockMvc: MockMvc
+
+    private lateinit var bookRepository: BookRepository
+    private lateinit var adminBookService: AdminBookService
+    private lateinit var adminBookController: AdminBookController
+
+    @BeforeEach
+    internal fun setUp() {
+        bookRepository = mock()
+        adminBookService = AdminBookService(bookRepository)
+        adminBookController = AdminBookController(adminBookService)
+        mockMvc = MockMvcBuilders.standaloneSetup(adminBookController).build()
+    }
 
     @Test
     @DisplayName("書籍を登録する")

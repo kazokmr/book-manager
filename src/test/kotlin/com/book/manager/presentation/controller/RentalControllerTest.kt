@@ -19,10 +19,13 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -34,21 +37,36 @@ import java.time.LocalDateTime
 @WithCustomMockUser
 internal class RentalControllerTest {
 
-    private val accountRepository = mock<AccountRepository>()
-    private val bookRepository = mock<BookRepository>()
-    private val rentalRepository = mock<RentalRepository>()
-    private val rentalService = RentalService(accountRepository, bookRepository, rentalRepository)
-    private val rentalController = RentalController(rentalService)
-    private val mockMvc = MockMvcBuilders.standaloneSetup(rentalController).build()
-    private val account = Account(1000L, "test@example.com", "pass", "test", RoleType.USER)
-    private val book = Book(1L, "title", "author", LocalDate.now())
+    private lateinit var mockMvc: MockMvc
 
-//    @BeforeEach
-//    internal fun setUp() {
+    private lateinit var accountRepository: AccountRepository
+    private lateinit var bookRepository: BookRepository
+    private lateinit var rentalRepository: RentalRepository
+    private lateinit var rentalService: RentalService
+    private lateinit var rentalController: RentalController
+
+    private lateinit var account: Account
+    private lateinit var book: Book
+
+    @BeforeEach
+    internal fun setUp() {
 //        val principal = BookManagerUserDetails(account)
 //        val auth = UsernamePasswordAuthenticationToken(principal, principal.password, principal.authorities)
 //        SecurityContextHolder.getContext().authentication = auth
-//    }
+        accountRepository = mock()
+        bookRepository = mock()
+        rentalRepository = mock()
+        rentalService = RentalService(accountRepository, bookRepository, rentalRepository)
+        rentalController = RentalController(rentalService)
+        mockMvc = MockMvcBuilders.standaloneSetup(rentalController).build()
+//        mockMvc =
+//            MockMvcBuilders
+//                .webAppContextSetup(webApplicationContext)
+//                .apply<DefaultMockMvcBuilder>(springSecurity())
+//                .build()
+        account = Account(1000L, "test@example.com", "pass", "test", RoleType.USER)
+        book = Book(1L, "title", "author", LocalDate.now())
+    }
 
     @Test
     @DisplayName("書籍の貸出")
@@ -62,7 +80,13 @@ internal class RentalControllerTest {
         whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
 
         // When
-        mockMvc.perform(post("/rental/start").contentType(APPLICATION_JSON).content(json))
+        mockMvc
+            .perform(
+                post("/rental/start")
+                    .contentType(APPLICATION_JSON)
+                    .content(json)
+                    .with(csrf().asHeader())
+            )
             .andExpect(status().isOk)
 
         // Then

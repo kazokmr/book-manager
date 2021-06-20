@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -17,8 +18,14 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 
 internal class BookManagerUserDetailsServiceTest {
 
-    private val authenticationService = mock<AuthenticationService>()
-    private val bookManagerUserDetailsService = BookManagerUserDetailsService(authenticationService)
+    private lateinit var authenticationService: AuthenticationService
+    private lateinit var bookManagerUserDetailsService: BookManagerUserDetailsService
+
+    @BeforeEach
+    internal fun setUp() {
+        authenticationService = mock()
+        bookManagerUserDetailsService = BookManagerUserDetailsService(authenticationService)
+    }
 
     @Test
     @DisplayName("アカウントが無ければNullを返す")
@@ -55,9 +62,9 @@ annotation class WithCustomMockUser(
     val pass: String = "pass",
     val username: String = "test",
     val roleType: RoleType = RoleType.USER
-) {}
+)
 
-class WithMockCustomUserSecurityContextFactory() : WithSecurityContextFactory<WithCustomMockUser> {
+class WithMockCustomUserSecurityContextFactory : WithSecurityContextFactory<WithCustomMockUser> {
     override fun createSecurityContext(user: WithCustomMockUser): SecurityContext {
         val account = Account(user.id, user.email, user.pass, user.username, user.roleType)
         val principal = BookManagerUserDetails(account)

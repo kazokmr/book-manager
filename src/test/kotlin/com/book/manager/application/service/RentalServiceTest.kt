@@ -15,6 +15,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -22,11 +23,19 @@ import java.time.LocalDateTime
 
 internal class RentalServiceTest {
 
-    private val accountRepository = mock<AccountRepository>()
-    private val bookRepository = mock<BookRepository>()
-    private val rentalRepository = mock<RentalRepository>()
+    private lateinit var accountRepository: AccountRepository
+    private lateinit var bookRepository: BookRepository
+    private lateinit var rentalRepository: RentalRepository
 
-    private val rentalService = RentalService(accountRepository, bookRepository, rentalRepository)
+    private lateinit var rentalService: RentalService
+
+    @BeforeEach
+    internal fun setUp() {
+        accountRepository = mock()
+        bookRepository = mock()
+        rentalRepository = mock()
+        rentalService = RentalService(accountRepository, bookRepository, rentalRepository)
+    }
 
     @Test
     @DisplayName("書籍が借りられていたら、貸出情報を削除する")

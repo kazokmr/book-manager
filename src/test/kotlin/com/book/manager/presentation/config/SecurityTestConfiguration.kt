@@ -2,10 +2,10 @@ package com.book.manager.presentation.config
 
 import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.security.BookManagerUserDetailsService
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 
-@Configuration
+@TestConfiguration
 class SecurityTestConfiguration(private val authenticationService: AuthenticationService) {
 
     /*  このBean定義は、Controllerクラスのテストで、認証済みユーザーをBookManagerUserDetailsServiceクラスから取得する

@@ -8,13 +8,20 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 internal class AuthenticationServiceTest {
 
-    private val accountRepository = mock<AccountRepository>()
-    private val authenticationService = AuthenticationService(accountRepository)
+    private lateinit var accountRepository: AccountRepository
+    private lateinit var authenticationService: AuthenticationService
+
+    @BeforeEach
+    internal fun setUp() {
+        accountRepository = mock()
+        authenticationService = AuthenticationService(accountRepository)
+    }
 
     @Test
     @DisplayName("EmailでDB検索を行うこと")
