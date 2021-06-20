@@ -15,8 +15,10 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -26,26 +28,38 @@ import java.time.LocalDateTime
 
 internal class BookControllerTest {
 
-    private val bookRepository = mock<BookRepository>()
-    private val bookService = BookService(bookRepository)
-    private val bookController = BookController(bookService)
-    private val book = Book(100L, "Kotlin入門", "コトリン太郎", LocalDate.now())
+    private lateinit var mockMvc: MockMvc
+
+    private lateinit var bookRepository: BookRepository
+    private lateinit var bookService: BookService
+    private lateinit var bookController: BookController
+    private lateinit var book: Book
+
+    @BeforeEach
+    internal fun setUp() {
+        bookRepository = mock()
+        bookService = BookService(bookRepository)
+        bookController = BookController(bookService)
+        mockMvc = MockMvcBuilders.standaloneSetup(bookController).build()
+
+        book = Book(100L, "Kotlin入門", "コトリン太郎", LocalDate.now())
+    }
 
     @Test
     @DisplayName("書籍リストの取得")
     fun `getList is success`() {
 
+        // Given
         val bookList = listOf(BookWithRental(book, null))
-
         whenever(bookRepository.findAllWithRental()).thenReturn(bookList)
 
+        // When
+        val resultResponse = mockMvc.perform(get("/book/list")).andExpect(status().isOk).andReturn().response
+
+        // Then
+        val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
         val expectedResponse = GetBookListResponse(listOf(BookInfo(BookWithRental(book, null))))
         val expected = ObjectMapper().registerKotlinModule().writeValueAsString(expectedResponse)
-        val mockMvc = MockMvcBuilders.standaloneSetup(bookController).build()
-
-        val resultResponse = mockMvc.perform(get("/book/list")).andExpect(status().isOk).andReturn().response
-        val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-
         assertThat(result).isEqualTo(expected)
     }
 
@@ -53,19 +67,21 @@ internal class BookControllerTest {
     @DisplayName("書籍の詳細情報の取得")
     fun `getDetail is success`() {
 
+        // Given
         val rental = Rental(book.id, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
         val bookWithRental = BookWithRental(book, rental)
+
         whenever(bookRepository.findWithRental(book.id)).thenReturn(bookWithRental)
 
-        val expectedResponse = GetBookDetailResponse(bookWithRental)
-        // LocalDateTimeを利用するためにJavaTimeModuleを登録する(これはKotlinModuleだと登録できない)
-        val expected = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(expectedResponse)
-
-        val mockMvc = MockMvcBuilders.standaloneSetup(bookController).build()
+        // When
         val resultResponse =
             mockMvc.perform(get("/book/detail/${book.id}")).andExpect(status().isOk).andReturn().response
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
 
+        // Then
+        val expectedResponse = GetBookDetailResponse(bookWithRental)
+        // LocalDateTimeを利用するためにJavaTimeModuleを登録する(これはKotlinModuleだと登録できない)
+        val expected = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(expectedResponse)
         assertThat(result).isEqualTo(expected)
     }
 
@@ -73,13 +89,15 @@ internal class BookControllerTest {
     @DisplayName("書籍情報が取得できない場合")
     fun `getDetail when book is not exists then throw Exception`() {
 
-        whenever(bookRepository.findWithRental(any())).thenReturn(null)
+        // Given
         val bookId = 100L
+        whenever(bookRepository.findWithRental(any())).thenReturn(null)
 
-        val mockMvc = MockMvcBuilders.standaloneSetup(bookController).build()
-
+        // When
         val response =
             mockMvc.perform(get("/book/detail/$bookId")).andExpect(status().isBadRequest).andReturn().response
+
+        // Then
         assertThat(response.errorMessage).isEqualTo("存在しない書籍ID: $bookId")
     }
 }

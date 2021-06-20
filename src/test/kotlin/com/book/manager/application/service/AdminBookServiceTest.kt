@@ -10,16 +10,23 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class AdminBookServiceTest {
 
-    private val bookRepository = mock<BookRepository>()
-    private val adminBookService = AdminBookService(bookRepository)
+    private lateinit var bookRepository: BookRepository
+    private lateinit var adminBookService: AdminBookService
+    private lateinit var book: Book
 
-    private val book = Book(1L, "title", "hogehoge", LocalDate.now())
+    @BeforeEach
+    internal fun setUp() {
+        bookRepository = mock()
+        adminBookService = AdminBookService(bookRepository)
+        book = Book(1L, "title", "hogehoge", LocalDate.now())
+    }
 
     @Test
     @DisplayName("書籍の登録処理")

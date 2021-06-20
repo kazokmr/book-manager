@@ -6,14 +6,21 @@ import com.book.manager.domain.repository.BookRepository
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class BookServiceTest {
 
-    private val bookRepository = mock<BookRepository>()
-    private val bookService = BookService(bookRepository)
+    private lateinit var bookRepository: BookRepository
+    private lateinit var bookService: BookService
+
+    @BeforeEach
+    internal fun setUp() {
+        bookRepository = mock()
+        bookService = BookService(bookRepository)
+    }
 
     @Test
     @DisplayName("書籍リストがあればリストを返す")
