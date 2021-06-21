@@ -1,6 +1,7 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.RentalService
+import com.book.manager.application.service.security.BookManagerUserDetails
 import com.book.manager.application.service.security.WithCustomMockUser
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
@@ -22,7 +23,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -30,10 +31,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delet
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.bind.support.WebDataBinderFactory
+import org.springframework.web.context.request.NativeWebRequest
+import org.springframework.web.method.support.HandlerMethodArgumentResolver
+import org.springframework.web.method.support.ModelAndViewContainer
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@SpringBootTest
 @WithCustomMockUser
 internal class RentalControllerTest {
 
@@ -50,20 +54,16 @@ internal class RentalControllerTest {
 
     @BeforeEach
     internal fun setUp() {
-//        val principal = BookManagerUserDetails(account)
-//        val auth = UsernamePasswordAuthenticationToken(principal, principal.password, principal.authorities)
-//        SecurityContextHolder.getContext().authentication = auth
         accountRepository = mock()
         bookRepository = mock()
         rentalRepository = mock()
         rentalService = RentalService(accountRepository, bookRepository, rentalRepository)
         rentalController = RentalController(rentalService)
-        mockMvc = MockMvcBuilders.standaloneSetup(rentalController).build()
-//        mockMvc =
-//            MockMvcBuilders
-//                .webAppContextSetup(webApplicationContext)
-//                .apply<DefaultMockMvcBuilder>(springSecurity())
-//                .build()
+        mockMvc =
+            MockMvcBuilders
+                .standaloneSetup(rentalController)
+                .setCustomArgumentResolvers(putAuthenticationPrincipal)
+                .build()
         account = Account(1000L, "test@example.com", "pass", "test", RoleType.USER)
         book = Book(1L, "title", "author", LocalDate.now())
     }
@@ -75,9 +75,10 @@ internal class RentalControllerTest {
         // Given
         val rentalStartRequest = RentalStartRequest(book.id)
         val json = ObjectMapper().registerKotlinModule().writeValueAsString(rentalStartRequest)
+        val bookWithRental = BookWithRental(book, null)
 
         whenever(accountRepository.findById(any())).thenReturn(account)
-        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
+        whenever(bookRepository.findWithRental(any())).thenReturn(bookWithRental)
 
         // When
         mockMvc
@@ -236,5 +237,18 @@ internal class RentalControllerTest {
         // Then
         assertThat(response.errorMessage).isEqualTo("他のユーザーが貸出中の商品です accountId: ${account.id}, bookId: ${book.id}")
         verify(rentalRepository, times(0)).endRental(any())
+    }
+
+    // Controllerクラスの @AuthenticationPrincipalセッションにダミーPrincipalをセットする処理
+    private val putAuthenticationPrincipal = object : HandlerMethodArgumentResolver {
+        override fun supportsParameter(parameter: MethodParameter) =
+            parameter.parameterType.isAssignableFrom(BookManagerUserDetails::class.java)
+
+        override fun resolveArgument(
+            parameter: MethodParameter,
+            mavContainer: ModelAndViewContainer?,
+            webRequest: NativeWebRequest,
+            binderFactory: WebDataBinderFactory?
+        ) = BookManagerUserDetails(account)
     }
 }
