@@ -1,8 +1,8 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.RentalService
+import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.application.service.security.BookManagerUserDetails
-import com.book.manager.application.service.security.WithCustomMockUser
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.model.Book
