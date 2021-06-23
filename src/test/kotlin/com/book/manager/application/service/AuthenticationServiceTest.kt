@@ -26,31 +26,45 @@ internal class AuthenticationServiceTest {
     @Test
     @DisplayName("EmailでDB検索を行うこと")
     fun `findAccount when call with email then read db with email`() {
+
+        // Given
         val email = "test@example.com"
+
+        // When
         authenticationService.findAccount(email)
+
+        // Then
         verify(accountRepository).findByEmail(email)
     }
 
     @Test
     @DisplayName("Emailからユーザーを検索する")
     fun `findAccount when email is not null then return account`() {
+
+        // Given
         val email = "test@example.com"
         val account = Account(100L, email, "pass", "hogehoge", RoleType.USER)
-        whenever(accountRepository.findByEmail(any())).thenReturn(account)
+        whenever(accountRepository.findByEmail(any() as String)).thenReturn(account)
 
+        // When
         val result = authenticationService.findAccount(email)
 
+        // Then
         assertThat(result).isEqualTo(account)
     }
 
     @Test
     @DisplayName("Emailに該当するユーザーがいなければNullを返す")
     fun `findAccount when account does not have email return null`() {
-        val email = "test@example.com"
-        whenever(accountRepository.findByEmail(any())).thenReturn(null)
 
+        // Given
+        val email = "test@example.com"
+        whenever(accountRepository.findByEmail(any() as String)).thenReturn(null)
+
+        // When
         val result = authenticationService.findAccount(email)
 
+        // Then
         assertThat(result).isNull()
     }
 }

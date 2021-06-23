@@ -4,7 +4,6 @@ import com.book.manager.application.service.BookService
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
-import com.book.manager.domain.repository.BookRepository
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
@@ -18,10 +17,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.server.ResponseStatusException
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -29,16 +30,13 @@ import java.time.LocalDateTime
 internal class BookControllerTest {
 
     private lateinit var mockMvc: MockMvc
-
-    private lateinit var bookRepository: BookRepository
     private lateinit var bookService: BookService
     private lateinit var bookController: BookController
     private lateinit var book: Book
 
     @BeforeEach
     internal fun setUp() {
-        bookRepository = mock()
-        bookService = BookService(bookRepository)
+        bookService = mock()
         bookController = BookController(bookService)
         mockMvc = MockMvcBuilders.standaloneSetup(bookController).build()
 
@@ -51,7 +49,7 @@ internal class BookControllerTest {
 
         // Given
         val bookList = listOf(BookWithRental(book, null))
-        whenever(bookRepository.findAllWithRental()).thenReturn(bookList)
+        whenever(bookService.getList()).thenReturn(bookList)
 
         // When
         val resultResponse = mockMvc.perform(get("/book/list")).andExpect(status().isOk).andReturn().response
@@ -71,7 +69,7 @@ internal class BookControllerTest {
         val rental = Rental(book.id, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
         val bookWithRental = BookWithRental(book, rental)
 
-        whenever(bookRepository.findWithRental(book.id)).thenReturn(bookWithRental)
+        whenever(bookService.getDetail(any() as Long)).thenReturn(bookWithRental)
 
         // When
         val resultResponse =
@@ -90,14 +88,17 @@ internal class BookControllerTest {
     fun `getDetail when book is not exists then throw Exception`() {
 
         // Given
-        val bookId = 100L
-        whenever(bookRepository.findWithRental(any())).thenReturn(null)
+        whenever(bookService.getDetail(any() as Long)).thenThrow(IllegalArgumentException::class.java)
 
         // When
-        val response =
-            mockMvc.perform(get("/book/detail/$bookId")).andExpect(status().isBadRequest).andReturn().response
+        val exception = mockMvc
+            .perform(get("/book/detail/${book.id}"))
+            .andExpect(status().isBadRequest)
+            .andReturn()
+            .resolvedException
 
         // Then
-        assertThat(response.errorMessage).isEqualTo("存在しない書籍ID: $bookId")
+        assertThat(exception!!::class).isEqualTo(ResponseStatusException::class)
+        assertThat(exception.message).isEqualTo("${HttpStatus.BAD_REQUEST}")
     }
 }
