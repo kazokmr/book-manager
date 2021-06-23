@@ -25,73 +25,96 @@ internal class AdminBookServiceTest {
     internal fun setUp() {
         bookRepository = mock()
         adminBookService = AdminBookService(bookRepository)
-        book = Book(1L, "title", "hogehoge", LocalDate.now())
+        book = Book(100, "title", "hogehoge", LocalDate.now())
     }
 
     @Test
-    @DisplayName("書籍の登録処理")
+    @DisplayName("書籍の登録")
     fun `register when book is not null then register the book`() {
+
+        // When
         adminBookService.register(book)
+
+        // Then
         verify(bookRepository).register(book)
     }
 
     @Test
-    @DisplayName("書籍が登録済みなら例外発生")
+    @DisplayName("書籍が既に存在していたら登録しない")
     fun `register when book has already been existed then throw Exception`() {
-        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
 
+        // Given
+        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
+
+        // When
         val exception = Assertions.assertThrows(IllegalArgumentException::class.java) {
             adminBookService.register(book)
         }
 
+        // Then
         assertThat(exception.message).isEqualTo("既に存在する書籍ID: ${book.id}")
-        verify(bookRepository, times(0)).register(any())
+        verify(bookRepository, times(0)).register(any() as Book)
     }
 
     @Test
-    @DisplayName("書籍の削除処理")
+    @DisplayName("書籍の削除")
     fun `delete when book is no null then delete the book`() {
-        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
 
+        // Given
+        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
+
+        // When
         adminBookService.delete(book.id)
 
+        // Then
         verify(bookRepository).delete(book.id)
     }
 
     @Test
-    @DisplayName("書籍が存在しなければ削除で例外を発生する")
+    @DisplayName("書籍が存在しなければ削除しない")
     fun `delete when book is not exist then throw Exception`() {
-        whenever(bookRepository.findWithRental(any())).thenReturn(null)
 
+        // Given
+        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
+
+        // When
         val exception = Assertions.assertThrows(IllegalArgumentException::class.java) {
             adminBookService.delete(book.id)
         }
 
+        // Then
         assertThat(exception.message).isEqualTo("存在しない書籍ID: ${book.id}")
-        verify(bookRepository, times(0)).delete(any())
+        verify(bookRepository, times(0)).delete(any() as Long)
     }
 
     @Test
-    @DisplayName("書籍の更新処理")
+    @DisplayName("書籍の更新")
     fun `update when book is exists then update the book`() {
-        whenever(bookRepository.findWithRental(book.id)).thenReturn(BookWithRental(book, null))
 
+        // Given
+        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
+
+        // When
         adminBookService.update(book.id, "test", "author", LocalDate.now())
 
-        verify(bookRepository).update(any(), any(), any(), any())
+        // Then
+        verify(bookRepository).update(any() as Long, any() as String, any() as String, any() as LocalDate)
     }
 
     @Test
     @DisplayName("書籍が存在しなければ更新すると例外が発生する")
     fun `update when book is not exist then throw Exception`() {
 
-        whenever(bookRepository.findWithRental(book.id)).thenReturn(null)
+        // Given
+        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
 
+        // When
         val exception = Assertions.assertThrows(java.lang.IllegalArgumentException::class.java) {
             adminBookService.update(book.id, "test", "author", LocalDate.now())
         }
 
+        // Then
         assertThat(exception.message).isEqualTo("存在しない書籍ID: ${book.id}")
-        verify(bookRepository, times(0)).update(any(), any(), any(), any())
+        verify(bookRepository, times(0)).update(any() as Long, any() as String, any() as String, any() as LocalDate)
     }
 }

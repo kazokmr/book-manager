@@ -38,7 +38,7 @@ class RentalService(
             bookRepository.findWithRental(bookId) ?: throw IllegalArgumentException("該当する書籍が存在しません bookId: $bookId")
 
         if (!book.isRental) throw IllegalArgumentException("未貸出の書籍です bookId: $bookId")
-        if (book.rental?.accountId != accountId) throw IllegalArgumentException("他のユーザーが貸出中の商品です accountId: $accountId, bookId: $bookId")
+        if (book.rental?.accountId != accountId) throw IllegalArgumentException("他のユーザーが貸出中の書籍です bookId: $bookId")
 
         rentalRepository.endRental(bookId)
     }
