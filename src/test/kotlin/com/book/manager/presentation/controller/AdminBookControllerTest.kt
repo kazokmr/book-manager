@@ -1,6 +1,7 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.AdminBookService
+import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
@@ -14,7 +15,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -42,7 +42,7 @@ internal class AdminBookControllerTest {
 
     @Test
     @DisplayName("書籍を登録する")
-    fun `register when book of request is not registered then the book is done`() {
+    fun `register when book of request is not registered then register`() {
 
         // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
@@ -64,14 +64,15 @@ internal class AdminBookControllerTest {
     }
 
     @Test
-    @DisplayName("書籍が登録できなければ400 BadRequest エラー")
-    fun `register when book can not be register then BadRequest`() {
+    @DisplayName("書籍が登録できなければ HTTP400 BAD_REQUEST")
+    fun `register when book can not be register then throw BadRequest`() {
 
         // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
         val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
+        val reason = "エラー: ${request.id}"
 
-        whenever(adminBookService.register(any() as Book)).thenThrow(IllegalArgumentException::class.java)
+        whenever(adminBookService.register(any() as Book)).thenReturn(Result.Failure(reason))
 
         // When
         val exception =
@@ -87,8 +88,9 @@ internal class AdminBookControllerTest {
                 .resolvedException
 
         // Then
-        assertThat(exception!!::class.java).isEqualTo(ResponseStatusException::class.java)
-        assertThat(exception.message).isEqualTo("${HttpStatus.BAD_REQUEST}")
+        assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
+        exception as ResponseStatusException
+        assertThat(exception.reason).isEqualTo(reason)
     }
 
     @Test
@@ -114,15 +116,16 @@ internal class AdminBookControllerTest {
     }
 
     @Test
-    @DisplayName("書籍が更新できなければ400 BadRequest エラー")
-    fun `update when book can not be update then return BadRequest`() {
+    @DisplayName("書籍が更新できなければ HTTP400 BAD_REQUEST")
+    fun `update when book can not be update then throw BadRequest`() {
 
         // Given
         val request = UpdateBookRequest(100L, "title", "author", LocalDate.now())
         val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
+        val reason = "エラー: ${request.id}"
 
         whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
-            .thenThrow(IllegalArgumentException::class.java)
+            .thenReturn(Result.Failure(reason))
 
         // When
         val exception =
@@ -138,8 +141,9 @@ internal class AdminBookControllerTest {
                 .resolvedException
 
         // Then
-        assertThat(exception!!::class.java).isEqualTo(ResponseStatusException::class.java)
-        assertThat(exception.message).isEqualTo("${HttpStatus.BAD_REQUEST}")
+        assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
+        exception as ResponseStatusException
+        assertThat(exception.reason).isEqualTo(reason)
     }
 
     @Test
@@ -162,12 +166,13 @@ internal class AdminBookControllerTest {
     }
 
     @Test
-    @DisplayName("書籍が削除できなければ400 BadRequest エラー")
-    fun `delete when book can not be delete then return BadRequest`() {
+    @DisplayName("書籍が削除できなければ HTTP400 BAD_REQUEST")
+    fun `delete when book can not be delete then throw BadRequest`() {
 
         // Given
         val bookId = 100L
-        whenever(adminBookService.delete(any() as Long)).thenThrow(IllegalArgumentException::class.java)
+        val reason = "エラー: $bookId"
+        whenever(adminBookService.delete(any() as Long)).thenReturn(Result.Failure(reason))
 
         // When
         val exception =
@@ -181,8 +186,9 @@ internal class AdminBookControllerTest {
                 .resolvedException
 
         // Then
-        assertThat(exception!!::class.java).isEqualTo(ResponseStatusException::class.java)
-        assertThat(exception.message).isEqualTo("${HttpStatus.BAD_REQUEST}")
+        assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
+        exception as ResponseStatusException
+        assertThat(exception.reason).isEqualTo(reason)
     }
 
 }

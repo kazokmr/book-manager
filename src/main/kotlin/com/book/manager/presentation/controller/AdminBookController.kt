@@ -1,6 +1,7 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.AdminBookService
+import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
@@ -22,28 +23,26 @@ class AdminBookController(private val adminBookService: AdminBookService) {
 
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterBookRequest) {
-        try {
-            adminBookService.register(Book(request.id, request.title, request.author, request.releaseDate))
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        when (val result =
+            adminBookService.register(Book(request.id, request.title, request.author, request.releaseDate))) {
+            is Result.Success -> result.data
+            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
         }
     }
 
     @PutMapping("/update")
     fun update(@RequestBody request: UpdateBookRequest) {
-        try {
-            adminBookService.update(request.id, request.title, request.author, request.releaseDate)
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        when (val result = adminBookService.update(request.id, request.title, request.author, request.releaseDate)) {
+            is Result.Success -> result.data
+            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
         }
     }
 
     @DeleteMapping("/delete/{bookId}")
     fun delete(@PathVariable("bookId") bookId: Long) {
-        try {
-            adminBookService.delete(bookId)
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        when (val result = adminBookService.delete(bookId)) {
+            is Result.Success -> result.data
+            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
         }
     }
 }

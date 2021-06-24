@@ -1,6 +1,7 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.RentalService
+import com.book.manager.application.service.result.Result
 import com.book.manager.application.service.security.BookManagerUserDetails
 import com.book.manager.presentation.form.RentalStartRequest
 import org.springframework.http.HttpStatus
@@ -24,19 +25,17 @@ class RentalController(private val rentalService: RentalService) {
         @AuthenticationPrincipal userDetails: BookManagerUserDetails,
         @RequestBody request: RentalStartRequest
     ) {
-        try {
-            rentalService.startRental(request.bookId, userDetails.id)
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        when (val result = rentalService.startRental(request.bookId, userDetails.id)) {
+            is Result.Success -> result.data
+            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
         }
     }
 
     @DeleteMapping("/end/{bookId}")
     fun endRental(@AuthenticationPrincipal userDetails: BookManagerUserDetails, @PathVariable("bookId") bookId: Long) {
-        try {
-            rentalService.endRental(bookId, userDetails.id)
-        } catch (e: java.lang.IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        when (val result = rentalService.endRental(bookId, userDetails.id)) {
+            is Result.Success -> result.data
+            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
         }
     }
 }

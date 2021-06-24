@@ -1,6 +1,7 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.BookService
+import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
@@ -17,7 +18,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -69,7 +69,7 @@ internal class BookControllerTest {
         val rental = Rental(book.id, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
         val bookWithRental = BookWithRental(book, rental)
 
-        whenever(bookService.getDetail(any() as Long)).thenReturn(bookWithRental)
+        whenever(bookService.getDetail(any() as Long)).thenReturn(Result.Success(bookWithRental))
 
         // When
         val resultResponse =
@@ -84,11 +84,12 @@ internal class BookControllerTest {
     }
 
     @Test
-    @DisplayName("書籍情報が取得できない場合")
-    fun `getDetail when book is not exists then throw Exception`() {
+    @DisplayName("書籍情報が取得できない場合は HTTP400 BAD_REQUEST")
+    fun `getDetail when book is not exists then throw BadRequest`() {
 
         // Given
-        whenever(bookService.getDetail(any() as Long)).thenThrow(IllegalArgumentException::class.java)
+        val reason = "エラー: ${book.id}"
+        whenever(bookService.getDetail(any() as Long)).thenReturn(Result.Failure(reason))
 
         // When
         val exception = mockMvc
@@ -98,7 +99,8 @@ internal class BookControllerTest {
             .resolvedException
 
         // Then
-        assertThat(exception!!::class).isEqualTo(ResponseStatusException::class)
-        assertThat(exception.message).isEqualTo("${HttpStatus.BAD_REQUEST}")
+        assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
+        exception as ResponseStatusException
+        assertThat(exception.reason).isEqualTo(reason)
     }
 }
