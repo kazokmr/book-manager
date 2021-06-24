@@ -1,5 +1,6 @@
 package com.book.manager.application.service
 
+import com.book.manager.application.service.result.Result
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.model.Book
@@ -14,7 +15,6 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -45,33 +45,36 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("書籍の貸出登録を行う")
-    fun `startRental when book is not rental then start to rental`() {
+    fun `startRental when book is not rental then return success`() {
 
         // Given
         whenever(accountRepository.findById(any() as Long)).thenReturn(account)
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
 
         // When
-        rentalService.startRental(book.id, account.id)
+        val result = rentalService.startRental(book.id, account.id)
 
         // Then
+        assertThat(result).isInstanceOf(Result.Success::class.java)
+        result as Result.Success
+        assertThat(result.data).isEqualTo("Book ${book.id} has been renting by ${account.id}")
         verify(rentalRepository).startRental(any() as Rental)
     }
 
     @Test
     @DisplayName("該当ユーザーが存在しなければ書籍は貸出しできない")
-    fun `startRental when account is not exist then throws Exception`() {
+    fun `startRental when account is not exist then return failure`() {
 
         // Given
         whenever(accountRepository.findById(any() as Long)).thenReturn(null)
 
         // When
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            rentalService.startRental(book.id, account.id)
-        }
+        val result = rentalService.startRental(book.id, account.id)
 
         // Then
-        assertThat(exception.message).`as`("エラーメッセージ").isEqualTo("該当するユーザーが存在しません accountId: ${account.id}")
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        result as Result.Failure
+        assertThat(result.message).isEqualTo("該当するユーザーが存在しません accountId: ${account.id}")
 
         verify(accountRepository).findById(account.id)
         verify(bookRepository, times(0)).findWithRental(any() as Long)
@@ -80,19 +83,19 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("該当する書籍が存在しなければ貸出しできない")
-    fun `startRental when book is not exist then throws Exception`() {
+    fun `startRental when book is not exist then return failure`() {
 
         // Given
         whenever(accountRepository.findById(any() as Long)).thenReturn(account)
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
 
         // When
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            rentalService.startRental(book.id, account.id)
-        }
+        val result = rentalService.startRental(book.id, account.id)
 
         // Then
-        assertThat(exception.message).`as`("エラーメッセージ").isEqualTo("該当する書籍が存在しません bookId: ${book.id}")
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        result as Result.Failure
+        assertThat(result.message).isEqualTo("該当する書籍が存在しません bookId: ${book.id}")
 
         verify(accountRepository).findById(account.id)
         verify(bookRepository).findWithRental(book.id)
@@ -101,7 +104,7 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("書籍が貸出中なら貸出しできない")
-    fun `startRental when book has been renting then throw Exception`() {
+    fun `startRental when book has been renting then return failure`() {
 
         //Give
         whenever(accountRepository.findById(any() as Long)).thenReturn(account)
@@ -110,12 +113,12 @@ internal class RentalServiceTest {
         whenever(bookRepository.findWithRental(book.id)).thenReturn(rentBook)
 
         // When
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            rentalService.startRental(book.id, account.id)
-        }
+        val result = rentalService.startRental(book.id, account.id)
 
         // Then
-        assertThat(exception.message).`as`("エラーメッセージ").isEqualTo("貸出中の書籍です bookId: ${book.id}")
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        result as Result.Failure
+        assertThat(result.message).isEqualTo("貸出中の書籍です bookId: ${book.id}")
 
         verify(accountRepository).findById(account.id)
         verify(bookRepository).findWithRental(book.id)
@@ -124,7 +127,7 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("書籍が借りられていたら、貸出情報を削除する")
-    fun `endRental when book is rental then delete to rental`() {
+    fun `endRental when book is rental then success delete`() {
 
         // Given
         val rental = Rental(book.id, account.id, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
@@ -133,9 +136,13 @@ internal class RentalServiceTest {
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(bookWithRental)
 
         // When
-        rentalService.endRental(book.id, account.id)
+        val result = rentalService.endRental(book.id, account.id)
 
         // Then
+        assertThat(result).isInstanceOf(Result.Success::class.java)
+        result as Result.Success
+        assertThat(result.data).isEqualTo("Book ${book.id} is returning from ${account.id}")
+
         verify(accountRepository).findById(account.id)
         verify(bookRepository).findWithRental(book.id)
         verify(rentalRepository).endRental(book.id)
@@ -143,18 +150,18 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("該当ユーザーが存在しなければ書籍は返却できない")
-    fun `endRental when account is not exist then throws Exception`() {
+    fun `endRental when account is not exist then return failure`() {
 
         // Given
         whenever(accountRepository.findById(any() as Long)).thenReturn(null)
 
         // When
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            rentalService.endRental(book.id, account.id)
-        }
+        val result = rentalService.endRental(book.id, account.id)
 
         // Then
-        assertThat(exception.message).`as`("エラーメッセージ").isEqualTo("該当するユーザーが存在しません accountId: ${account.id}")
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        result as Result.Failure
+        assertThat(result.message).isEqualTo("該当するユーザーが存在しません accountId: ${account.id}")
 
         verify(accountRepository).findById(account.id)
         verify(bookRepository, times(0)).findWithRental(any() as Long)
@@ -163,19 +170,19 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("該当する書籍が存在しなければ返却できない")
-    fun `endRental when book is not exist then throws Exception`() {
+    fun `endRental when book is not exist then return failure`() {
 
         // Given
         whenever(accountRepository.findById(any() as Long)).thenReturn(account)
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
 
         // When
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            rentalService.endRental(book.id, account.id)
-        }
+        val result = rentalService.endRental(book.id, account.id)
 
         // Then
-        assertThat(exception.message).`as`("エラーメッセージ").isEqualTo("該当する書籍が存在しません bookId: ${book.id}")
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        result as Result.Failure
+        assertThat(result.message).isEqualTo("該当する書籍が存在しません bookId: ${book.id}")
 
         verify(accountRepository).findById(account.id)
         verify(bookRepository).findWithRental(book.id)
@@ -184,19 +191,19 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("書籍が借りられていなかったら、返却できない")
-    fun `endRental when book is not rental then throw exception`() {
+    fun `endRental when book is not rental then return failure`() {
 
         // Given
         whenever(accountRepository.findById(any() as Long)).thenReturn(account)
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
 
         // When
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            rentalService.endRental(book.id, account.id)
-        }
+        val result = rentalService.endRental(book.id, account.id)
 
         // Then
-        assertThat(exception.message).`as`("エラーメッセージ").isEqualTo("未貸出の書籍です bookId: ${book.id}")
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        result as Result.Failure
+        assertThat(result.message).isEqualTo("未貸出の書籍です bookId: ${book.id}")
 
         verify(accountRepository).findById(account.id)
         verify(bookRepository).findWithRental(book.id)
@@ -205,7 +212,7 @@ internal class RentalServiceTest {
 
     @Test
     @DisplayName("別のユーザーが借りている書籍なら、返却できない")
-    fun `endRental when book has been renting by other account then throw exception`() {
+    fun `endRental when book has been renting by other account then return failure`() {
 
         // Given
         whenever(accountRepository.findById(any() as Long)).thenReturn(account)
@@ -214,12 +221,12 @@ internal class RentalServiceTest {
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(rentBook)
 
         // When
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            rentalService.endRental(book.id, account.id)
-        }
+        val result = rentalService.endRental(book.id, account.id)
 
         // Then
-        assertThat(exception.message).`as`("エラーメッセージ").isEqualTo("他のユーザーが貸出中の書籍です bookId: ${book.id}")
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        result as Result.Failure
+        assertThat(result.message).isEqualTo("他のユーザーが貸出中の書籍です bookId: ${book.id}")
 
         verify(accountRepository).findById(account.id)
         verify(bookRepository).findWithRental(book.id)

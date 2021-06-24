@@ -2,6 +2,7 @@ package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.RentalService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
+import com.book.manager.application.service.result.Result
 import com.book.manager.application.service.security.BookManagerUserDetails
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -94,14 +94,15 @@ internal class RentalControllerTest {
     }
 
     @Test
-    @DisplayName("書籍が貸し出せない場合は400 BadRequest エラー")
-    fun `startRental when book can not be rent then status is BadRequest`() {
+    @DisplayName("書籍が貸し出せない場合は HTTP400 BAD_REQUEST")
+    fun `startRental when book can not be rent then throw BadRequest`() {
 
         // Given
         val rentalStartRequest = RentalStartRequest(book.id)
         val json = ObjectMapper().registerKotlinModule().writeValueAsString(rentalStartRequest)
+        val reason = "エラー: bookId ${book.id} accountId ${account.id}"
         whenever(rentalService.startRental(any() as Long, any() as Long))
-            .thenThrow(IllegalArgumentException::class.java)
+            .thenReturn(Result.Failure(reason))
 
         // When
         val exception = mockMvc
@@ -116,8 +117,9 @@ internal class RentalControllerTest {
             .resolvedException
 
         // Then
-        assertThat(exception!!::class.java).isEqualTo(ResponseStatusException::class.java)
-        assertThat(exception.message).isEqualTo("${HttpStatus.BAD_REQUEST}")
+        assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
+        exception as ResponseStatusException
+        assertThat(exception.reason).isEqualTo(reason)
     }
 
     @Test
@@ -137,11 +139,12 @@ internal class RentalControllerTest {
     }
 
     @Test
-    @DisplayName("書籍が返却できなければ400 BadRequest エラー")
-    fun `endRental when an account is not exist then throw Exception`() {
+    @DisplayName("書籍が返却できなければ HTTP400 BAD_REQUEST")
+    fun `endRental when an account is not exist then throw BadRequest`() {
 
         // Given
-        whenever(rentalService.endRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException::class.java)
+        val reason = "エラー: bookId ${book.id} accountId ${account.id}"
+        whenever(rentalService.endRental(any() as Long, any() as Long)).thenReturn(Result.Failure(reason))
 
         // When
         val exception = mockMvc
@@ -154,7 +157,8 @@ internal class RentalControllerTest {
             .resolvedException
 
         // Then
-        assertThat(exception!!::class.java).isEqualTo(ResponseStatusException::class.java)
-        assertThat(exception.message).isEqualTo("${HttpStatus.BAD_REQUEST}")
+        assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
+        exception as ResponseStatusException
+        assertThat(exception.reason).isEqualTo(reason)
     }
 }

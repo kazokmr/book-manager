@@ -1,6 +1,8 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.BookService
+import com.book.manager.application.service.result.Result
+import com.book.manager.domain.model.BookWithRental
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
@@ -23,11 +25,9 @@ class BookController(private val bookService: BookService) {
 
     @GetMapping("detail/{book_id}")
     fun getDetail(@PathVariable("book_id") bookId: Long): GetBookDetailResponse {
-        return try {
-            val book = bookService.getDetail(bookId)
-            GetBookDetailResponse(book)
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        return when (val result = bookService.getDetail(bookId)) {
+            is Result.Success -> GetBookDetailResponse(result.data as BookWithRental)
+            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
         }
     }
 }

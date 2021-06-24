@@ -1,5 +1,6 @@
 package com.book.manager.application.service
 
+import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.repository.BookRepository
 import org.springframework.stereotype.Service
@@ -10,20 +11,35 @@ import java.time.LocalDate
 class AdminBookService(private val bookRepository: BookRepository) {
 
     @Transactional
-    fun register(book: Book) {
-        bookRepository.findWithRental(book.id)?.let { throw IllegalArgumentException("既に存在する書籍ID: ${book.id}") }
-        bookRepository.register(book)
+    fun register(book: Book): Result {
+        return when (bookRepository.findWithRental(book.id)) {
+            null -> {
+                bookRepository.register(book)
+                Result.Success(book)
+            }
+            else -> Result.Failure("既に存在する書籍ID: ${book.id}")
+        }
     }
 
     @Transactional
-    fun update(bookId: Long, title: String?, author: String?, releaseDate: LocalDate?) {
-        bookRepository.findWithRental(bookId) ?: throw IllegalArgumentException("存在しない書籍ID: $bookId")
-        bookRepository.update(bookId, title, author, releaseDate)
+    fun update(bookId: Long, title: String?, author: String?, releaseDate: LocalDate?): Result {
+        return when (bookRepository.findWithRental(bookId)) {
+            null -> Result.Failure("存在しない書籍ID: $bookId")
+            else -> {
+                bookRepository.update(bookId, title, author, releaseDate)
+                Result.Success(bookId)
+            }
+        }
     }
 
     @Transactional
-    fun delete(bookId: Long) {
-        bookRepository.findWithRental(bookId) ?: throw IllegalArgumentException("存在しない書籍ID: $bookId")
-        bookRepository.delete(bookId)
+    fun delete(bookId: Long): Result {
+        return when (bookRepository.findWithRental(bookId)) {
+            null -> Result.Failure("存在しない書籍ID: $bookId")
+            else -> {
+                bookRepository.delete(bookId)
+                Result.Success(bookId)
+            }
+        }
     }
 }

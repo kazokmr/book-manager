@@ -16,9 +16,15 @@ class BookManagerUserDetailsService(private val authenticationService: Authentic
     }
 }
 
-data class BookManagerUserDetails(val id: Long, val email: String, val pass: String, val roleType: RoleType) :
+data class BookManagerUserDetails(
+    val id: Long,
+    val email: String,
+    val pass: String,
+    val name: String,
+    val roleType: RoleType
+) :
     UserDetails {
-    constructor(account: Account) : this(account.id, account.email, account.password, account.roleType)
+    constructor(account: Account) : this(account.id, account.email, account.password, account.name, account.roleType)
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         return AuthorityUtils.createAuthorityList(this.roleType.toString())
