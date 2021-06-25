@@ -1,20 +1,25 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.AdminBookService
+import com.book.manager.application.service.AuthenticationService
+import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.application.service.result.Result
+import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -22,23 +27,18 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delet
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 
-internal class AdminBookControllerTest {
+@WebMvcTest(controllers = [AdminBookController::class])
+@WithCustomMockUser(roleType = RoleType.ADMIN)
+internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
-    private lateinit var mockMvc: MockMvc
-
+    @MockBean
     private lateinit var adminBookService: AdminBookService
-    private lateinit var adminBookController: AdminBookController
 
-    @BeforeEach
-    internal fun setUp() {
-        adminBookService = mock()
-        adminBookController = AdminBookController(adminBookService)
-        mockMvc = MockMvcBuilders.standaloneSetup(adminBookController).build()
-    }
+    @MockBean
+    private lateinit var authenticationService: AuthenticationService
 
     @Test
     @DisplayName("書籍を登録する")
@@ -46,7 +46,10 @@ internal class AdminBookControllerTest {
 
         // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
-        val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
+        val json = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerModule(JavaTimeModule())
+            .writeValueAsString(request)
 
         // When
         mockMvc
@@ -69,7 +72,11 @@ internal class AdminBookControllerTest {
 
         // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
-        val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
+        val json =
+            ObjectMapper()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .registerModule(JavaTimeModule())
+                .writeValueAsString(request)
         val reason = "エラー: ${request.id}"
 
         whenever(adminBookService.register(any() as Book)).thenReturn(Result.Failure(reason))
@@ -99,7 +106,11 @@ internal class AdminBookControllerTest {
 
         // Given
         val request = UpdateBookRequest(100L, "title", "author", LocalDate.now())
-        val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
+        val json =
+            ObjectMapper()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .registerModule(JavaTimeModule())
+                .writeValueAsString(request)
 
         // When
         mockMvc
@@ -121,7 +132,11 @@ internal class AdminBookControllerTest {
 
         // Given
         val request = UpdateBookRequest(100L, "title", "author", LocalDate.now())
-        val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(request)
+        val json =
+            ObjectMapper()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .registerModule(JavaTimeModule())
+                .writeValueAsString(request)
         val reason = "エラー: ${request.id}"
 
         whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))

@@ -1,6 +1,8 @@
 package com.book.manager.presentation.controller
 
+import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.BookService
+import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
@@ -9,37 +11,42 @@ import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.server.ResponseStatusException
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class BookControllerTest {
+@WebMvcTest(controllers = [BookController::class])
+@WithCustomMockUser
+internal class BookControllerTest(@Autowired var mockMvc: MockMvc) {
 
-    private lateinit var mockMvc: MockMvc
+    @MockBean
     private lateinit var bookService: BookService
-    private lateinit var bookController: BookController
+
+    @MockBean
+    private lateinit var authenticationService: AuthenticationService
+
     private lateinit var book: Book
 
     @BeforeEach
     internal fun setUp() {
-        bookService = mock()
-        bookController = BookController(bookService)
-        mockMvc = MockMvcBuilders.standaloneSetup(bookController).build()
-
         book = Book(100L, "Kotlin入門", "コトリン太郎", LocalDate.now())
     }
 
@@ -52,12 +59,22 @@ internal class BookControllerTest {
         whenever(bookService.getList()).thenReturn(bookList)
 
         // When
-        val resultResponse = mockMvc.perform(get("/book/list")).andExpect(status().isOk).andReturn().response
+        val resultResponse =
+            mockMvc
+                .perform(
+                    get("/book/list")
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isOk)
+                .andReturn().response
 
         // Then
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
         val expectedResponse = GetBookListResponse(listOf(BookInfo(BookWithRental(book, null))))
-        val expected = ObjectMapper().registerKotlinModule().writeValueAsString(expectedResponse)
+        val expected = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerKotlinModule()
+            .writeValueAsString(expectedResponse)
         assertThat(result).isEqualTo(expected)
     }
 
@@ -73,13 +90,24 @@ internal class BookControllerTest {
 
         // When
         val resultResponse =
-            mockMvc.perform(get("/book/detail/${book.id}")).andExpect(status().isOk).andReturn().response
+            mockMvc
+                .perform(
+                    get("/book/detail/${book.id}")
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isOk)
+                .andReturn()
+                .response
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
 
         // Then
         val expectedResponse = GetBookDetailResponse(bookWithRental)
         // LocalDateTimeを利用するためにJavaTimeModuleを登録する(これはKotlinModuleだと登録できない)
-        val expected = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(expectedResponse)
+        val expected = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(JavaTimeModule())
+            .writeValueAsString(expectedResponse)
         assertThat(result).isEqualTo(expected)
     }
 
@@ -93,7 +121,10 @@ internal class BookControllerTest {
 
         // When
         val exception = mockMvc
-            .perform(get("/book/detail/${book.id}"))
+            .perform(
+                get("/book/detail/${book.id}")
+                    .with(csrf().asHeader())
+            )
             .andExpect(status().isBadRequest)
             .andReturn()
             .resolvedException
