@@ -48,6 +48,10 @@ dependencies {
     testImplementation("org.assertj:assertj-core")
     testImplementation("org.mockito:mockito-core")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
+    testImplementation("org.testcontainers:testcontainers:1.15.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.15.3")
+    testImplementation("org.testcontainers:postgresql:1.15.3")
+    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.0")
 }
 
 configurations {
