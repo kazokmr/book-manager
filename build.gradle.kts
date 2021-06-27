@@ -13,6 +13,7 @@ plugins {
     kotlin("plugin.spring") version "1.5.20"
     id("com.google.protobuf") version "0.8.15"
     id("idea")
+    id("jacoco")
 }
 
 group = "com.book.manager"
@@ -70,6 +71,15 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+
 
 mybatisGenerator {
     verbose = true
