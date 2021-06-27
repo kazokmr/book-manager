@@ -11,12 +11,12 @@ import org.springframework.stereotype.Repository
 @Repository
 class RentalRepositoryImpl(private val rentalMapper: RentalMapper) : RentalRepository {
 
-    override fun startRental(rental: Rental) {
-        rentalMapper.insert(toRecord(rental))
+    override fun startRental(rental: Rental): Int {
+        return rentalMapper.insert(toRecord(rental))
     }
 
-    override fun endRental(bookId: Long) {
-        rentalMapper.deleteByPrimaryKey(bookId)
+    override fun endRental(bookId: Long): Int {
+        return rentalMapper.deleteByPrimaryKey(bookId)
     }
 
     private fun toRecord(rental: Rental): RentalRecord {

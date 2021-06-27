@@ -76,5 +76,5 @@ interface AccountMapper {
                 "#{account.roleType.name}::role_type" +
                 ")"
     )
-    fun create(@Param("account") accountRecord: AccountRecord): Int
+    fun insertRecord(@Param("account") accountRecord: AccountRecord): Int
 }
