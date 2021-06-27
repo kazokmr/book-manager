@@ -12,8 +12,7 @@ import com.book.manager.infrastructure.database.mapper.RentalDynamicSqlSupport.R
 import com.book.manager.infrastructure.database.record.BookWithRentalRecord
 import org.mybatis.dynamic.sql.SqlBuilder.equalTo
 import org.mybatis.dynamic.sql.SqlBuilder.isEqualTo
-import org.mybatis.dynamic.sql.SqlBuilder.select
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.from
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.select
 
 private val columnList = listOf(
     id,
@@ -25,21 +24,19 @@ private val columnList = listOf(
     returnDeadline
 )
 
-fun BookWithRentalMapper.select(): List<BookWithRentalRecord> {
-    val selectStatement = select(columnList).from(Book, "b") {
+fun BookWithRentalMapper.select(): List<BookWithRentalRecord> =
+    select(columnList) {
+        from(Book, "b")
         leftJoin(Rental, "r") {
             on(id, equalTo(Rental.bookId))
         }
-    }
-    return selectMany(selectStatement)
-}
+    }.let { selectMany(it) }
 
-fun BookWithRentalMapper.selectByPrimaryKey(id_: Long): BookWithRentalRecord? {
-    val selectStatement = select(columnList).from(Book, "b") {
+fun BookWithRentalMapper.selectByPrimaryKey(bookId: Long): BookWithRentalRecord? =
+    select(columnList) {
+        from(Book, "b")
         leftJoin(Rental, "r") {
             on(id, equalTo(Rental.bookId))
         }
-        where(id, isEqualTo(id_))
-    }
-    return selectOne(selectStatement)
-}
+        where(id, isEqualTo(bookId))
+    }.let { selectOne(it) }

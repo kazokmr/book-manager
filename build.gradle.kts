@@ -6,11 +6,11 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "2.5.0"
+    id("org.springframework.boot") version "2.5.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
-    kotlin("jvm") version "1.5.10"
-    kotlin("plugin.spring") version "1.5.10"
+    kotlin("jvm") version "1.5.20"
+    kotlin("plugin.spring") version "1.5.20"
     id("com.google.protobuf") version "0.8.15"
     id("idea")
 }
@@ -33,7 +33,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0")
-    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.2.1")
+    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.3.0")
     implementation("redis.clients:jedis")
     implementation("io.grpc:grpc-kotlin-stub:1.1.0")
     implementation("io.grpc:grpc-netty:1.35.1")
