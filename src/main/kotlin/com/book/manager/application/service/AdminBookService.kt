@@ -13,7 +13,7 @@ class AdminBookService(private val bookRepository: BookRepository) {
     @Transactional
     fun register(book: Book): Result {
         return when (bookRepository.findWithRental(book.id)) {
-            null -> bookRepository.register(book).let { Result.Success(it) }
+            null -> bookRepository.register(book).run { Result.Success(book) }
             else -> Result.Failure("既に存在する書籍ID: ${book.id}")
         }
     }
@@ -22,7 +22,7 @@ class AdminBookService(private val bookRepository: BookRepository) {
     fun update(bookId: Long, title: String?, author: String?, releaseDate: LocalDate?): Result {
         return when (bookRepository.findWithRental(bookId)) {
             null -> Result.Failure("存在しない書籍ID: $bookId")
-            else -> bookRepository.update(bookId, title, author, releaseDate).let { Result.Success(it) }
+            else -> bookRepository.update(bookId, title, author, releaseDate).run { Result.Success(bookId) }
         }
     }
 
@@ -30,7 +30,7 @@ class AdminBookService(private val bookRepository: BookRepository) {
     fun delete(bookId: Long): Result {
         return when (bookRepository.findWithRental(bookId)) {
             null -> Result.Failure("存在しない書籍ID: $bookId")
-            else -> bookRepository.delete(bookId).let { Result.Success(it) }
+            else -> bookRepository.delete(bookId).run { Result.Success((bookId)) }
         }
     }
 }
