@@ -2,15 +2,14 @@ package com.book.manager.infrastructure.database.repository
 
 import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.RentalRepository
-import com.book.manager.infrastructure.database.mapper.RentalMapper
-import com.book.manager.infrastructure.database.mapper.deleteByPrimaryKey
-import com.book.manager.infrastructure.database.mapper.insert
-import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
-import com.book.manager.infrastructure.database.record.RentalRecord
+import com.book.manager.infrastructure.database.dbunit.CsvDataSetLoader
 import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
+import com.github.springtestdbunit.DbUnitTestExecutionListener
+import com.github.springtestdbunit.annotation.DatabaseSetup
+import com.github.springtestdbunit.annotation.DbUnitConfiguration
+import com.github.springtestdbunit.annotation.ExpectedDatabase
+import com.github.springtestdbunit.assertion.DatabaseAssertionMode.NON_STRICT_UNORDERED
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.SoftAssertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -20,70 +19,53 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.test.context.TestExecutionListeners
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import java.time.LocalDateTime
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(RentalRepositoryImpl::class)
+@DbUnitConfiguration(dataSetLoader = CsvDataSetLoader::class)
+@TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class RentalRepositoryImplTest : TestContainerPostgres() {
 
     @Autowired
     private lateinit var rentalRepository: RentalRepository
 
-    @Autowired
-    private lateinit var rentalMapper: RentalMapper
-
-    private lateinit var rentalRecord: RentalRecord
-
-    @BeforeEach
-    internal fun setUp() {
-        rentalRecord = RentalRecord(100, 222, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
-    }
-
     @Test
     @DisplayName("Rentalテーブルへの登録")
+    @DatabaseSetup("/testdata/rental/init-data")
+    @ExpectedDatabase("/testdata/rental/after-start-rental", assertionMode = NON_STRICT_UNORDERED)
     fun `startRental when star renting then register Rental table`() {
 
         //Given
-        rentalMapper.deleteByPrimaryKey(rentalRecord.bookId!!)
         val rental = Rental(
-            rentalRecord.bookId!!,
-            rentalRecord.accountId!!,
-            rentalRecord.rentalDatetime!!,
-            rentalRecord.returnDeadline!!
+            100,
+            222,
+            LocalDateTime.parse("2021-06-29T00:00:00.000"),
+            LocalDateTime.parse("2021-07-12T00:00:00.000")
         )
 
         // When
-        val count = rentalRepository.startRental(rental)
+        val registeredCount = rentalRepository.startRental(rental)
 
         // Then
-        assertThat(count).isEqualTo(1)
-        val result = rentalMapper.selectByPrimaryKey(rentalRecord.bookId!!)
-        assertThat(result).isNotNull
-        SoftAssertions().apply {
-            assertThat(result?.bookId).isEqualTo(rentalRecord.bookId)
-            assertThat(result?.accountId).isEqualTo(rentalRecord.accountId)
-            assertThat(result?.rentalDatetime).isEqualTo(rentalRecord.rentalDatetime)
-            assertThat(result?.returnDeadline).isEqualTo(rentalRecord.returnDeadline)
-        }.assertAll()
+        assertThat(registeredCount).isEqualTo(1)
     }
 
     @Test
     @DisplayName("登録済みの書籍IDがあれば、Rentalテーブルに登録しない")
+    @DatabaseSetup("/testdata/rental/init-data")
+    @ExpectedDatabase("/testdata/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
     fun `startRental when bookId has already been rent then is not registering Rental Table`() {
 
         // Given
-        rentalMapper.deleteByPrimaryKey(rentalRecord.bookId!!)
-        val rentItem =
-            Rental(rentalRecord.bookId!!, 333, LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(13))
-        rentalRepository.startRental(rentItem)
-
-        // When
         val rental = Rental(
-            rentalRecord.bookId!!,
-            rentalRecord.accountId!!,
-            rentalRecord.rentalDatetime!!,
-            rentalRecord.returnDeadline!!
+            1,
+            222,
+            LocalDateTime.parse("2021-06-29T00:00:00.000"),
+            LocalDateTime.parse("2021-07-12T00:00:00.000")
         )
 
         // Then
@@ -94,33 +76,33 @@ internal class RentalRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("Rentalテーブルからレコードを削除する")
+    @DatabaseSetup("/testdata/rental/init-data")
+    @ExpectedDatabase("/testdata/rental/after-end-rental", assertionMode = NON_STRICT_UNORDERED)
     fun `endRental when rental is exist then delete`() {
 
         // Given
-        rentalMapper.deleteByPrimaryKey(rentalRecord.bookId!!)
-        rentalMapper.insert(rentalRecord)
-
+        val bookId = 999L
 
         // When
-        val count = rentalRepository.endRental(rentalRecord.bookId!!)
+        val deleteCount = rentalRepository.endRental(bookId)
 
         // Then
-        assertThat(count).isEqualTo(1)
-        rentalMapper.selectByPrimaryKey(rentalRecord.bookId!!).let { assertThat(it).isNull() }
+        assertThat(deleteCount).isEqualTo(1)
     }
 
     @Test
     @DisplayName("Rental情報が登録されていなければ削除しない")
+    @DatabaseSetup("/testdata/rental/init-data")
+    @ExpectedDatabase("/testdata/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
     fun `endRental when recode is not exist then does not delete`() {
 
         // Given
-        rentalMapper.deleteByPrimaryKey(rentalRecord.bookId!!)
+        val bookId = 500L
 
         // When
-        val count = rentalRepository.endRental(rentalRecord.bookId!!)
+        val count = rentalRepository.endRental(bookId)
 
         // Then
         assertThat(count).isEqualTo(0)
-        rentalMapper.selectByPrimaryKey(rentalRecord.bookId!!).let { assertThat(it).isNull() }
     }
 }
