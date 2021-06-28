@@ -1,13 +1,16 @@
 package com.book.manager.infrastructure.database.repository
 
 import com.book.manager.domain.enum.RoleType
+import com.book.manager.domain.model.Account
 import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.infrastructure.database.mapper.AccountMapper
-import com.book.manager.infrastructure.database.mapper.deleteByPrimaryKey
+import com.book.manager.infrastructure.database.mapper.delete
 import com.book.manager.infrastructure.database.record.AccountRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
+import com.github.springtestdbunit.DbUnitTestExecutionListener
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -16,10 +19,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestExecutionListeners
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(AccountRepositoryImpl::class)
+@ContextConfiguration
+@TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class AccountRepositoryImplTest : TestContainerPostgres() {
 
     @Autowired
@@ -28,11 +36,28 @@ internal class AccountRepositoryImplTest : TestContainerPostgres() {
     @Autowired
     private lateinit var accountMapper: AccountMapper
 
-    private lateinit var accountRecord: AccountRecord
-
+    /*
+    accountテーブルはEnum型で作成したRoleTypeを持っており、DBUnitからPostgresqlDriver経由でのInsert文でエラーとなって
+    登録できない。
+    なので、Mapperを使って、SetUpメソッドで登録し、tearDownメソッドで削除する方法を利用する
+     */
     @BeforeEach
     internal fun setUp() {
-        accountRecord = AccountRecord(999, "user@example.com", "pass", "user", RoleType.USER)
+
+        val initAccount1 = AccountRecord(1, "admin@example.com", "passpass", "admin", RoleType.ADMIN)
+        val initAccount2 = AccountRecord(2, "user@example.com", "passpass", "user", RoleType.USER)
+        val initAccount3 = AccountRecord(999, "admin2@example.com", "passpass", "admin2", RoleType.ADMIN)
+        val initAccount4 = AccountRecord(8888, "user2@example.com", "passpass", "user2", RoleType.USER)
+
+        accountMapper.insertRecord(initAccount1)
+        accountMapper.insertRecord(initAccount2)
+        accountMapper.insertRecord(initAccount3)
+        accountMapper.insertRecord(initAccount4)
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        accountMapper.delete { allRows() }
     }
 
     @Test
@@ -40,19 +65,20 @@ internal class AccountRepositoryImplTest : TestContainerPostgres() {
     fun `findById when account is exist then find by ID`() {
 
         // Given
-        accountMapper.insertRecord(accountRecord)
+        val accountId = 1L
+        val expectedAccount = Account(accountId, "admin@example.com", "passpass", "admin", RoleType.ADMIN)
 
         // When
-        val account = accountRepository.findById(accountRecord.id!!)
+        val resultAccount = accountRepository.findById(accountId)
 
         // Then
-        assertThat(account).isNotNull
+        assertThat(resultAccount).isNotNull
         SoftAssertions().apply {
-            assertThat(account?.id).isEqualTo(accountRecord.id)
-            assertThat(account?.email).isEqualTo(accountRecord.email)
-            assertThat(account?.password).isEqualTo(accountRecord.password)
-            assertThat(account?.name).isEqualTo(accountRecord.name)
-            assertThat(account?.roleType).isEqualTo(accountRecord.roleType)
+            assertThat(resultAccount?.id).isEqualTo(expectedAccount.id)
+            assertThat(resultAccount?.email).isEqualTo(expectedAccount.email)
+            assertThat(resultAccount?.password).isEqualTo(expectedAccount.password)
+            assertThat(resultAccount?.name).isEqualTo(expectedAccount.name)
+            assertThat(resultAccount?.roleType).isEqualTo(expectedAccount.roleType)
         }.assertAll()
     }
 
@@ -62,7 +88,6 @@ internal class AccountRepositoryImplTest : TestContainerPostgres() {
 
         // Given
         val accountId = 777L
-        accountMapper.deleteByPrimaryKey(accountId)
 
         // When
         val account = accountRepository.findById(accountId)
@@ -76,19 +101,19 @@ internal class AccountRepositoryImplTest : TestContainerPostgres() {
     fun `findByEmail when account is exist then find by Email`() {
 
         // Given
-        accountMapper.insertRecord(accountRecord)
+        val expectedAccount = Account(8888, "user2@example.com", "passpass", "user2", RoleType.USER)
 
         // When
-        val account = accountRepository.findByEmail(accountRecord.email!!)
+        val account = accountRepository.findByEmail(expectedAccount.email)
 
         // Then
         assertThat(account).isNotNull
         SoftAssertions().apply {
-            assertThat(account?.id).isEqualTo(accountRecord.id)
-            assertThat(account?.email).isEqualTo(accountRecord.email)
-            assertThat(account?.password).isEqualTo(accountRecord.password)
-            assertThat(account?.name).isEqualTo(accountRecord.name)
-            assertThat(account?.roleType).isEqualTo(accountRecord.roleType)
+            assertThat(account?.id).isEqualTo(expectedAccount.id)
+            assertThat(account?.email).isEqualTo(expectedAccount.email)
+            assertThat(account?.password).isEqualTo(expectedAccount.password)
+            assertThat(account?.name).isEqualTo(expectedAccount.name)
+            assertThat(account?.roleType).isEqualTo(expectedAccount.roleType)
         }.assertAll()
     }
 
