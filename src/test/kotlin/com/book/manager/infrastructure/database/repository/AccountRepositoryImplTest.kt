@@ -7,7 +7,6 @@ import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.delete
 import com.book.manager.infrastructure.database.record.AccountRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
-import com.github.springtestdbunit.DbUnitTestExecutionListener
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.AfterEach
@@ -19,15 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.context.annotation.Import
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.TestExecutionListeners
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(AccountRepositoryImpl::class)
-@ContextConfiguration
-@TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class AccountRepositoryImplTest : TestContainerPostgres() {
 
     @Autowired

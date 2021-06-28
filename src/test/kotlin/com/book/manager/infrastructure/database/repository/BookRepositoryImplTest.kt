@@ -19,7 +19,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.BadSqlGrammarException
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestExecutionListeners
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import java.time.LocalDate
@@ -27,7 +26,6 @@ import java.time.LocalDate
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(BookRepositoryImpl::class)
-@ContextConfiguration
 @TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class BookRepositoryImplTest : TestContainerPostgres() {
 
@@ -36,8 +34,8 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("書籍が複数冊あれば全て検索すること")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
-    @ExpectedDatabase("/testdata/BookRepository/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
+    @ExpectedDatabase("/testdata/book/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findAllWithRental when there are many books then get all books`() {
 
         // When
@@ -49,8 +47,8 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("書籍が１冊だけならその１冊だけ検索すること")
-    @DatabaseSetup("/testdata/BookRepository/initSingleRecord.xml")
-    @ExpectedDatabase("/testdata/BookRepository/expectedSingleRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/testdata/book/initSingleRecord.xml")
+    @ExpectedDatabase("/testdata/book/expectedSingleRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findAllWithRental when there is a book then get one`() {
 
         // When
@@ -62,7 +60,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("書籍が無ければ空のリストが検索されること")
-    @DatabaseSetup("/testdata/BookRepository/initNoRecord.xml")
+    @DatabaseSetup("/testdata/book/initNoRecord.xml")
     fun `findAllWIthRental when there is no books then get employ list`() {
 
         // When
@@ -75,8 +73,8 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("貸出されていない登録されている書籍が検索できる")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
-    @ExpectedDatabase("/testdata/BookRepository/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
+    @ExpectedDatabase("/testdata/book/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findWithRental when book is exist and is not rent then get one without rental`() {
 
         // When
@@ -89,8 +87,8 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("貸出されていて登録されている書籍が検索できる")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
-    @ExpectedDatabase("/testdata/BookRepository/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
+    @ExpectedDatabase("/testdata/book/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findWithRental when book is exist and is rent then get one with rental`() {
 
         // When
@@ -103,7 +101,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("書籍を登録する")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `register when a book is not registered yet then register it`() {
 
         // Given
@@ -128,7 +126,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("既にIDが登録済みの書籍は登録できない")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `register when a book has already registered then will not register it`() {
 
         // When
@@ -142,7 +140,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("既存IDを持つ書籍情報のプロパティを更新する")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `update when book id has already been registered then update its properties`() {
 
         // Given
@@ -169,7 +167,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("変更したプロパティだけが更新されること")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `update when book will be updated some properties then update only their updated properties`() {
 
         // Given
@@ -196,7 +194,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("プロパティを何も変更しなければ更新されないこと")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `update when book will not be updated any properties then update any columns`() {
 
         // Then
@@ -207,7 +205,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("存在しない書籍IDなら更新されないこと")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `update when book id is not exist then book will not be updated`() {
 
         // Given
@@ -227,7 +225,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("書籍を削除する")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `delete when book is exist then delete it`() {
 
         // Given
@@ -246,7 +244,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("登録されていない書籍を削除しても削除できないこと")
-    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @DatabaseSetup("/testdata/book/initMultiRecord.xml")
     fun `delete when book will be deleted without registration then number of delete is zero`() {
 
         // Given
