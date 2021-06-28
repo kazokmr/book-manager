@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <book id="1" title="Kotlin入門" author="コトリン" release_date="2020-06-29"/>
+    <book id="2" title="Spring入門" author="スプリング" release_date="2020-01-01"/>
+    <book id="3" title="Java入門" author="ジャヴァ" release_date="2000-01-01"/>
+    <book id="4" title="Scala入門" author="スカラ" release_date="2001-01-01"/>
+    <rental book_id="2" account_id="528" rental_datetime="2021-06-28 16:28:00.000"
+            return_deadline="2021-07-12 00:00:00.000"/>
+</dataset>

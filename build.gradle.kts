@@ -53,6 +53,8 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.15.3")
     testImplementation("org.testcontainers:postgresql:1.15.3")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.0")
+    testImplementation("org.dbunit:dbunit:2.7.0")
+    testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
 }
 
 configurations {

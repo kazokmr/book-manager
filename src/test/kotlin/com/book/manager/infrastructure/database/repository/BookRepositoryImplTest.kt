@@ -1,25 +1,17 @@
 package com.book.manager.infrastructure.database.repository
 
 import com.book.manager.domain.model.Book
-import com.book.manager.domain.model.BookWithRental
-import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.BookRepository
-import com.book.manager.infrastructure.database.mapper.BookDynamicSqlSupport
-import com.book.manager.infrastructure.database.mapper.BookMapper
-import com.book.manager.infrastructure.database.mapper.RentalMapper
-import com.book.manager.infrastructure.database.mapper.delete
-import com.book.manager.infrastructure.database.mapper.insert
-import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
-import com.book.manager.infrastructure.database.record.BookRecord
-import com.book.manager.infrastructure.database.record.RentalRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
+import com.github.springtestdbunit.DbUnitTestExecutionListener
+import com.github.springtestdbunit.annotation.DatabaseSetup
+import com.github.springtestdbunit.annotation.ExpectedDatabase
+import com.github.springtestdbunit.assertion.DatabaseAssertionMode.NON_STRICT_UNORDERED
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mybatis.dynamic.sql.util.kotlin.spring.deleteFrom
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -27,70 +19,51 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.BadSqlGrammarException
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestExecutionListeners
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(BookRepositoryImpl::class)
+@ContextConfiguration
+@TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Autowired
     private lateinit var bookRepository: BookRepository
 
-    @Autowired
-    private lateinit var bookMapper: BookMapper
-
-    @Autowired
-    private lateinit var rentalMapper: RentalMapper
-
-    @BeforeEach
-    fun setUp() {
-    }
-
     @Test
     @DisplayName("書籍が複数冊あれば全て検索すること")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @ExpectedDatabase("/testdata/BookRepository/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findAllWithRental when there are many books then get all books`() {
-
-        // Given
-        val book1 = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val book2 = Book(2, "Spring入門", "スプリング", LocalDate.now())
-
-        bookMapper.insert(BookRecord(book1.id, book1.title, book1.author, book1.releaseDate))
-        bookMapper.insert(BookRecord(book2.id, book2.title, book2.author, book2.releaseDate))
-
-        val expected = listOf(BookWithRental(book1, null), BookWithRental(book2, null))
 
         // When
         val resultList = bookRepository.findAllWithRental()
 
         // Then
-        assertThat(resultList.count()).isEqualTo(2)
-        assertThat(resultList).containsExactlyInAnyOrderElementsOf(expected)
+        assertThat(resultList.count()).`as`("4冊検索されること").isEqualTo(4)
     }
 
     @Test
     @DisplayName("書籍が１冊だけならその１冊だけ検索すること")
+    @DatabaseSetup("/testdata/BookRepository/initSingleRecord.xml")
+    @ExpectedDatabase("/testdata/BookRepository/expectedSingleRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findAllWithRental when there is a book then get one`() {
-
-        // Given
-        val book1 = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        bookMapper.insert(BookRecord(book1.id, book1.title, book1.author, book1.releaseDate))
 
         // When
         val resultList = bookRepository.findAllWithRental()
 
         // Then
-        assertThat(resultList.count()).isEqualTo(1)
-        assertThat(resultList).containsOnlyOnce(BookWithRental(book1, null))
+        assertThat(resultList.size).`as`("登録件数が１件であること").isEqualTo(1)
     }
 
     @Test
     @DisplayName("書籍が無ければ空のリストが検索されること")
+    @DatabaseSetup("/testdata/BookRepository/initNoRecord.xml")
     fun `findAllWIthRental when there is no books then get employ list`() {
-
-        // Given
-        bookMapper.delete(deleteFrom(BookDynamicSqlSupport.Book) { allRows() })
 
         // When
         val resultList = bookRepository.findAllWithRental()
@@ -102,75 +75,61 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("貸出されていない登録されている書籍が検索できる")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @ExpectedDatabase("/testdata/BookRepository/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findWithRental when book is exist and is not rent then get one without rental`() {
 
-        // Given
-        val book = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val bookRecord = BookRecord(book.id, book.title, book.author, book.releaseDate)
-        bookMapper.insert(bookRecord)
-
         // When
-        val bookWithRental = bookRepository.findWithRental(book.id)
+        val bookWithRental = bookRepository.findWithRental(1)
 
         // Then
-        assertThat(bookWithRental?.book).isEqualTo(book)
+        assertThat(bookWithRental?.book).isNotNull
         assertThat(bookWithRental?.isRental).isFalse
     }
 
-
     @Test
     @DisplayName("貸出されていて登録されている書籍が検索できる")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
+    @ExpectedDatabase("/testdata/BookRepository/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
     fun `findWithRental when book is exist and is rent then get one with rental`() {
 
-        // Given
-        val book = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val bookRecord = BookRecord(book.id, book.title, book.author, book.releaseDate)
-        bookMapper.insert(bookRecord)
-
-        val rental = Rental(book.id, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
-        val rentalRecord = RentalRecord(rental.bookId, rental.accountId, rental.rentalDatetime, rental.returnDeadline)
-        rentalMapper.insert(rentalRecord)
-
         // When
-        val bookWithRental = bookRepository.findWithRental(book.id)
+        val bookWithRental = bookRepository.findWithRental(2)
 
         // Then
-        assertThat(bookWithRental?.book).isEqualTo(book)
+        assertThat(bookWithRental?.book).isNotNull
         assertThat(bookWithRental?.isRental).isTrue
     }
 
     @Test
     @DisplayName("書籍を登録する")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `register when a book is not registered yet then register it`() {
 
         // Given
-        bookMapper.delete { allRows() }
-        val book = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
+        val book = Book(528, "Moyo入門", "moyomoyo", LocalDate.now())
 
         // When
-        val count = bookRepository.register(book)
+        val registeredCount = bookRepository.register(book)
+        val resultCount = bookRepository.findAllWithRental().count()
+        val resultBook = bookRepository.findWithRental(book.id)?.book
 
         // Then
-        assertThat(count).isEqualTo(1)
-        val result = bookMapper.selectByPrimaryKey(book.id)
+        assertThat(registeredCount).isEqualTo(1)
+        assertThat(resultCount).isEqualTo(5)
+        assertThat(resultBook).isNotNull
         SoftAssertions().apply {
-            assertThat(result?.id).isEqualTo(book.id)
-            assertThat(result?.title).isEqualTo(book.title)
-            assertThat(result?.author).isEqualTo(book.author)
-            assertThat(result?.releaseDate).isEqualTo(book.releaseDate)
+            assertThat(resultBook?.id).isEqualTo(book.id)
+            assertThat(resultBook?.title).isEqualTo(book.title)
+            assertThat(resultBook?.author).isEqualTo(book.author)
+            assertThat(resultBook?.releaseDate).isEqualTo(book.releaseDate)
         }.assertAll()
     }
 
     @Test
     @DisplayName("既にIDが登録済みの書籍は登録できない")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `register when a book has already registered then will not register it`() {
-
-        // Given
-        bookMapper.delete { allRows() }
-        val registeredBook = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val registeredRecord =
-            BookRecord(registeredBook.id, registeredBook.title, registeredBook.author, registeredBook.releaseDate)
-        bookMapper.insert(registeredRecord)
 
         // When
         val book = Book(1, "Kotlin再入門", "コトリン", LocalDate.now())
@@ -183,121 +142,124 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("既存IDを持つ書籍情報のプロパティを更新する")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `update when book id has already been registered then update its properties`() {
 
         // Given
-        bookMapper.delete { allRows() }
-        val book = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val bookRecord = BookRecord(book.id, book.title, book.author, book.releaseDate)
-        bookMapper.insert(bookRecord)
-
-        // When
+        val bookId = 1L
         val updatedTitle = "Spring入門"
         val updatedAuthor = "スプリング"
         val updatedReleaseDate = LocalDate.now().plusDays(60)
-        val count = bookRepository.update(book.id, updatedTitle, updatedAuthor, updatedReleaseDate)
+
+        // When
+        val updatedCount = bookRepository.update(bookId, updatedTitle, updatedAuthor, updatedReleaseDate)
+        val resultCount = bookRepository.findAllWithRental().count()
+        val resultBook = bookRepository.findWithRental(bookId)?.book
 
         // Then
-        assertThat(count).isEqualTo(1)
-
-        val result = bookMapper.selectByPrimaryKey(book.id)
+        assertThat(updatedCount).isEqualTo(1)
+        assertThat(resultCount).isEqualTo(4)
         SoftAssertions().apply {
-            assertThat(result?.id).isEqualTo(book.id)
-            assertThat(result?.title).isEqualTo(updatedTitle)
-            assertThat(result?.author).isEqualTo(updatedAuthor)
-            assertThat(result?.releaseDate).isEqualTo(updatedReleaseDate)
+            assertThat(resultBook?.id).isEqualTo(bookId)
+            assertThat(resultBook?.title).isEqualTo(updatedTitle)
+            assertThat(resultBook?.author).isEqualTo(updatedAuthor)
+            assertThat(resultBook?.releaseDate).isEqualTo(updatedReleaseDate)
         }.assertAll()
     }
 
     @Test
     @DisplayName("変更したプロパティだけが更新されること")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `update when book will be updated some properties then update only their updated properties`() {
 
         // Given
-        bookMapper.delete { allRows() }
-        val book = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val bookRecord = BookRecord(book.id, book.title, book.author, book.releaseDate)
-        bookMapper.insert(bookRecord)
+        val bookId = 3L
+        val updatedTitle = "Spring入門"
+        val author = "ジャヴァ"
+        val releaseDate = LocalDate.parse("2000-01-01")
 
         // When
-        val updatedTitle = "Spring入門"
-        val count = bookRepository.update(book.id, updatedTitle, null, null)
+        val updatedCount = bookRepository.update(bookId, updatedTitle, null, null)
+        val resultCount = bookRepository.findAllWithRental().count()
+        val resultBook = bookRepository.findWithRental(bookId)?.book
 
         // Then
-        assertThat(count).isEqualTo(1)
-
-        val result = bookMapper.selectByPrimaryKey(book.id)
+        assertThat(updatedCount).isEqualTo(1)
+        assertThat(resultCount).isEqualTo(4)
         SoftAssertions().apply {
-            assertThat(result?.id).isEqualTo(book.id)
-            assertThat(result?.title).isEqualTo(updatedTitle)
-            assertThat(result?.author).isEqualTo(book.author)
-            assertThat(result?.releaseDate).isEqualTo(book.releaseDate)
+            assertThat(resultBook?.id).isEqualTo(bookId)
+            assertThat(resultBook?.title).isEqualTo(updatedTitle)
+            assertThat(resultBook?.author).isEqualTo(author)
+            assertThat(resultBook?.releaseDate).isEqualTo(releaseDate)
         }.assertAll()
     }
 
     @Test
     @DisplayName("プロパティを何も変更しなければ更新されないこと")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `update when book will not be updated any properties then update any columns`() {
-
-        // Given
-        bookMapper.delete { allRows() }
-        val book = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val bookRecord = BookRecord(book.id, book.title, book.author, book.releaseDate)
-        bookMapper.insert(bookRecord)
 
         // Then
         assertThrows<BadSqlGrammarException> {
-            bookRepository.update(book.id, null, null, null)
+            bookRepository.update(1L, null, null, null)
         }
     }
 
     @Test
     @DisplayName("存在しない書籍IDなら更新されないこと")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `update when book id is not exist then book will not be updated`() {
 
         // Given
-        bookMapper.delete { allRows() }
-
-        // When
-        val updatedTitle = "Spring入門"
-        val updatedAuthor = "スプリング"
+        val bookId = 5L
+        val updatedTitle = "Groovy入門"
+        val updatedAuthor = "グルービー"
         val updatedReleaseDate = LocalDate.now().plusDays(60)
-        val count = bookRepository.update(1, updatedTitle, updatedAuthor, updatedReleaseDate)
+
+        //When
+        val updatedCount = bookRepository.update(bookId, updatedTitle, updatedAuthor, updatedReleaseDate)
+        val resultCount = bookRepository.findAllWithRental().count()
 
         // Then
-        assertThat(count).isEqualTo(0)
+        assertThat(updatedCount).isEqualTo(0)
+        assertThat(resultCount).isEqualTo(4)
     }
 
     @Test
     @DisplayName("書籍を削除する")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `delete when book is exist then delete it`() {
 
         // Given
-        bookMapper.delete { allRows() }
-        val book = Book(1, "Kotlin入門", "コトリン", LocalDate.now())
-        val bookRecord = BookRecord(book.id, book.title, book.author, book.releaseDate)
-        bookMapper.insert(bookRecord)
+        val bookId = 1L
 
         // When
-        val count = bookRepository.delete(book.id)
+        val deletedCount = bookRepository.delete(bookId)
+        val resultCount = bookRepository.findAllWithRental().count()
+        val resultBookWithRental = bookRepository.findWithRental(bookId)
 
         // Then
-        assertThat(count).isEqualTo(1)
-        val result = bookMapper.selectByPrimaryKey(book.id)
-        assertThat(result).isNull()
+        assertThat(deletedCount).isEqualTo(1)
+        assertThat(resultCount).isEqualTo(3)
+        assertThat(resultBookWithRental).isNull()
     }
 
     @Test
     @DisplayName("登録されていない書籍を削除しても削除できないこと")
+    @DatabaseSetup("/testdata/BookRepository/initMultiRecord.xml")
     fun `delete when book will be deleted without registration then number of delete is zero`() {
 
         // Given
-        bookMapper.delete { allRows() }
+        val bookId = 528L
 
         // When
-        val count = bookRepository.delete(1)
+        val deletedCount = bookRepository.delete(bookId)
+        val resultCount = bookRepository.findAllWithRental().count()
+        val resultBookWithRental = bookRepository.findWithRental(bookId)
 
         // Then
-        assertThat(count).isEqualTo(0)
+        assertThat(deletedCount).isEqualTo(0)
+        assertThat(resultCount).isEqualTo(4)
+        assertThat(resultBookWithRental).isNull()
     }
 }
