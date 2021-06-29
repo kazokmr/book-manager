@@ -1,4 +1,4 @@
-![GitHub Actions workflow status](https://github.com/kazokmr/book-manager/actions/workflows/gradle-test.yml/badge.svg)
+[![CI Workflow](https://github.com/kazokmr/book-manager/actions/workflows/gradle-test.yml/badge.svg)](https://github.com/kazokmr/book-manager/actions/workflows/gradle-test.yml)
 
 # book-manager
 

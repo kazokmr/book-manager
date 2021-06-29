@@ -19,6 +19,7 @@ plugins {
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
+jacoco.toolVersion = "0.8.7"
 
 repositories {
     mavenCentral()
@@ -74,14 +75,17 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.jacocoTestReport {
+tasks.withType<JacocoReport> {
     dependsOn(tasks.test)
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.map {
+            fileTree(it) {
+                exclude("**/greeter/*.class")
+                exclude("/proto/**/*.class")
+            }
+        }))
+    }
 }
-
-jacoco {
-    toolVersion = "0.8.7"
-}
-
 
 mybatisGenerator {
     verbose = true
