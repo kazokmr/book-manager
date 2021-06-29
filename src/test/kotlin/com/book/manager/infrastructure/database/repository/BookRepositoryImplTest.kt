@@ -105,7 +105,7 @@ internal class BookRepositoryImplTest : TestContainerPostgres() {
     fun `register when a book is not registered yet then register it`() {
 
         // Given
-        val book = Book(528, "Moyo入門", "moyomoyo", LocalDate.now())
+        val book = Book(100, "hoge入門", "hogehoge", LocalDate.now())
 
         // When
         val registeredCount = bookRepository.register(book)

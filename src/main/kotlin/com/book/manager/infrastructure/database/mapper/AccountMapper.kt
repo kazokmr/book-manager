@@ -62,19 +62,12 @@ interface AccountMapper {
     fun update(updateStatement: UpdateStatementProvider): Int
 
     @Insert(
-        "INSERT INTO account (" +
-                "id," +
-                "email," +
-                "password," +
-                "name," +
-                "role_type" +
-                ") VALUES (" +
-                "#{account.id}," +
-                "#{account.email}," +
-                "#{account.password}," +
-                "#{account.name}," +
-                "#{account.roleType.name}::role_type" +
-                ")"
+        """
+        INSERT INTO account 
+            (id,email,password,name,role_type)
+        VALUES 
+            (#{account.id},#{account.email},#{account.password},#{account.name},#{account.roleType.name}::role_type)
+        """
     )
     fun insertRecord(@Param("account") accountRecord: AccountRecord): Int
 }
