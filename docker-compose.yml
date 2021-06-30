@@ -9,7 +9,7 @@ services:
     container_name: db_postgresql
     environment:
       POSTGRES_PASSWORD: password
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --no-locale"
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --no-locale"
       TZ: Asia/Tokyo
     volumes:
       - postgresql_data:/var/lib/postgresql/data
