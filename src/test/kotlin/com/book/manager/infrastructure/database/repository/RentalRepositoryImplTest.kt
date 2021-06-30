@@ -35,8 +35,8 @@ internal class RentalRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("Rentalテーブルへの登録")
-    @DatabaseSetup("/testdata/rental/init-data")
-    @ExpectedDatabase("/testdata/rental/after-start-rental", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/test-data/rental/init-data")
+    @ExpectedDatabase("/test-data/rental/after-start-rental", assertionMode = NON_STRICT_UNORDERED)
     fun `startRental when star renting then register Rental table`() {
 
         //Given
@@ -56,8 +56,8 @@ internal class RentalRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("登録済みの書籍IDがあれば、Rentalテーブルに登録しない")
-    @DatabaseSetup("/testdata/rental/init-data")
-    @ExpectedDatabase("/testdata/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/test-data/rental/init-data")
+    @ExpectedDatabase("/test-data/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
     fun `startRental when bookId has already been rent then is not registering Rental Table`() {
 
         // Given
@@ -76,8 +76,8 @@ internal class RentalRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("Rentalテーブルからレコードを削除する")
-    @DatabaseSetup("/testdata/rental/init-data")
-    @ExpectedDatabase("/testdata/rental/after-end-rental", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/test-data/rental/init-data")
+    @ExpectedDatabase("/test-data/rental/after-end-rental", assertionMode = NON_STRICT_UNORDERED)
     fun `endRental when rental is exist then delete`() {
 
         // Given
@@ -92,8 +92,8 @@ internal class RentalRepositoryImplTest : TestContainerPostgres() {
 
     @Test
     @DisplayName("Rental情報が登録されていなければ削除しない")
-    @DatabaseSetup("/testdata/rental/init-data")
-    @ExpectedDatabase("/testdata/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
+    @DatabaseSetup("/test-data/rental/init-data")
+    @ExpectedDatabase("/test-data/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
     fun `endRental when recode is not exist then does not delete`() {
 
         // Given

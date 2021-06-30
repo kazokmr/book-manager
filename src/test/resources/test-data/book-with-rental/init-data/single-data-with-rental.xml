@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <book id="100" title="Kotlin入門" author="ことりん太郎" release_date="1950-10-01"/>
+    <rental book_id="100" account_id="3" rental_datetime="2021-07-01 05:39:48.000"
+            return_deadline="2021-07-15 05:39:48.000"/>
+</dataset>
