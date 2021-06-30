@@ -15,7 +15,7 @@ abstract class TestContainerPostgres {
             withDatabaseName("test")
             withUsername("user")
             withPassword("pass")
-            withEnv("POSTGRES_INITDB_ARGS", "--encoding=UTF8 --no-locale")
+            withEnv("POSTGRES_INITDB_ARGS", "--encoding=UTF-8 --no-locale")
             withEnv("TZ", "Asia/Tokyo")
             withInitScript("initdb/schema.sql")
             withReuse(true)
