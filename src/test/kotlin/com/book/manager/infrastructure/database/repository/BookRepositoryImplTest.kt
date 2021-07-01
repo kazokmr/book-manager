@@ -2,6 +2,7 @@ package com.book.manager.infrastructure.database.repository
 
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.repository.BookRepository
+import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
 import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
 import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
@@ -25,7 +26,7 @@ import java.time.LocalDate
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import(BookRepositoryImpl::class)
+@Import(value = [BookRepositoryImpl::class, DataSourceConfig::class])
 @TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class BookRepositoryImplTest : TestContainerPostgres() {
 
