@@ -3,6 +3,7 @@ package com.book.manager.infrastructure.database.repository
 import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.RentalRepository
 import com.book.manager.infrastructure.database.dbunit.CsvDataSetLoader
+import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
 import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
 import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
@@ -25,7 +26,7 @@ import java.time.LocalDateTime
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import(RentalRepositoryImpl::class)
+@Import(value = [RentalRepositoryImpl::class, DataSourceConfig::class])
 @DbUnitConfiguration(dataSetLoader = CsvDataSetLoader::class)
 @TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class RentalRepositoryImplTest : TestContainerPostgres() {

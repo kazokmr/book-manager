@@ -1,5 +1,6 @@
 package com.book.manager.infrastructure.database.mapper
 
+import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
 import com.book.manager.infrastructure.database.record.BookWithRentalRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
 import com.github.springtestdbunit.DbUnitTestExecutionListener
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.TestExecutionListeners
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import java.time.LocalDate
@@ -18,6 +20,7 @@ import java.time.LocalDateTime
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(value = [DataSourceConfig::class])
 @TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class BookWithRentalMapperExtensionsTest : TestContainerPostgres() {
 

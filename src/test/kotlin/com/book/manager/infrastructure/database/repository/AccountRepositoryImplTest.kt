@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Import
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import(AccountRepositoryImpl::class)
+@Import(value = [AccountRepositoryImpl::class])
 internal class AccountRepositoryImplTest : TestContainerPostgres() {
 
     @Autowired
