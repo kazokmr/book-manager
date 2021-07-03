@@ -1,5 +1,6 @@
 package com.book.manager.presentation.form
 
+import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
 import java.time.LocalDate
@@ -34,3 +35,7 @@ data class RentalInfo(val userId: Long, val rentalDatetime: LocalDateTime, val r
 data class RegisterBookRequest(val id: Long, val title: String, val author: String, val releaseDate: LocalDate)
 
 data class UpdateBookRequest(val id: Long, val title: String?, val author: String?, val releaseDate: LocalDate?)
+
+data class AdminBookResponse(val id: Long, val title: String, val author: String, val releaseDate: LocalDate) {
+    constructor(book: Book) : this(book.id, book.title, book.author, book.releaseDate)
+}

@@ -6,13 +6,14 @@ import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.application.service.result.Result
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
+import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.server.ResponseStatusException
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [AdminBookController::class])
@@ -51,19 +53,32 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
             .registerModule(JavaTimeModule())
             .writeValueAsString(request)
 
+        val book = Book(request.id, request.title, request.author, request.releaseDate)
+        whenever(adminBookService.register(any() as Book)).thenReturn(Result.Success(book))
+
         // When
-        mockMvc
-            .perform(
-                post("/admin/book/register")
-                    .contentType(APPLICATION_JSON)
-                    .content(json)
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isOk)
+        val resultContent =
+            mockMvc
+                .perform(
+                    post("/admin/book/register")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isCreated)
+                .andReturn()
+                .response
+                .getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        val book = Book(request.id, request.title, request.author, request.releaseDate)
-        verify(adminBookService).register(book)
+        val expectedResponse = AdminBookResponse(book)
+        val expectedContent = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(JavaTimeModule())
+            .writeValueAsString(expectedResponse)
+
+        assertThat(resultContent).isEqualTo(expectedContent)
     }
 
     @Test
@@ -112,18 +127,33 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
                 .registerModule(JavaTimeModule())
                 .writeValueAsString(request)
 
+        val book = Book(request.id, request.title!!, request.author!!, request.releaseDate!!)
+        whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
+            .thenReturn(Result.Success(book))
+
         // When
-        mockMvc
-            .perform(
-                put("/admin/book/update")
-                    .contentType(APPLICATION_JSON)
-                    .content(json)
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isOk)
+        val responseContent =
+            mockMvc
+                .perform(
+                    put("/admin/book/update")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isOk)
+                .andReturn()
+                .response
+                .getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        verify(adminBookService).update(request.id, request.title, request.author, request.releaseDate)
+        val expectedResponse = AdminBookResponse(book)
+        val expectedContent = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(JavaTimeModule())
+            .writeValueAsString(expectedResponse)
+
+        assertThat(responseContent).isEqualTo(expectedContent)
     }
 
     @Test
@@ -169,15 +199,19 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         val bookId = 100L
 
         // When
-        mockMvc
-            .perform(
-                delete("/admin/book/delete/$bookId")
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isOk)
+        val resultContent =
+            mockMvc
+                .perform(
+                    delete("/admin/book/delete/$bookId")
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isNoContent)
+                .andReturn()
+                .response
+                .getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        verify(adminBookService).delete(bookId)
+        assertThat(resultContent).isEmpty()
     }
 
     @Test

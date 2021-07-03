@@ -7,12 +7,15 @@ import com.book.manager.application.service.result.Result
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.model.Book
+import com.book.manager.domain.model.Rental
 import com.book.manager.presentation.form.RentalStartRequest
+import com.book.manager.presentation.form.RentalStartResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +31,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delet
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.server.ResponseStatusException
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @WebMvcTest(controllers = [RentalController::class])
 @WithCustomMockUser
@@ -60,18 +65,33 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
             .registerKotlinModule()
             .writeValueAsString(rentalStartRequest)
 
+        val rentalDate = LocalDateTime.now()
+        val rental = Rental(book.id, account.id, rentalDate, rentalDate.plusDays(14))
+        whenever(rentalService.startRental(any() as Long, any() as Long)).thenReturn(Result.Success(rental))
+
         // When
-        mockMvc
-            .perform(
-                post("/rental/start")
-                    .contentType(APPLICATION_JSON)
-                    .content(json)
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isOk)
+        val resultContent =
+            mockMvc
+                .perform(
+                    post("/rental/start")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isCreated)
+                .andReturn()
+                .response
+                .getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        verify(rentalService).startRental(book.id, account.id)
+        val expectedResponse = RentalStartResponse(rental)
+        val expectedContent = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(JavaTimeModule())
+            .writeValueAsString(expectedResponse)
+
+        assertThat(resultContent).isEqualTo(expectedContent)
     }
 
     @Test
@@ -86,16 +106,17 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
             .thenReturn(Result.Failure(reason))
 
         // When
-        val exception = mockMvc
-            .perform(
-                post("/rental/start")
-                    .contentType(APPLICATION_JSON)
-                    .content(json)
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isBadRequest)
-            .andReturn()
-            .resolvedException
+        val exception =
+            mockMvc
+                .perform(
+                    post("/rental/start")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isBadRequest)
+                .andReturn()
+                .resolvedException
 
         // Then
         assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
@@ -108,15 +129,19 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
     fun `endRental when return a book then end rental`() {
 
         // When
-        mockMvc
-            .perform(
-                delete("/rental/end/${book.id}")
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isOk)
+        val resultContent =
+            mockMvc
+                .perform(
+                    delete("/rental/end/${book.id}")
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isNoContent)
+                .andReturn()
+                .response
+                .getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        verify(rentalService).endRental(book.id, account.id)
+        assertThat(resultContent).isEmpty()
     }
 
     @Test
@@ -128,14 +153,15 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
         whenever(rentalService.endRental(any() as Long, any() as Long)).thenReturn(Result.Failure(reason))
 
         // When
-        val exception = mockMvc
-            .perform(
-                delete("/rental/end/${book.id}")
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isBadRequest)
-            .andReturn()
-            .resolvedException
+        val exception =
+            mockMvc
+                .perform(
+                    delete("/rental/end/${book.id}")
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isBadRequest)
+                .andReturn()
+                .resolvedException
 
         // Then
         assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
