@@ -100,7 +100,10 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
 
         // Given
         val rentalStartRequest = RentalStartRequest(book.id)
-        val json = ObjectMapper().registerKotlinModule().writeValueAsString(rentalStartRequest)
+        val json = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerKotlinModule()
+            .writeValueAsString(rentalStartRequest)
         val reason = "エラー: bookId ${book.id} accountId ${account.id}"
         whenever(rentalService.startRental(any() as Long, any() as Long))
             .thenReturn(Result.Failure(reason))
