@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("rental")
@@ -27,7 +28,7 @@ class RentalController(private val rentalService: RentalService) {
     @ResponseStatus(HttpStatus.CREATED)
     fun startRental(
         @AuthenticationPrincipal userDetails: BookManagerUserDetails,
-        @RequestBody request: RentalStartRequest
+        @RequestBody @Valid request: RentalStartRequest
     ): RentalStartResponse =
         when (val result = rentalService.startRental(request.bookId, userDetails.id)) {
             is Result.Success -> RentalStartResponse(result.data as Rental)
