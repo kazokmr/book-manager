@@ -128,6 +128,39 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
     }
 
     @Test
+    @DisplayName("書籍IDが1未満の場合は HTTP400 BAD_REQUEST")
+    fun `startRental when bookId is less than 1 then return BadRequest`() {
+
+        val rentalStartRequest = RentalStartRequest(0L)
+        val json = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerKotlinModule()
+            .writeValueAsString(rentalStartRequest)
+
+        // When
+        val resultResponse =
+            mockMvc
+                .perform(
+                    post("/rental/start")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isBadRequest)
+                .andReturn()
+                .response
+
+        val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
+
+        // Then
+        val expectedResponse = mapOf(Pair("bookId", "書籍IDには1以上の数値を入れてください。"))
+        val expected = ObjectMapper()
+            .registerKotlinModule()
+            .writeValueAsString(expectedResponse)
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
     @DisplayName("書籍の返却")
     fun `endRental when return a book then end rental`() {
 
