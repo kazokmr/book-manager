@@ -36,6 +36,6 @@ data class RegisterBookRequest(val id: Long, val title: String, val author: Stri
 
 data class UpdateBookRequest(val id: Long, val title: String?, val author: String?, val releaseDate: LocalDate?)
 
-data class AdminBookResponse(val id: Long, val title: String, val author: String, val releaseDate: LocalDate) {
+data class AdminBookResponse(val id: Long, val title: String?, val author: String?, val releaseDate: LocalDate?) {
     constructor(book: Book) : this(book.id, book.title, book.author, book.releaseDate)
 }

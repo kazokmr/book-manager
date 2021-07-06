@@ -1,9 +1,7 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.RentalService
-import com.book.manager.application.service.result.Result
 import com.book.manager.application.service.security.BookManagerUserDetails
-import com.book.manager.domain.model.Rental
 import com.book.manager.presentation.form.RentalStartRequest
 import com.book.manager.presentation.form.RentalStartResponse
 import org.springframework.http.HttpStatus
@@ -30,17 +28,18 @@ class RentalController(private val rentalService: RentalService) {
         @AuthenticationPrincipal userDetails: BookManagerUserDetails,
         @RequestBody @Valid request: RentalStartRequest
     ): RentalStartResponse =
-        when (val result = rentalService.startRental(request.bookId, userDetails.id)) {
-            is Result.Success -> RentalStartResponse(result.data as Rental)
-            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
-        }
+        kotlin.runCatching {
+            rentalService.startRental(request.bookId, userDetails.id)
+        }.fold(
+            onSuccess = { RentalStartResponse(it) },
+            onFailure = { throw ResponseStatusException(HttpStatus.BAD_REQUEST, it.message) }
+        )
 
     @DeleteMapping("/end/{bookId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun endRental(@AuthenticationPrincipal userDetails: BookManagerUserDetails, @PathVariable("bookId") bookId: Long) {
-        when (val result = rentalService.endRental(bookId, userDetails.id)) {
-            is Result.Success -> result.data
-            is Result.Failure -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, result.message)
-        }
+        kotlin.runCatching {
+            rentalService.endRental(bookId, userDetails.id)
+        }.onFailure { throw ResponseStatusException(HttpStatus.BAD_REQUEST, it.message) }
     }
 }

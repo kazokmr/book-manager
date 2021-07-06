@@ -1,6 +1,5 @@
 package com.book.manager.application.service
 
-import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.domain.repository.BookRepository
@@ -18,35 +17,35 @@ class RentalService(
     private val rentalRepository: RentalRepository
 ) {
     @Transactional
-    fun startRental(bookId: Long, accountId: Long): Result {
+    fun startRental(bookId: Long, accountId: Long): Rental {
         accountRepository.findById(accountId)
-            ?: return Result.Failure("該当するユーザーが存在しません accountId: $accountId")
+            ?: throw IllegalArgumentException("該当するユーザーが存在しません accountId: $accountId")
         val book = bookRepository.findWithRental(bookId)
-            ?: return Result.Failure("該当する書籍が存在しません bookId: $bookId")
+            ?: throw IllegalArgumentException("該当する書籍が存在しません bookId: $bookId")
 
         return when (book.isRental) {
-            true -> Result.Failure("貸出中の書籍です bookId: $bookId")
+            true -> throw IllegalArgumentException("貸出中の書籍です bookId: $bookId")
             false -> {
                 val rentalDateTime = LocalDateTime.now()
                 val returnDeadLine = rentalDateTime.plusDays(RENTAL_TERM_DAYS)
                 val rental = Rental(bookId, accountId, rentalDateTime, returnDeadLine)
                 rentalRepository.startRental(rental)
-                Result.Success("Book $bookId has been renting by $accountId")
+                rental
             }
         }
     }
 
     @Transactional
-    fun endRental(bookId: Long, accountId: Long): Result {
+    fun endRental(bookId: Long, accountId: Long): Long {
         accountRepository.findById(accountId)
-            ?: return Result.Failure("該当するユーザーが存在しません accountId: $accountId")
+            ?: throw IllegalArgumentException("該当するユーザーが存在しません accountId: $accountId")
         val book = bookRepository.findWithRental(bookId)
-            ?: return Result.Failure("該当する書籍が存在しません bookId: $bookId")
+            ?: throw IllegalArgumentException("該当する書籍が存在しません bookId: $bookId")
 
-        if (!book.isRental) return Result.Failure("未貸出の書籍です bookId: $bookId")
-        if (book.rental?.accountId != accountId) return Result.Failure("他のユーザーが貸出中の書籍です bookId: $bookId")
+        if (!book.isRental) throw IllegalArgumentException("未貸出の書籍です bookId: $bookId")
+        if (book.rental?.accountId != accountId) throw IllegalArgumentException("他のユーザーが貸出中の書籍です bookId: $bookId")
 
         rentalRepository.endRental(bookId)
-        return Result.Success("Book $bookId is returning from $accountId")
+        return bookId
     }
 }

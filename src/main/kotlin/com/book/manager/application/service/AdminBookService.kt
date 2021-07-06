@@ -1,6 +1,5 @@
 package com.book.manager.application.service
 
-import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.repository.BookRepository
 import org.springframework.stereotype.Service
@@ -11,26 +10,26 @@ import java.time.LocalDate
 class AdminBookService(private val bookRepository: BookRepository) {
 
     @Transactional
-    fun register(book: Book): Result {
+    fun register(book: Book): Book {
         return when (bookRepository.findWithRental(book.id)) {
-            null -> bookRepository.register(book).run { Result.Success(book) }
-            else -> Result.Failure("既に存在する書籍ID: ${book.id}")
+            null -> bookRepository.register(book).run { book }
+            else -> throw IllegalArgumentException("既に存在する書籍ID: ${book.id}")
         }
     }
 
     @Transactional
-    fun update(bookId: Long, title: String?, author: String?, releaseDate: LocalDate?): Result {
+    fun update(bookId: Long, title: String?, author: String?, releaseDate: LocalDate?): Long {
         return when (bookRepository.findWithRental(bookId)) {
-            null -> Result.Failure("存在しない書籍ID: $bookId")
-            else -> bookRepository.update(bookId, title, author, releaseDate).run { Result.Success(bookId) }
+            null -> throw IllegalArgumentException("存在しない書籍ID: $bookId")
+            else -> bookRepository.update(bookId, title, author, releaseDate).run { bookId }
         }
     }
 
     @Transactional
-    fun delete(bookId: Long): Result {
+    fun delete(bookId: Long): Long {
         return when (bookRepository.findWithRental(bookId)) {
-            null -> Result.Failure("存在しない書籍ID: $bookId")
-            else -> bookRepository.delete(bookId).run { Result.Success((bookId)) }
+            null -> throw IllegalArgumentException("存在しない書籍ID: $bookId")
+            else -> bookRepository.delete(bookId).run { bookId }
         }
     }
 }

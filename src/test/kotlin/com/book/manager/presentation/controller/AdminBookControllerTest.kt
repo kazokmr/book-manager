@@ -3,7 +3,6 @@ package com.book.manager.presentation.controller
 import com.book.manager.application.service.AdminBookService
 import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
-import com.book.manager.application.service.result.Result
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.AdminBookResponse
@@ -54,7 +53,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
             .writeValueAsString(request)
 
         val book = Book(request.id, request.title, request.author, request.releaseDate)
-        whenever(adminBookService.register(any() as Book)).thenReturn(Result.Success(book))
+        whenever(adminBookService.register(any() as Book)).thenReturn(book)
 
         // When
         val resultContent =
@@ -94,7 +93,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
                 .writeValueAsString(request)
         val reason = "エラー: ${request.id}"
 
-        whenever(adminBookService.register(any() as Book)).thenReturn(Result.Failure(reason))
+        whenever(adminBookService.register(any() as Book)).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
@@ -129,7 +128,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         val book = Book(request.id, request.title!!, request.author!!, request.releaseDate!!)
         whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
-            .thenReturn(Result.Success(book))
+            .thenReturn(request.id)
 
         // When
         val responseContent =
@@ -170,7 +169,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         val reason = "エラー: ${request.id}"
 
         whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
-            .thenReturn(Result.Failure(reason))
+            .thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
@@ -221,7 +220,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         // Given
         val bookId = 100L
         val reason = "エラー: $bookId"
-        whenever(adminBookService.delete(any() as Long)).thenReturn(Result.Failure(reason))
+        whenever(adminBookService.delete(any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
