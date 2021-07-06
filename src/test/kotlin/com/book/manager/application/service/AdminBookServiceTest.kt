@@ -1,6 +1,5 @@
 package com.book.manager.application.service
 
-import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.repository.BookRepository
@@ -13,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class AdminBookServiceTest {
@@ -36,10 +36,8 @@ internal class AdminBookServiceTest {
         val result = adminBookService.register(book)
 
         // Then
-        assertThat(result).isInstanceOf(Result.Success::class.java)
-        result as Result.Success
-        assertThat(result.data).isEqualTo(book)
         verify(bookRepository).register(book)
+        assertThat(result).isEqualTo(book)
     }
 
     @Test
@@ -50,13 +48,13 @@ internal class AdminBookServiceTest {
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
 
         // When
-        val result = adminBookService.register(book)
+        val result = assertThrows<IllegalArgumentException> {
+            adminBookService.register(book)
+        }
 
         // Then
-        assertThat(result).isInstanceOf(Result.Failure::class.java)
-        result as Result.Failure
-        assertThat(result.message).isEqualTo("既に存在する書籍ID: ${book.id}")
         verify(bookRepository, times(0)).register(any() as Book)
+        assertThat(result.message).isEqualTo("既に存在する書籍ID: ${book.id}")
     }
 
     @Test
@@ -70,10 +68,8 @@ internal class AdminBookServiceTest {
         val result = adminBookService.delete(book.id)
 
         // Then
-        assertThat(result).isInstanceOf(Result.Success::class.java)
-        result as Result.Success
-        assertThat(result.data).isEqualTo(book.id)
         verify(bookRepository).delete(book.id)
+        assertThat(result).isEqualTo(book.id)
     }
 
     @Test
@@ -84,13 +80,11 @@ internal class AdminBookServiceTest {
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
 
         // When
-        val result = adminBookService.delete(book.id)
+        val result = assertThrows<IllegalArgumentException> { adminBookService.delete(book.id) }
 
         // Then
-        assertThat(result).isInstanceOf(Result.Failure::class.java)
-        result as Result.Failure
-        assertThat(result.message).isEqualTo("存在しない書籍ID: ${book.id}")
         verify(bookRepository, times(0)).delete(any() as Long)
+        assertThat(result.message).isEqualTo("存在しない書籍ID: ${book.id}")
     }
 
     @Test
@@ -104,10 +98,8 @@ internal class AdminBookServiceTest {
         val result = adminBookService.update(book.id, "test", "author", LocalDate.now())
 
         // Then
-        assertThat(result).isInstanceOf(Result.Success::class.java)
-        result as Result.Success
-        assertThat(result.data).isEqualTo(book.id)
         verify(bookRepository).update(any() as Long, any() as String, any() as String, any() as LocalDate)
+        assertThat(result).isEqualTo(book.id)
     }
 
     @Test
@@ -118,12 +110,12 @@ internal class AdminBookServiceTest {
         whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
 
         // When
-        val result = adminBookService.update(book.id, "test", "author", LocalDate.now())
+        val result = assertThrows<IllegalArgumentException> {
+            adminBookService.update(book.id, "test", "author", LocalDate.now())
+        }
 
         // Then
-        assertThat(result).isInstanceOf(Result.Failure::class.java)
-        result as Result.Failure
-        assertThat(result.message).isEqualTo("存在しない書籍ID: ${book.id}")
         verify(bookRepository, times(0)).update(any() as Long, any() as String, any() as String, any() as LocalDate)
+        assertThat(result.message).isEqualTo("存在しない書籍ID: ${book.id}")
     }
 }

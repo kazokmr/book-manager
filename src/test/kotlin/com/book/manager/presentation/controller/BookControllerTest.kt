@@ -3,7 +3,6 @@ package com.book.manager.presentation.controller
 import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.BookService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
-import com.book.manager.application.service.result.Result
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
@@ -86,7 +85,7 @@ internal class BookControllerTest(@Autowired var mockMvc: MockMvc) {
         val rental = Rental(book.id, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
         val bookWithRental = BookWithRental(book, rental)
 
-        whenever(bookService.getDetail(any() as Long)).thenReturn(Result.Success(bookWithRental))
+        whenever(bookService.getDetail(any() as Long)).thenReturn(bookWithRental)
 
         // When
         val resultResponse =
@@ -117,7 +116,7 @@ internal class BookControllerTest(@Autowired var mockMvc: MockMvc) {
 
         // Given
         val reason = "エラー: ${book.id}"
-        whenever(bookService.getDetail(any() as Long)).thenReturn(Result.Failure(reason))
+        whenever(bookService.getDetail(any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception = mockMvc

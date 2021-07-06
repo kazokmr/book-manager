@@ -3,7 +3,6 @@ package com.book.manager.presentation.controller
 import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.RentalService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
-import com.book.manager.application.service.result.Result
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.model.Book
@@ -67,7 +66,7 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
 
         val rentalDate = LocalDateTime.now()
         val rental = Rental(book.id, account.id, rentalDate, rentalDate.plusDays(14))
-        whenever(rentalService.startRental(any() as Long, any() as Long)).thenReturn(Result.Success(rental))
+        whenever(rentalService.startRental(any() as Long, any() as Long)).thenReturn(rental)
 
         // When
         val resultContent =
@@ -105,8 +104,7 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
             .registerKotlinModule()
             .writeValueAsString(rentalStartRequest)
         val reason = "エラー: bookId ${book.id} accountId ${account.id}"
-        whenever(rentalService.startRental(any() as Long, any() as Long))
-            .thenReturn(Result.Failure(reason))
+        whenever(rentalService.startRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
@@ -186,7 +184,7 @@ internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
 
         // Given
         val reason = "エラー: bookId ${book.id} accountId ${account.id}"
-        whenever(rentalService.endRental(any() as Long, any() as Long)).thenReturn(Result.Failure(reason))
+        whenever(rentalService.endRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
