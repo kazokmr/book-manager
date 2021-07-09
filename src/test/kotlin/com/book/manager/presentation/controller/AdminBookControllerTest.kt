@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -112,6 +113,72 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         assertThat(exception).isInstanceOf(ResponseStatusException::class.java)
         exception as ResponseStatusException
         assertThat(exception.reason).isEqualTo(reason)
+    }
+
+    @Test
+    @DisplayName("リクエストに必須パラメータが無ければ、書籍は登録できない")
+    fun `register when request parameter does not have request item then return exception`() {
+
+        // Given
+        val request = mapOf("id" to 100L, "title" to "入門", "author" to "moyo")
+        val json = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerKotlinModule()
+            .writeValueAsString(request)
+
+        // When
+        val result =
+            mockMvc
+                .perform(
+                    post("/admin/book/register")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isBadRequest)
+                .andReturn()
+
+        val response = result.response.getContentAsString(StandardCharsets.UTF_8)
+
+        // Then
+        val expected = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerKotlinModule()
+            .writeValueAsString(mapOf("入力パラメータがありません" to "release_date"))
+        assertThat(response).isEqualTo(expected)
+    }
+
+    @Test
+    @DisplayName("リクエストパラメータと値の型が異なればエラー")
+    fun `register when id is string then throw exception`() {
+
+        // Given
+        val request = mapOf("id" to "abc", "title" to "入門", "author" to "moyo", "release_date" to "2018-04-19")
+        val json = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerKotlinModule()
+            .writeValueAsString(request)
+
+        // When
+        val result =
+            mockMvc
+                .perform(
+                    post("/admin/book/register")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf().asHeader())
+                )
+                .andExpect(status().isBadRequest)
+                .andReturn()
+
+        val response = result.response.getContentAsString(StandardCharsets.UTF_8)
+
+        // Then
+        val expected = ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerKotlinModule()
+            .writeValueAsString(mapOf("入力パラメータの型が一致しません" to "type of id should be long. but value was abc"))
+        assertThat(response).isEqualTo(expected)
     }
 
     @Test

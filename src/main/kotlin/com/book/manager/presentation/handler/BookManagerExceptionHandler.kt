@@ -1,12 +1,13 @@
 package com.book.manager.presentation.handler
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
@@ -28,16 +29,27 @@ class BookManagerExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     /**
-     * ResponseEntityExceptionHanderクラスの@ExceptionHandlerで定義されていない例外クラスを受け取る
+     * Non-Nullableなプロパティにマッピングするパラメータが不正だった場合のエラーメッセージを作成する
      * */
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(value = [Exception::class])
-    fun handlerException(
-        ex: Exception,
+    override fun handleHttpMessageNotReadable(
+        ex: HttpMessageNotReadableException,
         headers: HttpHeaders,
+        status: HttpStatus,
         request: WebRequest
     ): ResponseEntity<Any> {
-        return super.handleExceptionInternal(ex, null, headers, HttpStatus.BAD_REQUEST, request)
+        val body = when (val cause = ex.cause) {
+            is MissingKotlinParameterException -> {
+                cause.path.joinToString(",") { it.fieldName }
+                    .let { mapOf(Pair("入力パラメータがありません", it)) }
+            }
+            is InvalidFormatException -> {
+                cause.path.joinToString(",") {
+                    "type of ${it.fieldName} should be ${cause.targetType}. but value was ${cause.value}"
+                }.let { mapOf(Pair("入力パラメータの型が一致しません", it)) }
+            }
+            else -> mapOf(Pair("予期せぬエラー ${cause?.javaClass?.name}", ex.localizedMessage))
+        }
+        return handleExceptionInternal(ex, body, headers, status, request)
     }
 
     override fun handleExceptionInternal(
