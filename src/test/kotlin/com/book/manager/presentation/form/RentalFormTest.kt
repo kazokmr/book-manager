@@ -1,20 +1,27 @@
 package com.book.manager.presentation.form
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import javax.validation.Validation
+import javax.validation.Validator
 
 internal class RentalFormTest {
 
-    private val validator = Validation.buildDefaultValidatorFactory().validator
+    private lateinit var validator: Validator
 
     // parameterrizedTestの@MethodSource で使うstaticメソッド
     companion object {
         @Suppress("unused")
         @JvmStatic
         fun bookIds() = longArrayOf(1, 10, 100, 1000)
+    }
+
+    @BeforeEach
+    internal fun setUp() {
+        validator = Validation.buildDefaultValidatorFactory().validator
     }
 
     @ParameterizedTest(name = "書籍IDが0以下は入力エラー: BookID => {0}")
