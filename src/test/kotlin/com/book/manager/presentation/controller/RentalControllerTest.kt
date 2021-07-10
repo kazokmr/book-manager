@@ -36,7 +36,7 @@ import java.time.LocalDateTime
 
 @WebMvcTest(controllers = [RentalController::class])
 @WithCustomMockUser
-internal class RentalControllerTest(@Autowired var mockMvc: MockMvc) {
+internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
 
     @MockBean
     private lateinit var rentalService: RentalService

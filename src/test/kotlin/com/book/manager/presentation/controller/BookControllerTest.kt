@@ -34,7 +34,7 @@ import java.time.LocalDateTime
 
 @WebMvcTest(controllers = [BookController::class])
 @WithCustomMockUser
-internal class BookControllerTest(@Autowired var mockMvc: MockMvc) {
+internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
 
     @MockBean
     private lateinit var bookService: BookService
