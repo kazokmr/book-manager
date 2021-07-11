@@ -5,12 +5,15 @@ import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 
 internal class BookManagerUserDetailsServiceTest {
 
@@ -24,17 +27,21 @@ internal class BookManagerUserDetailsServiceTest {
     }
 
     @Test
-    @DisplayName("アカウントが無ければNullを返す")
+    @DisplayName("アカウントが無ければ UsernameNotFoundExceptionを返す")
     fun `loadUserByUsername when account is null then return null`() {
 
         // Given
+        val username = "invalidUser"
         whenever(authenticationService.findAccount(any() as String)).thenReturn(null)
 
         // When
-        val result = bookManagerUserDetailsService.loadUserByUsername("user")
+        val result = assertThrows<UsernameNotFoundException> {
+            bookManagerUserDetailsService.loadUserByUsername(username)
+        }
 
         // Then
-        assertThat(result).isNull()
+        verify(authenticationService).findAccount(username)
+        assertThat(result.message).isEqualTo("無効なユーザー名です $username")
     }
 
     @Test
