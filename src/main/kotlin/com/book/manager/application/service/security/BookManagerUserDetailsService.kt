@@ -7,13 +7,15 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 
 class BookManagerUserDetailsService(private val authenticationService: AuthenticationService) : UserDetailsService {
 
-    override fun loadUserByUsername(username: String): UserDetails? {
-        val account = authenticationService.findAccount(username)
-        return account?.let { BookManagerUserDetails(account) }
-    }
+    override fun loadUserByUsername(username: String): UserDetails =
+        when (val account = authenticationService.findAccount(username)) {
+            null -> throw UsernameNotFoundException("無効なユーザー名です $username")
+            else -> BookManagerUserDetails(account)
+        }
 }
 
 data class BookManagerUserDetails(
