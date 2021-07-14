@@ -36,7 +36,7 @@ class LoggingAdvice {
     @After("execution(* com.book.manager.presentation.controller..*.*(..))")
     fun afterLog(joinPoint: JoinPoint) {
         val account = SecurityContextHolder.getContext().authentication.principal as BookManagerUserDetails
-        logger.info("End: ${joinPoint.signature} accountId-${account.id}")
+        logger.info("End: ${joinPoint.signature} accountId=${account.id}")
     }
 
     @Around("execution(* com.book.manager.presentation.controller..*.*(..))")
