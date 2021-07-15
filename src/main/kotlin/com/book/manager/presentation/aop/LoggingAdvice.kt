@@ -61,7 +61,7 @@ class LoggingAdvice {
                 "execution(* com.book.manager.presentation.controller..*.*(..))",
         throwing = "e"
     )
-    fun afterThrowingLog(joinPoint: JoinPoint, e: IllegalArgumentException) {
+    fun afterThrowingLog(joinPoint: JoinPoint, e: Exception) {
         logger.error("Exception: ${e.javaClass} signature=${joinPoint.signature} message=${e.message}")
     }
 }
