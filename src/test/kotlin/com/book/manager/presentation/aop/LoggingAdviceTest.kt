@@ -54,11 +54,13 @@ internal class LoggingAdviceTest {
 
     // AOP(ログ出力)対象クラス
     private lateinit var proxy: BookController
+
     // Session情報を取得するためのMockリクエスト
     private lateinit var request: MockHttpServletRequest
 
     // 検査用のログ出力先となるAppender
     private lateinit var mockAppender: Appender
+
     // 出力したログを保持する
     @Captor
     private lateinit var logMessageCaptor: ArgumentCaptor<LogEvent>
@@ -66,7 +68,7 @@ internal class LoggingAdviceTest {
     @BeforeEach
     internal fun setUp() {
 
-        // AOPの対象とするクラスをProxyにする
+        // Controllerクラスの実行をAspectJProxyFactoryでフィルタリングして、追加したAdviceクラスを実行させる
         val bookController = BookController(bookService)
         val factory = AspectJProxyFactory(bookController)
         factory.addAspect(LoggingAdvice())
