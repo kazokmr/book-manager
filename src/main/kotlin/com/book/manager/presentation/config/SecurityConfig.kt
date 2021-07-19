@@ -7,7 +7,6 @@ import com.book.manager.presentation.handler.BookManagerAccessDeniedHandler
 import com.book.manager.presentation.handler.BookManagerAuthenticationEntryPoint
 import com.book.manager.presentation.handler.BookManagerAuthenticationFailureHandler
 import com.book.manager.presentation.handler.BookManagerAuthenticationSuccessHandler
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -23,23 +22,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 class SecurityConfig(private val authenticationService: AuthenticationService) : WebSecurityConfigurerAdapter() {
 
-    // Accountのパスワードをエンコードする際に必要となるのでBeanにする
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
-
-    // パスワード認証時 `configure(AuthenticationManagerBuilder)` にエンコードするのでDI
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
 
     override fun configure(http: HttpSecurity) {
         http.authorizeRequests()
             .mvcMatchers("/greeter/**").permitAll()
-            .mvcMatchers("/login").permitAll()
             .mvcMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
             .anyRequest().authenticated()
             .and()
             .formLogin()
-            .loginProcessingUrl("/login")
+            .loginProcessingUrl("/login").permitAll()
             .usernameParameter("email")
             .passwordParameter("pass")
             .successHandler(BookManagerAuthenticationSuccessHandler())
@@ -59,7 +52,7 @@ class SecurityConfig(private val authenticationService: AuthenticationService) :
 
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.userDetailsService(BookManagerUserDetailsService(authenticationService))
-            .passwordEncoder(passwordEncoder)
+            .passwordEncoder(passwordEncoder())
     }
 
     private fun corsConfigurationSource(): CorsConfigurationSource {
