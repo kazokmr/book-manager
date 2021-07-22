@@ -103,7 +103,7 @@ configurations {
     getByName("${integrationDirName}RuntimeOnly").extendsFrom(configurations.testRuntimeOnly.get())
 }
 
-val integrationTest = task<Test>("integrationTest") {
+val integrationTest = task<Test>("${integrationDirName}Test") {
     description = "Runs integration tests."
     group = "verification"
     testClassesDirs = sourceSets.getByName(integrationDirName).output.classesDirs
@@ -118,8 +118,8 @@ tasks.check {
 idea {
     module {
         sourceSets[integrationDirName].let {
-            testSourceDirs.plusAssign(it.allSource)
-            testResourceDirs.plusAssign(it.resources)
+            testSourceDirs = testSourceDirs.plus(it.allSource.srcDirs)
+            testResourceDirs = testResourceDirs.plus(it.resources.srcDirs)
         }
     }
 }
