@@ -63,7 +63,7 @@ jobs:
 
       # Build with Gradle
       - name: Build with Gradle
-        run: ./gradlew clean test jacocoTestReport
+        run: ./gradlew clean check jacocoTestReport
 
       # Test Reportをアーカイブする
       - name: Archive Test Reports

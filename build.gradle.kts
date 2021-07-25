@@ -6,15 +6,16 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    kotlin("jvm") version "1.5.21"
+    kotlin("plugin.spring") version "1.5.21"
     id("org.springframework.boot") version "2.5.2"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
-    kotlin("jvm") version "1.5.20"
-    kotlin("plugin.spring") version "1.5.20"
-    id("com.google.protobuf") version "0.8.15"
-    id("idea")
     id("jacoco")
+    id("idea")
+    id("com.google.protobuf") version "0.8.15"
 }
+
+apply(plugin = "io.spring.dependency-management")
 
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
@@ -88,6 +89,35 @@ tasks.withType<JacocoReport> {
     }
 }
 
+val integrationDirName = "integration"
+
+sourceSets {
+    create(integrationDirName) {
+        compileClasspath += main.get().output
+        runtimeClasspath += main.get().output
+    }
+}
+
+configurations {
+    getByName("${integrationDirName}RuntimeOnly").extendsFrom(configurations.testRuntimeOnly.get())
+}
+
+val integrationImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+val integrationTest = task<Test>("${integrationDirName}Test") {
+    description = "Runs integration tests."
+    group = "verification"
+    testClassesDirs = sourceSets.getByName(integrationDirName).output.classesDirs
+    classpath = sourceSets.getByName(integrationDirName).runtimeClasspath
+    mustRunAfter("test")
+}
+
+tasks.check {
+    dependsOn(integrationTest)
+}
+
 mybatisGenerator {
     verbose = true
     configFile = "$projectDir/src/main/resources/generatorConfig.xml"
@@ -111,6 +141,15 @@ protobuf {
                 id("grpc")
                 id("grpckt")
             }
+        }
+    }
+}
+
+idea {
+    module {
+        project.sourceSets[integrationDirName].let {
+            testSourceDirs = testSourceDirs.plus(it.allSource.srcDirs)
+            testResourceDirs = testResourceDirs.plus(it.resources.srcDirs)
         }
     }
 }
