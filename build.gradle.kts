@@ -99,8 +99,11 @@ sourceSets {
 }
 
 configurations {
-    getByName("${integrationDirName}Implementation").extendsFrom(configurations.testImplementation.get())
     getByName("${integrationDirName}RuntimeOnly").extendsFrom(configurations.testRuntimeOnly.get())
+}
+
+val integrationImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
 }
 
 val integrationTest = task<Test>("${integrationDirName}Test") {
@@ -113,15 +116,6 @@ val integrationTest = task<Test>("${integrationDirName}Test") {
 
 tasks.check {
     dependsOn(integrationTest)
-}
-
-idea {
-    module {
-        sourceSets[integrationDirName].let {
-            testSourceDirs = testSourceDirs.plus(it.allSource.srcDirs)
-            testResourceDirs = testResourceDirs.plus(it.resources.srcDirs)
-        }
-    }
 }
 
 mybatisGenerator {
@@ -147,6 +141,15 @@ protobuf {
                 id("grpc")
                 id("grpckt")
             }
+        }
+    }
+}
+
+idea {
+    module {
+        project.sourceSets[integrationDirName].let {
+            testSourceDirs = testSourceDirs.plus(it.allSource.srcDirs)
+            testResourceDirs = testResourceDirs.plus(it.resources.srcDirs)
         }
     }
 }
