@@ -93,8 +93,8 @@ val integrationDirName = "integration"
 
 sourceSets {
     create(integrationDirName) {
-        compileClasspath += main.get().output
-        runtimeClasspath += main.get().output
+        compileClasspath += main.get().output + test.get().output
+        runtimeClasspath += main.get().output + test.get().output
     }
 }
 
