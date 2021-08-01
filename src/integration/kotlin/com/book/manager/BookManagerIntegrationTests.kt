@@ -50,9 +50,9 @@ internal class BookManagerIntegrationTests(@Autowired val mockMvc: MockMvc) : Te
     @BeforeEach
     internal fun setUp() {
 
-        val account1 = AccountRecord(1, "admin@example.com", encode("admin"), "admin", RoleType.ADMIN)
-        val account2 = AccountRecord(2, "user@example.com", encode("user"), "user", RoleType.USER)
-        val account3 = AccountRecord(1000, "test@example.com", encode("pass"), "test", RoleType.USER)
+        val account1 = AccountRecord(1, "admin@example.com", "admin".encode(), "admin", RoleType.ADMIN)
+        val account2 = AccountRecord(2, "user@example.com", "user".encode(), "user", RoleType.USER)
+        val account3 = AccountRecord(1000, "test@example.com", "pass".encode(), "test", RoleType.USER)
 
         accountMapper.insertRecord(account1)
         accountMapper.insertRecord(account2)
@@ -66,7 +66,7 @@ internal class BookManagerIntegrationTests(@Autowired val mockMvc: MockMvc) : Te
         rentalMapper.delete { allRows() }
     }
 
-    private fun encode(password: String) = BCryptPasswordEncoder().encode(password)
+    private fun String.encode() = BCryptPasswordEncoder().encode(this)
 
     @Test
     @DisplayName("ログインテスト")
