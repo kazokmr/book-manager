@@ -25,7 +25,7 @@ annotation class WithCustomMockUser(
     val roleType: RoleType = RoleType.USER
 )
 
-class WithMockCustomUserSecurityContextFactory : WithSecurityContextFactory<WithCustomMockUser> {
+open class WithMockCustomUserSecurityContextFactory : WithSecurityContextFactory<WithCustomMockUser> {
     override fun createSecurityContext(user: WithCustomMockUser): SecurityContext {
         val account = Account(user.id, user.email, user.pass, user.username, user.roleType)
         val principal = BookManagerUserDetails(account)

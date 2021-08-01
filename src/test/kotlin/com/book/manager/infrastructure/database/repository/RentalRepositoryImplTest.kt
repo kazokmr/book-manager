@@ -4,7 +4,7 @@ import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.RentalRepository
 import com.book.manager.infrastructure.database.dbunit.CsvDataSetLoader
 import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
-import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
+import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
 import com.github.springtestdbunit.annotation.DbUnitConfiguration
@@ -29,7 +29,7 @@ import java.time.LocalDateTime
 @Import(value = [RentalRepositoryImpl::class, DataSourceConfig::class])
 @DbUnitConfiguration(dataSetLoader = CsvDataSetLoader::class)
 @TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
-internal class RentalRepositoryImplTest : TestContainerPostgres() {
+internal class RentalRepositoryImplTest : TestContainerDataRegistry() {
 
     @Autowired
     private lateinit var rentalRepository: RentalRepository

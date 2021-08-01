@@ -3,7 +3,7 @@ package com.book.manager.infrastructure.database.repository
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.repository.BookRepository
 import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
-import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
+import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
 import com.github.springtestdbunit.annotation.ExpectedDatabase
@@ -28,7 +28,7 @@ import java.time.LocalDate
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(value = [BookRepositoryImpl::class, DataSourceConfig::class])
 @TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
-internal class BookRepositoryImplTest : TestContainerPostgres() {
+internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Autowired
     private lateinit var bookRepository: BookRepository
