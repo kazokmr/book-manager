@@ -2,7 +2,7 @@ package com.book.manager.infrastructure.database.mapper
 
 import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
 import com.book.manager.infrastructure.database.record.BookWithRentalRecord
-import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
+import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
 import org.assertj.core.api.Assertions.assertThat
@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(value = [DataSourceConfig::class])
 @TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
-internal class BookWithRentalMapperExtensionsTest : TestContainerPostgres() {
+internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() {
 
     @Autowired
     private lateinit var mapper: BookWithRentalMapper

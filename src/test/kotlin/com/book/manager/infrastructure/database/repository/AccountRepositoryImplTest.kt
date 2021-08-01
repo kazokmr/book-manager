@@ -6,7 +6,7 @@ import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.delete
 import com.book.manager.infrastructure.database.record.AccountRecord
-import com.book.manager.infrastructure.database.testcontainers.TestContainerPostgres
+import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.AfterEach
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Import
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(value = [AccountRepositoryImpl::class])
-internal class AccountRepositoryImplTest : TestContainerPostgres() {
+internal class AccountRepositoryImplTest : TestContainerDataRegistry() {
 
     @Autowired
     private lateinit var accountRepository: AccountRepository
