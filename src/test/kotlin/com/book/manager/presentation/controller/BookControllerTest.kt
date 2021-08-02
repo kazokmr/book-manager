@@ -11,7 +11,6 @@ import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
@@ -42,11 +41,15 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
     @MockBean
     private lateinit var authenticationService: AuthenticationService
 
-    private lateinit var book: Book
+    private lateinit var testBooks: List<Book>
 
     @BeforeEach
     internal fun setUp() {
-        book = Book(100L, "Kotlin入門", "コトリン太郎", LocalDate.now())
+        testBooks = listOf(
+            Book(100, "Kotlin入門", "コトリン太郎", LocalDate.now()),
+            Book(200, "Java入門", "ジャバ太郎", LocalDate.now()),
+            Book(300, "Spring入門", "スプリング太郎", LocalDate.now()),
+        )
     }
 
     @Test
@@ -54,8 +57,8 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `getList is success`() {
 
         // Given
-        val bookList = listOf(BookWithRental(book, null))
-        whenever(bookService.getList()).thenReturn(bookList)
+        val bookWithRentalList = testBooks.map { BookWithRental(it, null) }
+        whenever(bookService.getList()).thenReturn(bookWithRentalList)
 
         // When
         val resultResponse =
@@ -69,12 +72,15 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-        val expectedResponse = GetBookListResponse(listOf(BookInfo(BookWithRental(book, null))))
-        val expected = ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .registerKotlinModule()
-            .writeValueAsString(expectedResponse)
-        assertThat(result).isEqualTo(expected)
+            .let {
+                ObjectMapper()
+                    .registerKotlinModule()
+                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                    .readValue(it, GetBookListResponse::class.java)
+            }
+
+        val expected = GetBookListResponse(bookWithRentalList.map { BookInfo(it) })
+        assertThat(result.bookList).containsAll(expected.bookList)
     }
 
     @Test
@@ -82,31 +88,32 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `getDetail is success`() {
 
         // Given
-        val rental = Rental(book.id, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
-        val bookWithRental = BookWithRental(book, rental)
-
+        val rental = Rental(testBooks[0].id, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
+        val bookWithRental = BookWithRental(testBooks[0], rental)
         whenever(bookService.getDetail(any() as Long)).thenReturn(bookWithRental)
 
         // When
         val resultResponse =
             mockMvc
                 .perform(
-                    get("/book/detail/${book.id}")
+                    get("/book/detail/${testBooks[0].id}")
                         .with(csrf().asHeader())
                 )
                 .andExpect(status().isOk)
                 .andReturn()
                 .response
-        val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        val expectedResponse = GetBookDetailResponse(bookWithRental)
-        // LocalDateTimeを利用するためにJavaTimeModuleを登録する(これはKotlinModuleだと登録できない)
-        val expected = ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            .registerModule(JavaTimeModule())
-            .writeValueAsString(expectedResponse)
+        // LocalDateTimeを利用するためにJavaTimeModuleを追加定義する
+        val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
+            .let {
+                ObjectMapper()
+                    .registerKotlinModule()
+                    .registerModule(JavaTimeModule())
+                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                    .readValue(it, GetBookDetailResponse::class.java)
+            }
+        val expected = GetBookDetailResponse(bookWithRental)
         assertThat(result).isEqualTo(expected)
     }
 
@@ -115,13 +122,13 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `getDetail when book is not exists then throw BadRequest`() {
 
         // Given
-        val reason = "エラー: ${book.id}"
+        val reason = "エラー: ${testBooks[0].id}"
         whenever(bookService.getDetail(any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception = mockMvc
             .perform(
-                get("/book/detail/${book.id}")
+                get("/book/detail/${testBooks[0].id}")
                     .with(csrf().asHeader())
             )
             .andExpect(status().isBadRequest)
