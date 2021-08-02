@@ -11,7 +11,6 @@ import com.book.manager.presentation.form.RentalStartRequest
 import com.book.manager.presentation.form.RentalStartResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
@@ -60,8 +59,8 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
         // Given
         val rentalStartRequest = RentalStartRequest(book.id)
         val json = ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
             .registerKotlinModule()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
             .writeValueAsString(rentalStartRequest)
 
         val rentalDate = LocalDateTime.now()
@@ -69,7 +68,7 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
         whenever(rentalService.startRental(any() as Long, any() as Long)).thenReturn(rental)
 
         // When
-        val resultContent =
+        val resultResponse =
             mockMvc
                 .perform(
                     post("/rental/start")
@@ -80,17 +79,18 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
                 .andExpect(status().isCreated)
                 .andReturn()
                 .response
-                .getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        val expectedResponse = RentalStartResponse(rental)
-        val expectedContent = ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            .registerModule(JavaTimeModule())
-            .writeValueAsString(expectedResponse)
-
-        assertThat(resultContent).isEqualTo(expectedContent)
+        val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
+            .let {
+                ObjectMapper()
+                    .registerKotlinModule()
+                    .registerModule(JavaTimeModule())
+                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                    .readValue(it, RentalStartResponse::class.java)
+            }
+        val expected = RentalStartResponse(rental)
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
