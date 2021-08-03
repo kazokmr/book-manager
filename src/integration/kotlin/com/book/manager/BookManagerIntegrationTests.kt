@@ -1,6 +1,5 @@
 package com.book.manager
 
-import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.BookMapper
@@ -13,30 +12,34 @@ import com.book.manager.infrastructure.database.record.RentalRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookListResponse
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.RequestEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.nio.charset.StandardCharsets
+import org.springframework.util.LinkedMultiValueMap
+import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@SpringBootTest
-@AutoConfigureMockMvc
-internal class BookManagerIntegrationTests(@Autowired val mockMvc: MockMvc) : TestContainerDataRegistry() {
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
+
+    @Autowired
+    private lateinit var restTemplate: TestRestTemplate
+
+    @LocalServerPort
+    private var port: Int = 0
 
     @Autowired
     private lateinit var accountMapper: AccountMapper
@@ -46,6 +49,7 @@ internal class BookManagerIntegrationTests(@Autowired val mockMvc: MockMvc) : Te
 
     @Autowired
     private lateinit var rentalMapper: RentalMapper
+
 
     @BeforeEach
     internal fun setUp() {
@@ -75,21 +79,28 @@ internal class BookManagerIntegrationTests(@Autowired val mockMvc: MockMvc) : Te
         val user = "admin@example.com"
         val pass = "admin"
 
+        val loginForm = LinkedMultiValueMap<String, String>().apply {
+            add("email", user)
+            add("pass", pass)
+        }
+
         // When
+        val request = RequestEntity
+            .post(URI.create("http://localhost:$port/login"))
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .accept(MediaType.TEXT_HTML)
+            .body(loginForm)
+
+        val response = restTemplate.exchange(request, String::class.java)
+
         // Then
-        mockMvc
-            .perform(
-                formLogin()
-                    .loginProcessingUrl("/login")
-                    .user("email", user)
-                    .password("pass", pass)
-            )
-            .andExpect(status().isOk)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        // CookieにセットされるSESSIONとXSRF-TOKENを出力しておく
+        response.headers[HttpHeaders.SET_COOKIE]?.map { it.split(";")[0] }?.forEach { println(it) }
     }
 
     @Test
     @DisplayName("書籍リストを取得する")
-    @WithCustomMockUser
     fun `bookList when list is exist then return them`() {
 
         // Given
@@ -106,26 +117,13 @@ internal class BookManagerIntegrationTests(@Autowired val mockMvc: MockMvc) : Te
         rentalMapper.insert(RentalRecord(bookInfo3.id, 999, LocalDateTime.now(), LocalDateTime.now().plusDays(14)))
 
         // When
-        val resultResponse =
-            mockMvc
-                .perform(
-                    get("/book/list")
-                        .with(csrf().asHeader())
-                )
-                .andExpect(status().isOk)
-                .andReturn()
-                .response
+        val response = restTemplate.getForEntity("http://localhost:$port/book/list", GetBookListResponse::class.java)
 
         // Then
-        val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-            .let {
-                ObjectMapper()
-                    .registerKotlinModule()
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                    .readValue(it, GetBookListResponse::class.java)
-            }
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        val result = response.body
         val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
-        assertThat(result.bookList).containsAll(expected.bookList)
+        assertThat(result?.bookList).containsAll(expected.bookList)
     }
 
 }
