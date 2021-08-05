@@ -80,7 +80,7 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
             }
 
         val expected = GetBookListResponse(bookWithRentalList.map { BookInfo(it) })
-        assertThat(result.bookList).containsAll(expected.bookList)
+        assertThat(result.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
     }
 
     @Test
