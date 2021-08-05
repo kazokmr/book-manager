@@ -22,7 +22,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
@@ -75,6 +77,7 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
     @Test
     @DisplayName("ログインテスト")
     fun `login when user is exist then login`() {
+
         // Given
         val user = "admin@example.com"
         val pass = "admin"
@@ -116,14 +119,35 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         rentalMapper.insert(RentalRecord(bookInfo2.id, 999, LocalDateTime.now(), LocalDateTime.now().plusDays(14)))
         rentalMapper.insert(RentalRecord(bookInfo3.id, 999, LocalDateTime.now(), LocalDateTime.now().plusDays(14)))
 
+        val loginForm = LinkedMultiValueMap<String, String>().apply {
+            add("email", "admin@example.com")
+            add("pass", "admin")
+        }
+
+        val loginRequest = RequestEntity
+            .post(URI.create("http://localhost:$port/login"))
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .accept(MediaType.TEXT_HTML)
+            .body(loginForm)
+
+        val loginResponse = restTemplate.exchange(loginRequest, String::class.java)
+        val cookies = loginResponse.headers[HttpHeaders.SET_COOKIE]
+        val httpHeaders = HttpHeaders()
+        cookies?.forEach { httpHeaders.add("Cookie", it) }
+
         // When
-        val response = restTemplate.getForEntity("http://localhost:$port/book/list", GetBookListResponse::class.java)
+        val response = restTemplate.exchange(
+            "http://localhost:$port/book/list",
+            HttpMethod.GET,
+            HttpEntity<String>(httpHeaders),
+            GetBookListResponse::class.java
+        )
 
         // Then
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         val result = response.body
         val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
-        assertThat(result?.bookList).containsAll(expected.bookList)
+        assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
     }
 
 }
