@@ -10,6 +10,8 @@ import com.book.manager.infrastructure.database.record.AccountRecord
 import com.book.manager.infrastructure.database.record.BookRecord
 import com.book.manager.infrastructure.database.record.RentalRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
+import com.book.manager.presentation.config.IntegrationTestConfiguration
+import com.book.manager.presentation.config.IntegrationTestRestTemplate
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookListResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -20,25 +22,22 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.util.LinkedMultiValueMap
-import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
+@Import(IntegrationTestConfiguration::class)
 internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @Autowired
-    private lateinit var restTemplate: TestRestTemplate
+    private lateinit var restTemplate: IntegrationTestRestTemplate
 
     @LocalServerPort
     private var port: Int = 0
@@ -82,19 +81,8 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         val user = "admin@example.com"
         val pass = "admin"
 
-        val loginForm = LinkedMultiValueMap<String, String>().apply {
-            add("email", user)
-            add("pass", pass)
-        }
-
         // When
-        val request = RequestEntity
-            .post(URI.create("http://localhost:$port/login"))
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .accept(MediaType.TEXT_HTML)
-            .body(loginForm)
-
-        val response = restTemplate.exchange(request, String::class.java)
+        val response = restTemplate.login(port, user, pass)
 
         // Then
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -119,21 +107,9 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         rentalMapper.insert(RentalRecord(bookInfo2.id, 999, LocalDateTime.now(), LocalDateTime.now().plusDays(14)))
         rentalMapper.insert(RentalRecord(bookInfo3.id, 999, LocalDateTime.now(), LocalDateTime.now().plusDays(14)))
 
-        val loginForm = LinkedMultiValueMap<String, String>().apply {
-            add("email", "admin@example.com")
-            add("pass", "admin")
-        }
-
-        val loginRequest = RequestEntity
-            .post(URI.create("http://localhost:$port/login"))
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .accept(MediaType.TEXT_HTML)
-            .body(loginForm)
-
-        val loginResponse = restTemplate.exchange(loginRequest, String::class.java)
-        val cookies = loginResponse.headers[HttpHeaders.SET_COOKIE]
-        val httpHeaders = HttpHeaders()
-        cookies?.forEach { httpHeaders.add("Cookie", it) }
+        val user = "admin@example.com"
+        val pass = "admin"
+        val httpHeaders = restTemplate.getHeaderAfterLogin(port, user, pass)
 
         // When
         val response = restTemplate.exchange(
@@ -149,5 +125,4 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
         assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
     }
-
 }
