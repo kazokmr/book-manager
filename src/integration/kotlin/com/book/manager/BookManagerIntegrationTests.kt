@@ -24,9 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.LocalDate
@@ -86,8 +83,6 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
         // Then
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        // CookieにセットされるSESSIONとXSRF-TOKENを出力しておく
-        response.headers[HttpHeaders.SET_COOKIE]?.map { it.split(";")[0] }?.forEach { println(it) }
     }
 
     @Test
@@ -109,15 +104,10 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
         val user = "admin@example.com"
         val pass = "admin"
-        val httpHeaders = restTemplate.getHeaderAfterLogin(port, user, pass)
+        restTemplate.login(port, user, pass)
 
         // When
-        val response = restTemplate.exchange(
-            "http://localhost:$port/book/list",
-            HttpMethod.GET,
-            HttpEntity<String>(httpHeaders),
-            GetBookListResponse::class.java
-        )
+        val response = restTemplate.getForEntity("http://localhost:$port/book/list", GetBookListResponse::class.java)
 
         // Then
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)

@@ -1,14 +1,14 @@
 package com.book.manager.presentation.config
 
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.http.HttpHeaders
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.util.LinkedMultiValueMap
 import java.net.URI
 
-class IntegrationTestRestTemplate : TestRestTemplate() {
+class IntegrationTestRestTemplate(builder: RestTemplateBuilder) : TestRestTemplate(builder) {
 
     fun login(port: Int, user: String? = "user@example.com", pass: String? = "user"): ResponseEntity<String> {
 
@@ -24,13 +24,5 @@ class IntegrationTestRestTemplate : TestRestTemplate() {
             .body(loginForm)
 
         return restTemplate.exchange(request, String::class.java)
-    }
-
-    fun getHeaderAfterLogin(port: Int, user: String?, pass: String?): HttpHeaders {
-        val response = login(port, user, pass)
-        val cookies = response.headers[HttpHeaders.SET_COOKIE]
-        val httpHeaders = HttpHeaders()
-        cookies?.forEach { httpHeaders.add("Cookie", it) }
-        return httpHeaders
     }
 }
