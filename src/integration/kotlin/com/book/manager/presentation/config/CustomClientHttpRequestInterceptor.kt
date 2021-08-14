@@ -21,13 +21,18 @@ class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
         execution: ClientHttpRequestExecution
     ): ClientHttpResponse {
 
-        // Requestヘッダーに直前のResponseヘッダーのCookieをセットしてから送信する
+        // Requestヘッダーに直前のResponseヘッダーのSessionとCSRF Tokenをセットしてから送信する
         val cookiesForRequest = cookies.values.map { it.toString() }.toList()
         logger.info("Using cookies: $cookiesForRequest")
         request.headers.addAll(HttpHeaders.COOKIE, cookiesForRequest)
 
+        val csrfToken = cookies.filter { it.key == "XSRF-TOKEN" }.map { it.value.value }.firstOrNull()
+        logger.info("Using csrf-token: $csrfToken")
+        request.headers["X-XSRF-TOKEN"] = csrfToken
+
         logger.info("Request: uri=${request.uri}, headers=${request.headers}, body=${String(body)}")
         val response = execution.execute(request, body)
+        logger.info("Response: status=${response.statusCode}")
 
         val cookiesFromResponse = response.headers[HttpHeaders.SET_COOKIE]?.flatMap { HttpCookie.parse(it) }
         logger.info("Extracted cookies from response: $cookiesFromResponse")
@@ -35,4 +40,6 @@ class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
 
         return response
     }
+
+
 }
