@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delet
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(controllers = [AdminBookController::class])
-internal class FormLoginTest {
+internal class SecurityConfigTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc

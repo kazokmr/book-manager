@@ -54,7 +54,7 @@ dependencies {
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.0")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
-    testImplementation("org.dbunit:dbunit:2.7.1")
+    testImplementation("org.dbunit:dbunit:2.7.2")
     testImplementation("org.testcontainers:testcontainers:1.16.0")
     testImplementation("org.testcontainers:junit-jupiter:1.16.0")
     testImplementation("org.testcontainers:postgresql:1.16.0")

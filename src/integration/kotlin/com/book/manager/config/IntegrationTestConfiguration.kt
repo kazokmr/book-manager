@@ -1,4 +1,4 @@
-package com.book.manager.presentation.config
+package com.book.manager.config
 
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.web.client.RestTemplateBuilder

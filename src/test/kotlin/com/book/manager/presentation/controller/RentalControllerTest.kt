@@ -7,12 +7,10 @@ import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.Rental
+import com.book.manager.config.CustomJsonConverter
+import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.presentation.form.RentalStartRequest
 import com.book.manager.presentation.form.RentalStartResponse
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -22,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -35,7 +34,11 @@ import java.time.LocalDateTime
 
 @WebMvcTest(controllers = [RentalController::class])
 @WithCustomMockUser
-internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
+@Import(CustomTestConfiguration::class)
+internal class RentalControllerTest(
+    @Autowired val mockMvc: MockMvc,
+    @Autowired val jsonConverter: CustomJsonConverter
+) {
 
     @MockBean
     private lateinit var rentalService: RentalService
@@ -57,11 +60,8 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `startRental when a book can be rent then start rental`() {
 
         // Given
-        val rentalStartRequest = RentalStartRequest(book.id)
-        val json = ObjectMapper()
-            .registerKotlinModule()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .writeValueAsString(rentalStartRequest)
+        val request = RentalStartRequest(book.id)
+        val json = jsonConverter.toJson(request)
 
         val rentalDate = LocalDateTime.now()
         val rental = Rental(book.id, account.id, rentalDate, rentalDate.plusDays(14))
@@ -82,13 +82,7 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-            .let {
-                ObjectMapper()
-                    .registerKotlinModule()
-                    .registerModule(JavaTimeModule())
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                    .readValue(it, RentalStartResponse::class.java)
-            }
+            .let { jsonConverter.toObject(it, RentalStartResponse::class.java) }
         val expected = RentalStartResponse(rental)
         assertThat(result).isEqualTo(expected)
     }
@@ -98,11 +92,8 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `startRental when book can not be rent then throw BadRequest`() {
 
         // Given
-        val rentalStartRequest = RentalStartRequest(book.id)
-        val json = ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .registerKotlinModule()
-            .writeValueAsString(rentalStartRequest)
+        val request = RentalStartRequest(book.id)
+        val json = jsonConverter.toJson(request)
         val reason = "エラー: bookId ${book.id} accountId ${account.id}"
         whenever(rentalService.startRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException(reason))
 
@@ -131,10 +122,7 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Given
         val wrongMap = mapOf(Pair("id", 1L))
-        val json = ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .registerKotlinModule()
-            .writeValueAsString(wrongMap)
+        val json = jsonConverter.toJson(wrongMap)
 
         // When
         val resultResponse =
@@ -153,9 +141,7 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val expectedResponse = mapOf(Pair("bookId", "書籍IDには1以上の数値を入れてください。"))
-        val expected = ObjectMapper()
-            .registerKotlinModule()
-            .writeValueAsString(expectedResponse)
+        val expected = jsonConverter.toJson(expectedResponse)
         assertThat(result).isEqualTo(expected)
     }
 
@@ -164,11 +150,8 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `startRental when bookId is less than 1 then return BadRequest`() {
 
         // Given
-        val rentalStartRequest = RentalStartRequest(0L)
-        val json = ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .registerKotlinModule()
-            .writeValueAsString(rentalStartRequest)
+        val request = RentalStartRequest(0L)
+        val json = jsonConverter.toJson(request)
 
         // When
         val resultResponse =
@@ -187,9 +170,7 @@ internal class RentalControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val expectedResponse = mapOf(Pair("bookId", "書籍IDには1以上の数値を入れてください。"))
-        val expected = ObjectMapper()
-            .registerKotlinModule()
-            .writeValueAsString(expectedResponse)
+        val expected = jsonConverter.toJson(expectedResponse)
         assertThat(result).isEqualTo(expected)
     }
 
