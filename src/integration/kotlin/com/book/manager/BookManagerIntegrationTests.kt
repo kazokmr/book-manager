@@ -1,5 +1,9 @@
 package com.book.manager
 
+import com.book.manager.config.CustomJsonConverter
+import com.book.manager.config.CustomTestConfiguration
+import com.book.manager.config.IntegrationTestConfiguration
+import com.book.manager.config.IntegrationTestRestTemplate
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
@@ -12,13 +16,12 @@ import com.book.manager.infrastructure.database.record.AccountRecord
 import com.book.manager.infrastructure.database.record.BookRecord
 import com.book.manager.infrastructure.database.record.RentalRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
-import com.book.manager.presentation.config.IntegrationTestConfiguration
-import com.book.manager.presentation.config.IntegrationTestRestTemplate
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.SoftAssertions
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -39,11 +42,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Import(IntegrationTestConfiguration::class)
+@Import(IntegrationTestConfiguration::class, CustomTestConfiguration::class)
 internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @Autowired
     private lateinit var restTemplate: IntegrationTestRestTemplate
+
+    @Autowired
+    private lateinit var jsonConverter: CustomJsonConverter
 
     @LocalServerPort
     private var port: Int = 0
@@ -120,9 +126,9 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
         // Then
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        val result = restTemplate.jsonStringToObject(response.body!!, GetBookListResponse::class.java)
+        val result = jsonConverter.toObject(response.body, GetBookListResponse::class.java)
         val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
-        assertThat(result.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
+        assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
     }
 
     @Test
@@ -134,10 +140,9 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         val pass = "admin"
         restTemplate.login(port, user, pass)
 
+        // When
         val book = Book(789, "統合テスト", "テスト二郎", LocalDate.of(2010, 12, 3))
-        val httpHeaders = HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_JSON
-        }
+        val httpHeaders = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
         val jsonObject = JSONObject().apply {
             put("id", book.id)
             put("title", book.title)
@@ -145,25 +150,30 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
             put("release_date", book.releaseDate.format(DateTimeFormatter.ISO_DATE))
         }
 
-        val request = HttpEntity<String>(jsonObject.toString(), httpHeaders)
+        val postRequest = HttpEntity<String>(jsonObject.toString(), httpHeaders)
         val postResponse = restTemplate.postForEntity(
             "http://localhost:$port/admin/book/register",
-            request,
-            AdminBookResponse::class.java
+            postRequest,
+            String::class.java
         )
-        assertThat(postResponse.statusCode).isEqualTo(HttpStatus.CREATED)
-        assertThat(postResponse.body?.id).isEqualTo(book.id)
+        val registeredBook = jsonConverter.toObject(postResponse.body, AdminBookResponse::class.java)
 
-        // When
+        // Then
         val response = restTemplate.getForEntity(
             "http://localhost:$port/book/detail/${book.id}",
             String::class.java
         )
-
-        // Then
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        val result = restTemplate.jsonStringToObject(response.body!!, GetBookDetailResponse::class.java)
+        val result = jsonConverter.toObject(response.body, GetBookDetailResponse::class.java)
         val expected = GetBookDetailResponse(BookWithRental(book, null))
-        assertThat(result).isEqualTo(expected)
+
+        SoftAssertions().apply {
+            assertThat(postResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+            assertThat(registeredBook?.id).isEqualTo(book.id)
+            assertThat(registeredBook?.title).isEqualTo(book.title)
+            assertThat(registeredBook?.author).isEqualTo(book.author)
+            assertThat(registeredBook?.releaseDate).isEqualTo(book.releaseDate)
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(result).isEqualTo(expected)
+        }.assertAll()
     }
 }
