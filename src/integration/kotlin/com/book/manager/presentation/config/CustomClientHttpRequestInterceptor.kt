@@ -40,6 +40,4 @@ class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
 
         return response
     }
-
-
 }
