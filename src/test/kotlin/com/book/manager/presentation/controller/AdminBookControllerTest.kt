@@ -5,13 +5,11 @@ import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
+import com.book.manager.config.CustomJsonConverter
+import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -20,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -33,7 +32,11 @@ import java.time.LocalDate
 
 @WebMvcTest(controllers = [AdminBookController::class])
 @WithCustomMockUser(roleType = RoleType.ADMIN)
-internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
+@Import(CustomTestConfiguration::class)
+internal class AdminBookControllerTest(
+    @Autowired val mockMvc: MockMvc,
+    @Autowired val jsonConverter: CustomJsonConverter
+) {
 
     @MockBean
     private lateinit var adminBookService: AdminBookService
@@ -47,11 +50,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
-        val json = ObjectMapper()
-            .registerKotlinModule()
-            .registerModule(JavaTimeModule())
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .writeValueAsString(request)
+        val json = jsonConverter.toJson(request)
 
         val book = Book(request.id, request.title, request.author, request.releaseDate)
         whenever(adminBookService.register(any() as Book)).thenReturn(book)
@@ -71,13 +70,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-            .let {
-                ObjectMapper()
-                    .registerKotlinModule()
-                    .registerModule(JavaTimeModule())
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                    .readValue(it, AdminBookResponse::class.java)
-            }
+            .let { jsonConverter.toObject(it, AdminBookResponse::class.java) }
         val expected = AdminBookResponse(book)
         assertThat(result).isEqualTo(expected)
     }
@@ -88,12 +81,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Given
         val request = RegisterBookRequest(100L, "title", "author", LocalDate.now())
-        val json =
-            ObjectMapper()
-                .registerKotlinModule()
-                .registerModule(JavaTimeModule())
-                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                .writeValueAsString(request)
+        val json = jsonConverter.toJson(request)
         val reason = "エラー: ${request.id}"
 
         whenever(adminBookService.register(any() as Book)).thenThrow(IllegalArgumentException(reason))
@@ -123,10 +111,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Given
         val request = mapOf("id" to 100L, "title" to "入門", "author" to "moyo")
-        val json = ObjectMapper()
-            .registerKotlinModule()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .writeValueAsString(request)
+        val json = jsonConverter.toJson(request)
 
         // When
         val result =
@@ -143,10 +128,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         val response = result.response.getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        val expected = ObjectMapper()
-            .registerKotlinModule()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .writeValueAsString(mapOf("入力パラメータがありません" to "release_date"))
+        val expected = jsonConverter.toJson(mapOf("入力パラメータがありません" to "release_date"))
         assertThat(response).isEqualTo(expected)
     }
 
@@ -156,11 +138,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Given
         val request = mapOf("id" to "abc", "title" to "入門", "author" to "moyo", "release_date" to "2018-04-19")
-        val json = ObjectMapper()
-            .registerKotlinModule()
-            .registerModule(JavaTimeModule())
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .writeValueAsString(request)
+        val json = jsonConverter.toJson(request)
 
         // When
         val result =
@@ -177,10 +155,9 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         val response = result.response.getContentAsString(StandardCharsets.UTF_8)
 
         // Then
-        val expected = ObjectMapper()
-            .registerKotlinModule()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .writeValueAsString(mapOf("入力パラメータの型が一致しません" to "type of id should be long. but value was abc"))
+        val expected = jsonConverter.toJson(
+            mapOf("入力パラメータの型が一致しません" to "type of id should be long. but value was abc")
+        )
         assertThat(response).isEqualTo(expected)
     }
 
@@ -191,11 +168,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         // Given
         val request =
             mapOf("id" to 123, "id" to 999, "title" to "入門", "author" to "moyo", "release_date" to "2018-04-19")
-        val json = ObjectMapper()
-            .registerKotlinModule()
-            .registerModule(JavaTimeModule())
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .writeValueAsString(request)
+        val json = jsonConverter.toJson(request)
 
         val book = Book(999, "入門", "moyo", LocalDate.of(2018, 4, 19))
         whenever(adminBookService.register(any() as Book)).thenReturn(book)
@@ -215,13 +188,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-            .let {
-                ObjectMapper()
-                    .registerKotlinModule()
-                    .registerModule(JavaTimeModule())
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                    .readValue(it, AdminBookResponse::class.java)
-            }
+            .let { jsonConverter.toObject(it, AdminBookResponse::class.java) }
         val expected = AdminBookResponse(book)
         assertThat(result).isEqualTo(expected)
     }
@@ -232,11 +199,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Given
         val request = UpdateBookRequest(100L, "title", "author", LocalDate.now())
-        val json =
-            ObjectMapper()
-                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                .registerModule(JavaTimeModule())
-                .writeValueAsString(request)
+        val json = jsonConverter.toJson(request)
 
         val book = Book(request.id, request.title!!, request.author!!, request.releaseDate!!)
         whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
@@ -257,13 +220,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-            .let {
-                ObjectMapper()
-                    .registerKotlinModule()
-                    .registerModule(JavaTimeModule())
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                    .readValue(it, AdminBookResponse::class.java)
-            }
+            .let { jsonConverter.toObject(it, AdminBookResponse::class.java) }
         val expected = AdminBookResponse(book)
         assertThat(result).isEqualTo(expected)
     }
@@ -274,11 +231,7 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Given
         val request = UpdateBookRequest(100L, "title", "author", LocalDate.now())
-        val json =
-            ObjectMapper()
-                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                .registerModule(JavaTimeModule())
-                .writeValueAsString(request)
+        val json = jsonConverter.toJson(request)
         val reason = "エラー: ${request.id}"
 
         whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
@@ -351,5 +304,4 @@ internal class AdminBookControllerTest(@Autowired val mockMvc: MockMvc) {
         exception as ResponseStatusException
         assertThat(exception.reason).isEqualTo(reason)
     }
-
 }

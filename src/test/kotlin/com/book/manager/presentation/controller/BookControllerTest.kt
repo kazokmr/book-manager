@@ -3,16 +3,14 @@ package com.book.manager.presentation.controller
 import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.BookService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
+import com.book.manager.config.CustomJsonConverter
+import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -22,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -33,7 +32,8 @@ import java.time.LocalDateTime
 
 @WebMvcTest(controllers = [BookController::class])
 @WithCustomMockUser
-internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
+@Import(CustomTestConfiguration::class)
+internal class BookControllerTest(@Autowired val mockMvc: MockMvc, @Autowired val jsonConverter: CustomJsonConverter) {
 
     @MockBean
     private lateinit var bookService: BookService
@@ -72,15 +72,9 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
 
         // Then
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-            .let {
-                ObjectMapper()
-                    .registerKotlinModule()
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                    .readValue(it, GetBookListResponse::class.java)
-            }
-
+            .let { jsonConverter.toObject(it, GetBookListResponse::class.java) }
         val expected = GetBookListResponse(bookWithRentalList.map { BookInfo(it) })
-        assertThat(result.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
+        assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
     }
 
     @Test
@@ -106,13 +100,7 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc) {
         // Then
         // LocalDateTimeを利用するためにJavaTimeModuleを追加定義する
         val result = resultResponse.getContentAsString(StandardCharsets.UTF_8)
-            .let {
-                ObjectMapper()
-                    .registerKotlinModule()
-                    .registerModule(JavaTimeModule())
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                    .readValue(it, GetBookDetailResponse::class.java)
-            }
+            .let { jsonConverter.toObject(it, GetBookDetailResponse::class.java) }
         val expected = GetBookDetailResponse(bookWithRental)
         assertThat(result).isEqualTo(expected)
     }
