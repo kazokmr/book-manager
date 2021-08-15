@@ -1,4 +1,4 @@
-package com.book.manager.presentation.config
+package com.book.manager.config
 
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -21,7 +21,6 @@ class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
         execution: ClientHttpRequestExecution
     ): ClientHttpResponse {
 
-        // Requestヘッダーに直前のResponseヘッダーのSessionとCSRF Tokenをセットしてから送信する
         val cookiesForRequest = cookies.values.map { it.toString() }.toList()
         logger.info("Using cookies: $cookiesForRequest")
         request.headers.addAll(HttpHeaders.COOKIE, cookiesForRequest)
