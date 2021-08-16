@@ -14,7 +14,6 @@ internal class RentalFormTest {
 
     // parameterrizedTestの@MethodSource で使うstaticメソッド
     companion object {
-        @Suppress("unused")
         @JvmStatic
         fun bookIds() = longArrayOf(1, 10, 100, 1000)
     }
