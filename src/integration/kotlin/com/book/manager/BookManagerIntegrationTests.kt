@@ -2,19 +2,12 @@ package com.book.manager
 
 import com.book.manager.config.CustomJsonConverter
 import com.book.manager.config.CustomTestConfiguration
+import com.book.manager.config.CustomTestMapper
 import com.book.manager.config.IntegrationTestConfiguration
 import com.book.manager.config.IntegrationTestRestTemplate
-import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
-import com.book.manager.infrastructure.database.mapper.AccountMapper
-import com.book.manager.infrastructure.database.mapper.BookMapper
-import com.book.manager.infrastructure.database.mapper.RentalMapper
-import com.book.manager.infrastructure.database.mapper.delete
-import com.book.manager.infrastructure.database.mapper.insert
-import com.book.manager.infrastructure.database.record.AccountRecord
-import com.book.manager.infrastructure.database.record.BookRecord
-import com.book.manager.infrastructure.database.record.RentalRecord
+import com.book.manager.domain.model.Rental
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
@@ -36,13 +29,12 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Import(IntegrationTestConfiguration::class, CustomTestConfiguration::class)
+@Import(IntegrationTestConfiguration::class, CustomTestConfiguration::class, CustomTestMapper::class)
 internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @Autowired
@@ -51,39 +43,21 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
     @Autowired
     private lateinit var jsonConverter: CustomJsonConverter
 
+    @Autowired
+    private lateinit var testMapper: CustomTestMapper
+
     @LocalServerPort
     private var port: Int = 0
 
-    @Autowired
-    private lateinit var accountMapper: AccountMapper
-
-    @Autowired
-    private lateinit var bookMapper: BookMapper
-
-    @Autowired
-    private lateinit var rentalMapper: RentalMapper
-
-
     @BeforeEach
     internal fun setUp() {
-
-        val account1 = AccountRecord(1, "admin@example.com", "admin".encode(), "admin", RoleType.ADMIN)
-        val account2 = AccountRecord(2, "user@example.com", "user".encode(), "user", RoleType.USER)
-        val account3 = AccountRecord(1000, "test@example.com", "pass".encode(), "test", RoleType.USER)
-
-        accountMapper.insertRecord(account1)
-        accountMapper.insertRecord(account2)
-        accountMapper.insertRecord(account3)
+        testMapper.initDefaultAccounts()
     }
 
     @AfterEach
     internal fun tearDown() {
-        accountMapper.delete { allRows() }
-        bookMapper.delete { allRows() }
-        rentalMapper.delete { allRows() }
+        testMapper.clearAllData()
     }
-
-    private fun String.encode() = BCryptPasswordEncoder().encode(this)
 
     @Test
     @DisplayName("ログインテスト")
@@ -109,13 +83,26 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         val bookInfo2 = BookInfo(200, "Java入門", "じゃば太郎", true)
         val bookInfo3 = BookInfo(300, "Spring入門", "すぷりんぐ太郎", true)
         val bookInfo4 = BookInfo(400, "Kotlin実践", "ことりん太郎", false)
-
-        bookMapper.insert(BookRecord(bookInfo1.id, bookInfo1.title, bookInfo1.author, LocalDate.now()))
-        bookMapper.insert(BookRecord(bookInfo2.id, bookInfo2.title, bookInfo2.author, LocalDate.now()))
-        bookMapper.insert(BookRecord(bookInfo3.id, bookInfo3.title, bookInfo3.author, LocalDate.now()))
-        bookMapper.insert(BookRecord(bookInfo4.id, bookInfo4.title, bookInfo4.author, LocalDate.now()))
-        rentalMapper.insert(RentalRecord(bookInfo2.id, 999, LocalDateTime.now(), LocalDateTime.now().plusDays(14)))
-        rentalMapper.insert(RentalRecord(bookInfo3.id, 999, LocalDateTime.now(), LocalDateTime.now().plusDays(14)))
+        val testBookWithRentalList =
+            listOf(
+                BookWithRental(
+                    Book(bookInfo1.id, bookInfo1.title, bookInfo1.author, LocalDate.now()),
+                    null
+                ),
+                BookWithRental(
+                    Book(bookInfo2.id, bookInfo2.title, bookInfo2.author, LocalDate.now()),
+                    Rental(bookInfo2.id, 1000, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
+                ),
+                BookWithRental(
+                    Book(bookInfo3.id, bookInfo3.title, bookInfo3.author, LocalDate.now()),
+                    Rental(bookInfo3.id, 1000, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
+                ),
+                BookWithRental(
+                    Book(bookInfo4.id, bookInfo4.title, bookInfo4.author, LocalDate.now()),
+                    null
+                )
+            )
+        testMapper.createBookWithRental(testBookWithRentalList)
 
         val user = "admin@example.com"
         val pass = "admin"
