@@ -20,6 +20,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -32,6 +35,7 @@ import org.springframework.http.MediaType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration::class, CustomTestConfiguration::class, CustomTestMapper::class)
@@ -59,19 +63,53 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         testMapper.clearAllData()
     }
 
-    @Test
-    @DisplayName("ログインテスト")
-    fun `login when user is exist then login`() {
+    companion object {
+        @JvmStatic
+        fun users(): Stream<Arguments> = Stream.of(
+            Arguments.of("admin@example.com", "admin", HttpStatus.OK),
+            Arguments.of("user@example.com", "user", HttpStatus.OK),
+            Arguments.of("test@example.com", "test", HttpStatus.OK),
+            Arguments.of("none@example.com", "none", HttpStatus.UNAUTHORIZED)
+        )
+
+        @JvmStatic
+        fun dataOfRegister(): Stream<Arguments> {
+            val book = Book(789, "統合テスト", "テスト二郎", LocalDate.of(2010, 12, 3))
+            val expectedRegisteredBook = AdminBookResponse(book.id, book.title, book.author, book.releaseDate)
+            val expectedBookDetail = GetBookDetailResponse(BookWithRental(book, null))
+            return Stream.of(
+                Arguments.of(
+                    "admin@example.com",
+                    "admin",
+                    book,
+                    HttpStatus.CREATED,
+                    expectedRegisteredBook,
+                    HttpStatus.OK,
+                    expectedBookDetail
+                ),
+                Arguments.of(
+                    "user@example.com",
+                    "user",
+                    book,
+                    HttpStatus.FORBIDDEN,
+                    null,
+                    HttpStatus.BAD_REQUEST,
+                    null
+                )
+            )
+        }
+    }
+
+    @ParameterizedTest(name = "ログインテスト: User => {0}, Status => {2}")
+    @MethodSource("users")
+    fun `login when user is exist then login`(user: String, pass: String, expectedStatus: HttpStatus) {
 
         // Given
-        val user = "admin@example.com"
-        val pass = "admin"
-
         // When
         val response = restTemplate.login(port, user, pass)
 
         // Then
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.statusCode).isEqualTo(expectedStatus)
     }
 
     @Test
@@ -83,6 +121,8 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         val bookInfo2 = BookInfo(200, "Java入門", "じゃば太郎", true)
         val bookInfo3 = BookInfo(300, "Spring入門", "すぷりんぐ太郎", true)
         val bookInfo4 = BookInfo(400, "Kotlin実践", "ことりん太郎", false)
+        val bookInfoNone = BookInfo(9999, "未登録書籍", "アノニマス", false)
+
         val testBookWithRentalList =
             listOf(
                 BookWithRental(
@@ -112,23 +152,30 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         val response = restTemplate.getForEntity("http://localhost:$port/book/list", String::class.java)
 
         // Then
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         val result = jsonConverter.toObject(response.body, GetBookListResponse::class.java)
         val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
-        assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
+        SoftAssertions().apply {
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
+            assertThat(result?.bookList).`as`("登録していない書籍は含まれていないこと").doesNotContain(bookInfoNone)
+        }.assertAll()
     }
 
-    @Test
-    @DisplayName("書籍を登録する")
-    fun `when book is register then get this`() {
-
+    @ParameterizedTest(name = "書籍を登録する: user => {0}, registeredStatus => {3}, getStatus => {5}")
+    @MethodSource("dataOfRegister")
+    fun `when book is register then get this`(
+        user: String,
+        pass: String,
+        book: Book,
+        postStatus: HttpStatus,
+        expectedRegisteredBook: AdminBookResponse?,
+        getStatus: HttpStatus,
+        expectedBookDetail: GetBookDetailResponse?
+    ) {
         // Given
-        val user = "admin@example.com"
-        val pass = "admin"
         restTemplate.login(port, user, pass)
 
         // When
-        val book = Book(789, "統合テスト", "テスト二郎", LocalDate.of(2010, 12, 3))
         val httpHeaders = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
         val jsonObject = JSONObject().apply {
             put("id", book.id)
@@ -151,16 +198,12 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
             String::class.java
         )
         val result = jsonConverter.toObject(response.body, GetBookDetailResponse::class.java)
-        val expected = GetBookDetailResponse(BookWithRental(book, null))
 
         SoftAssertions().apply {
-            assertThat(postResponse.statusCode).isEqualTo(HttpStatus.CREATED)
-            assertThat(registeredBook?.id).isEqualTo(book.id)
-            assertThat(registeredBook?.title).isEqualTo(book.title)
-            assertThat(registeredBook?.author).isEqualTo(book.author)
-            assertThat(registeredBook?.releaseDate).isEqualTo(book.releaseDate)
-            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-            assertThat(result).isEqualTo(expected)
+            assertThat(postResponse.statusCode).isEqualTo(postStatus)
+            assertThat(registeredBook).isEqualTo(expectedRegisteredBook)
+            assertThat(response.statusCode).isEqualTo(getStatus)
+            assertThat(result).isEqualTo(expectedBookDetail)
         }.assertAll()
     }
 }
