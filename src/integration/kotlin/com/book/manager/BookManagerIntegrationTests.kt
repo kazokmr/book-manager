@@ -4,7 +4,6 @@ import com.book.manager.config.CustomJsonConverter
 import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.config.CustomTestMapper
 import com.book.manager.config.IntegrationTestConfiguration
-import com.book.manager.config.IntegrationTestRestTemplate
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
@@ -26,12 +25,18 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
+import org.springframework.util.LinkedMultiValueMap
+import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -42,7 +47,7 @@ import java.util.stream.Stream
 internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @Autowired
-    private lateinit var restTemplate: IntegrationTestRestTemplate
+    private lateinit var builder: RestTemplateBuilder
 
     @Autowired
     private lateinit var jsonConverter: CustomJsonConverter
@@ -53,8 +58,13 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
     @LocalServerPort
     private var port: Int = 0
 
+    private lateinit var baseUri: String
+    private lateinit var restTemplate: TestRestTemplate
+
     @BeforeEach
     internal fun setUp() {
+        baseUri = "http://localhost:$port"
+        restTemplate = TestRestTemplate(builder)
         testMapper.initDefaultAccounts()
     }
 
@@ -106,7 +116,7 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
         // Given
         // When
-        val response = restTemplate.login(port, user, pass)
+        val response = restTemplate.login(user, pass)
 
         // Then
         assertThat(response.statusCode).isEqualTo(expectedStatus)
@@ -146,10 +156,10 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
         val user = "admin@example.com"
         val pass = "admin"
-        restTemplate.login(port, user, pass)
+        restTemplate.login(user, pass)
 
         // When
-        val response = restTemplate.getForEntity("http://localhost:$port/book/list", String::class.java)
+        val response = restTemplate.getForEntity("$baseUri/book/list", String::class.java)
 
         // Then
         val result = jsonConverter.toObject(response.body, GetBookListResponse::class.java)
@@ -173,7 +183,7 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         expectedBookDetail: GetBookDetailResponse?
     ) {
         // Given
-        restTemplate.login(port, user, pass)
+        restTemplate.login(user, pass)
 
         // When
         val httpHeaders = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
@@ -185,18 +195,11 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         }
 
         val postRequest = HttpEntity<String>(jsonObject.toString(), httpHeaders)
-        val postResponse = restTemplate.postForEntity(
-            "http://localhost:$port/admin/book/register",
-            postRequest,
-            String::class.java
-        )
+        val postResponse = restTemplate.postForEntity("$baseUri/admin/book/register", postRequest, String::class.java)
         val registeredBook = jsonConverter.toObject(postResponse.body, AdminBookResponse::class.java)
 
         // Then
-        val response = restTemplate.getForEntity(
-            "http://localhost:$port/book/detail/${book.id}",
-            String::class.java
-        )
+        val response = restTemplate.getForEntity("$baseUri/book/detail/${book.id}", String::class.java)
         val result = jsonConverter.toObject(response.body, GetBookDetailResponse::class.java)
 
         SoftAssertions().apply {
@@ -205,5 +208,21 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
             assertThat(response.statusCode).isEqualTo(getStatus)
             assertThat(result).isEqualTo(expectedBookDetail)
         }.assertAll()
+    }
+
+    fun TestRestTemplate.login(user: String, pass: String): ResponseEntity<String> {
+
+        val loginForm = LinkedMultiValueMap<String, String>().apply {
+            add("email", user)
+            add("pass", pass)
+        }
+
+        val request = RequestEntity
+            .post(URI.create("$baseUri/login"))
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .accept(MediaType.TEXT_HTML)
+            .body(loginForm)
+
+        return restTemplate.exchange(request, String::class.java)
     }
 }
