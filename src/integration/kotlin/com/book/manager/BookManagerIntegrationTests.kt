@@ -4,7 +4,6 @@ import com.book.manager.config.CustomJsonConverter
 import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.config.CustomTestMapper
 import com.book.manager.config.IntegrationTestConfiguration
-import com.book.manager.config.IntegrationTestRestTemplate
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
@@ -26,12 +25,17 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
+import org.springframework.util.LinkedMultiValueMap
+import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -42,7 +46,7 @@ import java.util.stream.Stream
 internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @Autowired
-    private lateinit var restTemplate: IntegrationTestRestTemplate
+    private lateinit var restTemplate: TestRestTemplate
 
     @Autowired
     private lateinit var jsonConverter: CustomJsonConverter
@@ -205,5 +209,21 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
             assertThat(response.statusCode).isEqualTo(getStatus)
             assertThat(result).isEqualTo(expectedBookDetail)
         }.assertAll()
+    }
+
+    fun TestRestTemplate.login(port: Int, user: String, pass: String): ResponseEntity<String> {
+
+        val loginForm = LinkedMultiValueMap<String, String>().apply {
+            add("email", user)
+            add("pass", pass)
+        }
+
+        val request = RequestEntity
+            .post(URI.create("http://localhost:$port/login"))
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .accept(MediaType.TEXT_HTML)
+            .body(loginForm)
+
+        return restTemplate.exchange(request, String::class.java)
     }
 }
