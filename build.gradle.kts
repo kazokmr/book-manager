@@ -6,9 +6,9 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.21"
-    kotlin("plugin.spring") version "1.5.21"
-    id("org.springframework.boot") version "2.5.3"
+    kotlin("jvm") version "1.5.31"
+    kotlin("plugin.spring") version "1.5.31"
+    id("org.springframework.boot") version "2.5.4"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
     id("idea")
@@ -19,7 +19,7 @@ apply(plugin = "io.spring.dependency-management")
 
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 jacoco.toolVersion = "0.8.7"
 
 repositories {
@@ -69,7 +69,7 @@ configurations {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
+        jvmTarget = "16"
     }
 }
 
