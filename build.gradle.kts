@@ -19,7 +19,7 @@ apply(plugin = "io.spring.dependency-management")
 
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_16
 jacoco.toolVersion = "0.8.7"
 
 repositories {
