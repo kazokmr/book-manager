@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.5.31"
     kotlin("plugin.spring") version "1.5.31"
-    id("org.springframework.boot") version "2.5.4"
+    id("org.springframework.boot") version "2.5.5"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
     id("idea")
@@ -27,30 +27,30 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web:2.5.4")
-    implementation("org.springframework.boot:spring-boot-starter-log4j2:2.5.4")
-    implementation("org.springframework.boot:spring-boot-starter-security:2.5.4")
-    implementation("org.springframework.boot:spring-boot-starter-aop:2.5.4")
-    implementation("org.springframework.boot:spring-boot-starter-validation:2.5.4")
+    implementation("org.springframework.boot:spring-boot-starter-web:2.5.5")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2:2.5.5")
+    implementation("org.springframework.boot:spring-boot-starter-security:2.5.5")
+    implementation("org.springframework.boot:spring-boot-starter-aop:2.5.5")
+    implementation("org.springframework.boot:spring-boot-starter-validation:2.5.5")
     implementation("org.springframework.session:spring-session-data-redis:2.5.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.21")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.3.0")
     implementation("redis.clients:jedis:3.6.3")
-    implementation("io.grpc:grpc-kotlin-stub:1.1.0")
-    implementation("io.grpc:grpc-netty:1.40.1")
+    implementation("io.grpc:grpc-kotlin-stub:1.2.0")
+    implementation("io.grpc:grpc-netty:1.41.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.5.2-native-mt")
-    implementation("io.github.lognet:grpc-spring-boot-starter:4.5.6")
-    runtimeOnly("org.postgresql:postgresql:42.2.23")
+    implementation("io.github.lognet:grpc-spring-boot-starter:4.5.8")
+    runtimeOnly("org.postgresql:postgresql:42.2.24")
     mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.0")
-    testImplementation("org.springframework.boot:spring-boot-starter-test:2.5.4")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:2.5.5")
     testImplementation("org.springframework.security:spring-security-test:5.5.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.0")
-    testImplementation("org.assertj:assertj-core:3.20.2")
-    testImplementation("org.mockito:mockito-core:3.12.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.assertj:assertj-core:3.21.0")
+    testImplementation("org.mockito:mockito-core:4.0.0")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.0")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
