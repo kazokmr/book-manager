@@ -6,9 +6,9 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.0"
-    kotlin("plugin.spring") version "1.6.0"
-    id("org.springframework.boot") version "2.6.1"
+    kotlin("jvm") version "1.6.10"
+    kotlin("plugin.spring") version "1.6.10"
+    id("org.springframework.boot") version "2.6.2"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
     id("idea")
@@ -16,9 +16,6 @@ plugins {
 }
 
 apply(plugin = "io.spring.dependency-management")
-
-// TODO: Spring Boot が 2.6.2以降に上がって log4j2の依存バージョンも2.15.0以降に上がったら削除する。出ないと逆にVersionが固定されてしまう
-extra["log4j2.version"] = "2.15.0"
 
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
