@@ -6,9 +6,9 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.spring") version "1.6.10"
-    id("org.springframework.boot") version "2.6.4"
+    kotlin("jvm") version "1.6.20"
+    kotlin("plugin.spring") version "1.6.20"
+    id("org.springframework.boot") version "2.6.6"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
@@ -18,8 +18,8 @@ plugins {
 
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
-jacoco.toolVersion = "0.8.7"
+java.sourceCompatibility = JavaVersion.VERSION_18
+jacoco.toolVersion = "0.8.8"
 
 repositories {
     mavenCentral()
@@ -68,7 +68,7 @@ configurations {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+        jvmTarget = "18"
     }
 }
 
@@ -85,6 +85,11 @@ tasks.withType<JacocoReport> {
                 exclude("/proto/**/*.class")
             }
         }))
+    }
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
     }
 }
 
