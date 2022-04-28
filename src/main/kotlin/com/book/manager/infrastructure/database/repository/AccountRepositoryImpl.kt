@@ -15,7 +15,7 @@ class AccountRepositoryImpl(private val mapper: AccountMapper) : AccountReposito
 
     override fun findByEmail(email: String): Account? {
         val record = mapper.selectOne {
-            where(AccountDynamicSqlSupport.Account.email, SqlBuilder.isEqualTo(email))
+            where { AccountDynamicSqlSupport.Account.email isEqualTo email }
         }
         return record?.let { toModel(it) }
     }

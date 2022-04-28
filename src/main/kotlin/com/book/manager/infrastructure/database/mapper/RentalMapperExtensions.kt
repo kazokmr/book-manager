@@ -9,9 +9,19 @@ import com.book.manager.infrastructure.database.mapper.RentalDynamicSqlSupport.R
 import com.book.manager.infrastructure.database.mapper.RentalDynamicSqlSupport.Rental.rentalDatetime
 import com.book.manager.infrastructure.database.mapper.RentalDynamicSqlSupport.Rental.returnDeadline
 import com.book.manager.infrastructure.database.record.RentalRecord
-import org.mybatis.dynamic.sql.SqlBuilder.isEqualTo
-import org.mybatis.dynamic.sql.util.kotlin.*
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.*
+import org.mybatis.dynamic.sql.util.kotlin.CountCompleter
+import org.mybatis.dynamic.sql.util.kotlin.DeleteCompleter
+import org.mybatis.dynamic.sql.util.kotlin.KotlinUpdateBuilder
+import org.mybatis.dynamic.sql.util.kotlin.SelectCompleter
+import org.mybatis.dynamic.sql.util.kotlin.UpdateCompleter
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.countFrom
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.deleteFrom
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insert
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insertMultiple
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectDistinct
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectList
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectOne
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.update
 
 fun RentalMapper.count(completer: CountCompleter) =
     countFrom(this::count, Rental, completer)
@@ -21,7 +31,7 @@ fun RentalMapper.delete(completer: DeleteCompleter) =
 
 fun RentalMapper.deleteByPrimaryKey(bookId_: Long) =
     delete {
-        where(bookId, isEqualTo(bookId_))
+        where { bookId isEqualTo bookId_ }
     }
 
 fun RentalMapper.insert(record: RentalRecord) =
@@ -64,7 +74,7 @@ fun RentalMapper.selectDistinct(completer: SelectCompleter) =
 
 fun RentalMapper.selectByPrimaryKey(bookId_: Long) =
     selectOne {
-        where(bookId, isEqualTo(bookId_))
+        where { bookId isEqualTo bookId_ }
     }
 
 fun RentalMapper.update(completer: UpdateCompleter) =
@@ -91,7 +101,7 @@ fun RentalMapper.updateByPrimaryKey(record: RentalRecord) =
         set(accountId).equalTo(record::accountId)
         set(rentalDatetime).equalTo(record::rentalDatetime)
         set(returnDeadline).equalTo(record::returnDeadline)
-        where(bookId, isEqualTo(record::bookId))
+        where { bookId isEqualTo record.bookId!! }
     }
 
 fun RentalMapper.updateByPrimaryKeySelective(record: RentalRecord) =
@@ -99,5 +109,5 @@ fun RentalMapper.updateByPrimaryKeySelective(record: RentalRecord) =
         set(accountId).equalToWhenPresent(record::accountId)
         set(rentalDatetime).equalToWhenPresent(record::rentalDatetime)
         set(returnDeadline).equalToWhenPresent(record::returnDeadline)
-        where(bookId, isEqualTo(record::bookId))
+        where { bookId isEqualTo record.bookId!! }
     }
