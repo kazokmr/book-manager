@@ -30,10 +30,11 @@ jobs:
 
       # Set up JDK 17
       - name: Set up JDK17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
+          check-latest: true
           cache: 'gradle'
 
       # Build with Gradle

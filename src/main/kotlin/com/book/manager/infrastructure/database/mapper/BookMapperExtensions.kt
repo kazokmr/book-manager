@@ -9,9 +9,19 @@ import com.book.manager.infrastructure.database.mapper.BookDynamicSqlSupport.Boo
 import com.book.manager.infrastructure.database.mapper.BookDynamicSqlSupport.Book.releaseDate
 import com.book.manager.infrastructure.database.mapper.BookDynamicSqlSupport.Book.title
 import com.book.manager.infrastructure.database.record.BookRecord
-import org.mybatis.dynamic.sql.SqlBuilder.isEqualTo
-import org.mybatis.dynamic.sql.util.kotlin.*
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.*
+import org.mybatis.dynamic.sql.util.kotlin.CountCompleter
+import org.mybatis.dynamic.sql.util.kotlin.DeleteCompleter
+import org.mybatis.dynamic.sql.util.kotlin.KotlinUpdateBuilder
+import org.mybatis.dynamic.sql.util.kotlin.SelectCompleter
+import org.mybatis.dynamic.sql.util.kotlin.UpdateCompleter
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.countFrom
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.deleteFrom
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insert
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insertMultiple
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectDistinct
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectList
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectOne
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.update
 
 fun BookMapper.count(completer: CountCompleter) =
     countFrom(this::count, Book, completer)
@@ -21,7 +31,7 @@ fun BookMapper.delete(completer: DeleteCompleter) =
 
 fun BookMapper.deleteByPrimaryKey(id_: Long) =
     delete {
-        where(id, isEqualTo(id_))
+        where { id.isEqualTo(id_) }
     }
 
 fun BookMapper.insert(record: BookRecord) =
@@ -64,7 +74,7 @@ fun BookMapper.selectDistinct(completer: SelectCompleter) =
 
 fun BookMapper.selectByPrimaryKey(id_: Long) =
     selectOne {
-        where(id, isEqualTo(id_))
+        where { id.isEqualTo(id_) }
     }
 
 fun BookMapper.update(completer: UpdateCompleter) =
@@ -91,7 +101,7 @@ fun BookMapper.updateByPrimaryKey(record: BookRecord) =
         set(title).equalTo(record::title)
         set(author).equalTo(record::author)
         set(releaseDate).equalTo(record::releaseDate)
-        where(id, isEqualTo(record::id))
+        where { id isEqualTo record.id!! }
     }
 
 fun BookMapper.updateByPrimaryKeySelective(record: BookRecord) =
@@ -99,5 +109,5 @@ fun BookMapper.updateByPrimaryKeySelective(record: BookRecord) =
         set(title).equalToWhenPresent(record::title)
         set(author).equalToWhenPresent(record::author)
         set(releaseDate).equalToWhenPresent(record::releaseDate)
-        where(id, isEqualTo(record::id))
+        where { id isEqualTo record.id!! }
     }

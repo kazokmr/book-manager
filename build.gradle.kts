@@ -6,21 +6,20 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.spring") version "1.6.10"
-    id("org.springframework.boot") version "2.6.2"
+    kotlin("jvm") version "1.6.21"
+    kotlin("plugin.spring") version "1.6.21"
+    id("org.springframework.boot") version "2.6.7"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
     id("idea")
     id("com.google.protobuf") version "0.8.15"
 }
 
-apply(plugin = "io.spring.dependency-management")
-
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
-jacoco.toolVersion = "0.8.7"
+jacoco.toolVersion = "0.8.8"
 
 repositories {
     mavenCentral()
@@ -38,26 +37,26 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0")
-    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.3.0")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2")
+    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.0")
     implementation("redis.clients:jedis")
-    implementation("io.grpc:grpc-kotlin-stub:1.2.0")
-    implementation("io.grpc:grpc-netty:1.42.1")
-    implementation("io.github.lognet:grpc-spring-boot-starter:4.5.9")
+    implementation("io.grpc:grpc-kotlin-stub:1.2.1")
+    implementation("io.grpc:grpc-netty:1.45.1")
+    implementation("io.github.lognet:grpc-spring-boot-starter:4.7.0")
     runtimeOnly("org.postgresql:postgresql")
-    mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.0")
+    mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core")
     testImplementation("org.mockito:mockito-core")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
-    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.0")
+    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.2")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
-    testImplementation("org.dbunit:dbunit:2.7.2")
-    testImplementation("org.testcontainers:testcontainers:1.16.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.16.2")
-    testImplementation("org.testcontainers:postgresql:1.16.2")
+    testImplementation("org.dbunit:dbunit:2.7.3")
+    testImplementation("org.testcontainers:testcontainers:1.17.1")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.1")
+    testImplementation("org.testcontainers:postgresql:1.17.1")
 }
 
 configurations {
@@ -86,6 +85,11 @@ tasks.withType<JacocoReport> {
                 exclude("/proto/**/*.class")
             }
         }))
+    }
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
     }
 }
 

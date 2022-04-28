@@ -7,7 +7,6 @@ import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
 import com.book.manager.infrastructure.database.mapper.selectOne
 import com.book.manager.infrastructure.database.record.AccountRecord
-import org.mybatis.dynamic.sql.SqlBuilder
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -15,7 +14,7 @@ class AccountRepositoryImpl(private val mapper: AccountMapper) : AccountReposito
 
     override fun findByEmail(email: String): Account? {
         val record = mapper.selectOne {
-            where(AccountDynamicSqlSupport.Account.email, SqlBuilder.isEqualTo(email))
+            where { AccountDynamicSqlSupport.Account.email isEqualTo email }
         }
         return record?.let { toModel(it) }
     }

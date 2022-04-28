@@ -10,9 +10,19 @@ import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport.
 import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport.Account.password
 import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport.Account.roleType
 import com.book.manager.infrastructure.database.record.AccountRecord
-import org.mybatis.dynamic.sql.SqlBuilder.isEqualTo
-import org.mybatis.dynamic.sql.util.kotlin.*
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.*
+import org.mybatis.dynamic.sql.util.kotlin.CountCompleter
+import org.mybatis.dynamic.sql.util.kotlin.DeleteCompleter
+import org.mybatis.dynamic.sql.util.kotlin.KotlinUpdateBuilder
+import org.mybatis.dynamic.sql.util.kotlin.SelectCompleter
+import org.mybatis.dynamic.sql.util.kotlin.UpdateCompleter
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.countFrom
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.deleteFrom
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insert
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insertMultiple
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectDistinct
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectList
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectOne
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.update
 
 fun AccountMapper.count(completer: CountCompleter) =
     countFrom(this::count, Account, completer)
@@ -22,7 +32,7 @@ fun AccountMapper.delete(completer: DeleteCompleter) =
 
 fun AccountMapper.deleteByPrimaryKey(id_: Long) =
     delete {
-        where(id, isEqualTo(id_))
+        where { id.isEqualTo(id_) }
     }
 
 fun AccountMapper.insert(record: AccountRecord) =
@@ -68,7 +78,7 @@ fun AccountMapper.selectDistinct(completer: SelectCompleter) =
 
 fun AccountMapper.selectByPrimaryKey(id_: Long) =
     selectOne {
-        where(id, isEqualTo(id_))
+        where { id.isEqualTo(id_) }
     }
 
 fun AccountMapper.update(completer: UpdateCompleter) =
@@ -98,7 +108,7 @@ fun AccountMapper.updateByPrimaryKey(record: AccountRecord) =
         set(password).equalTo(record::password)
         set(name).equalTo(record::name)
         set(roleType).equalTo(record::roleType)
-        where(id, isEqualTo(record::id))
+        where { id isEqualTo record.id!! }
     }
 
 fun AccountMapper.updateByPrimaryKeySelective(record: AccountRecord) =
@@ -107,5 +117,5 @@ fun AccountMapper.updateByPrimaryKeySelective(record: AccountRecord) =
         set(password).equalToWhenPresent(record::password)
         set(name).equalToWhenPresent(record::name)
         set(roleType).equalToWhenPresent(record::roleType)
-        where(id, isEqualTo(record::id))
+        where { id isEqualTo record.id!! }
     }
