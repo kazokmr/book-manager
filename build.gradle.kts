@@ -18,7 +18,7 @@ plugins {
 
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_18
+java.sourceCompatibility = JavaVersion.VERSION_17
 jacoco.toolVersion = "0.8.8"
 
 repositories {
@@ -68,7 +68,7 @@ configurations {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "18"
+        jvmTarget = "17"
     }
 }
 
