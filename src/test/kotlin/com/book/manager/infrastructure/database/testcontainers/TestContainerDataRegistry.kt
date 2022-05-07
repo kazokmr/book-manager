@@ -12,7 +12,7 @@ abstract class TestContainerDataRegistry {
 
     companion object {
         @JvmStatic
-        val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres")).apply {
+        val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:14-alpine")).apply {
             withDatabaseName("test")
             withUsername("user")
             withPassword("pass")
@@ -23,7 +23,7 @@ abstract class TestContainerDataRegistry {
         }
 
         @JvmStatic
-        val redis: GenericContainer<*> = GenericContainer<Nothing>(DockerImageName.parse("redis")).apply {
+        val redis: GenericContainer<*> = GenericContainer<Nothing>(DockerImageName.parse("redis:7-alpine")).apply {
             withExposedPorts(6379)
             start()
         }
