@@ -12,7 +12,6 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
-    id("idea")
     id("com.google.protobuf") version "0.8.15"
 }
 
@@ -41,7 +40,7 @@ dependencies {
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.0")
     implementation("redis.clients:jedis")
     implementation("io.grpc:grpc-kotlin-stub:1.2.1")
-    implementation("io.grpc:grpc-netty:1.45.1")
+    implementation("io.grpc:grpc-netty:1.46.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:4.7.0")
     runtimeOnly("org.postgresql:postgresql")
     mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.1")
@@ -93,29 +92,29 @@ tasks.withType<JacocoReport> {
     }
 }
 
-val integrationDirName = "integration"
+val itTestName = "integration"
 
 sourceSets {
-    create(integrationDirName) {
+    create(itTestName) {
         compileClasspath += main.get().output + test.get().output
         runtimeClasspath += main.get().output + test.get().output
     }
 }
 
 configurations {
-    getByName("${integrationDirName}RuntimeOnly").extendsFrom(configurations.testRuntimeOnly.get())
+    getByName("${itTestName}RuntimeOnly").extendsFrom(configurations.testRuntimeOnly.get())
 }
 
 val integrationImplementation: Configuration by configurations.getting {
     extendsFrom(configurations.testImplementation.get())
 }
 
-val integrationTest = task<Test>("${integrationDirName}Test") {
+val integrationTest = task<Test>("${itTestName}Test") {
     description = "Runs integration tests."
     group = "verification"
-    testClassesDirs = sourceSets.getByName(integrationDirName).output.classesDirs
-    classpath = sourceSets.getByName(integrationDirName).runtimeClasspath
-    mustRunAfter("test")
+    testClassesDirs = sourceSets.getByName(itTestName).output.classesDirs
+    classpath = sourceSets.getByName(itTestName).runtimeClasspath
+    shouldRunAfter("test")
 }
 
 tasks.check {
@@ -145,15 +144,6 @@ protobuf {
                 id("grpc")
                 id("grpckt")
             }
-        }
-    }
-}
-
-idea {
-    module {
-        project.sourceSets[integrationDirName].let {
-            testSourceDirs = testSourceDirs.plus(it.allSource.srcDirs)
-            testResourceDirs = testResourceDirs.plus(it.resources.srcDirs)
         }
     }
 }
