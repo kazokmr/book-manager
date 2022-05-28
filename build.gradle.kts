@@ -8,11 +8,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
-    id("org.springframework.boot") version "2.6.7"
+    id("org.springframework.boot") version "2.7.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
-    id("com.google.protobuf") version "0.8.15"
+    id("com.google.protobuf") version "0.8.18"
 }
 
 group = "com.book.manager"
@@ -128,14 +128,14 @@ mybatisGenerator {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.15.1"
+        artifact = "com.google.protobuf:protoc:3.20.1"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.36.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.46.0"
         }
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.0.0:jdk7@jar"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.3.0:jdk8@jar"
         }
     }
     generateProtoTasks {
