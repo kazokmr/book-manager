@@ -1,12 +1,11 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.AdminBookService
-import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
-import com.book.manager.domain.enum.RoleType
-import com.book.manager.domain.model.Book
 import com.book.manager.config.CustomJsonConverter
 import com.book.manager.config.CustomTestConfiguration
+import com.book.manager.domain.enum.RoleType
+import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
@@ -40,9 +39,6 @@ internal class AdminBookControllerTest(
 
     @MockBean
     private lateinit var adminBookService: AdminBookService
-
-    @MockBean
-    private lateinit var authenticationService: AuthenticationService
 
     @Test
     @DisplayName("書籍を登録する")

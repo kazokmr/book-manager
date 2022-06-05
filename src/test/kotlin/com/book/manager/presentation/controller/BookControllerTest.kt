@@ -1,6 +1,5 @@
 package com.book.manager.presentation.controller
 
-import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.BookService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.config.CustomJsonConverter
@@ -37,9 +36,6 @@ internal class BookControllerTest(@Autowired val mockMvc: MockMvc, @Autowired va
 
     @MockBean
     private lateinit var bookService: BookService
-
-    @MockBean
-    private lateinit var authenticationService: AuthenticationService
 
     private lateinit var testBooks: List<Book>
 
