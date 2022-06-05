@@ -8,7 +8,10 @@ import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.stereotype.Service
+import java.io.Serial
 
+@Service
 class BookManagerUserDetailsService(private val authenticationService: AuthenticationService) : UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails =
@@ -53,5 +56,10 @@ data class BookManagerUserDetails(
 
     override fun isCredentialsNonExpired(): Boolean {
         return true
+    }
+
+    companion object {
+        @Serial
+        private const val serialVersionUID: Long = 3887265448650931817L
     }
 }

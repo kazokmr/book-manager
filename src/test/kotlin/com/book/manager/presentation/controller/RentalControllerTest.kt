@@ -1,14 +1,13 @@
 package com.book.manager.presentation.controller
 
-import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.RentalService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
+import com.book.manager.config.CustomJsonConverter
+import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.Rental
-import com.book.manager.config.CustomJsonConverter
-import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.presentation.form.RentalStartRequest
 import com.book.manager.presentation.form.RentalStartResponse
 import com.nhaarman.mockitokotlin2.any
@@ -42,9 +41,6 @@ internal class RentalControllerTest(
 
     @MockBean
     private lateinit var rentalService: RentalService
-
-    @MockBean
-    private lateinit var authenticationService: AuthenticationService
 
     private lateinit var account: Account
     private lateinit var book: Book

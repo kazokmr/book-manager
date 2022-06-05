@@ -1,6 +1,5 @@
 package com.book.manager.presentation.aop
 
-import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.BookService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.application.service.security.BookManagerUserDetails
@@ -46,9 +45,6 @@ import java.time.format.DateTimeFormatter
 internal class LoggingAdviceTest {
 
     // Controllerテストに必要なMockBean
-    @MockBean
-    private lateinit var authenticationService: AuthenticationService
-
     @MockBean
     private lateinit var bookService: BookService
 
