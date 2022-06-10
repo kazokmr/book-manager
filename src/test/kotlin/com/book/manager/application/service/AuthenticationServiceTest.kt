@@ -3,14 +3,14 @@ package com.book.manager.application.service
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.repository.AccountRepository
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 internal class AuthenticationServiceTest {
 
@@ -44,7 +44,7 @@ internal class AuthenticationServiceTest {
         // Given
         val email = "test@example.com"
         val account = Account(100L, email, "pass", "hogehoge", RoleType.USER)
-        whenever(accountRepository.findByEmail(any() as String)).thenReturn(account)
+        whenever(accountRepository.findByEmail(any())).thenReturn(account)
 
         // When
         val result = authenticationService.findAccount(email)
@@ -59,7 +59,7 @@ internal class AuthenticationServiceTest {
 
         // Given
         val email = "test@example.com"
-        whenever(accountRepository.findByEmail(any() as String)).thenReturn(null)
+        whenever(accountRepository.findByEmail(any())).thenReturn(null)
 
         // When
         val result = authenticationService.findAccount(email)

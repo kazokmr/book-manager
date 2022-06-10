@@ -10,12 +10,12 @@ import com.book.manager.domain.model.Rental
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean

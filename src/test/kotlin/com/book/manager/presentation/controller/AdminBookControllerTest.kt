@@ -9,11 +9,11 @@ import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -49,7 +49,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
 
         val book = Book(request.id, request.title, request.author, request.releaseDate)
-        whenever(adminBookService.register(any() as Book)).thenReturn(book)
+        whenever(adminBookService.register(any())).thenReturn(book)
 
         // When
         val resultResponse =
@@ -80,7 +80,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
         val reason = "エラー: ${request.id}"
 
-        whenever(adminBookService.register(any() as Book)).thenThrow(IllegalArgumentException(reason))
+        whenever(adminBookService.register(any())).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
@@ -167,7 +167,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
 
         val book = Book(999, "入門", "moyo", LocalDate.of(2018, 4, 19))
-        whenever(adminBookService.register(any() as Book)).thenReturn(book)
+        whenever(adminBookService.register(any())).thenReturn(book)
 
         // When
         val resultResponse =
@@ -198,7 +198,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
 
         val book = Book(request.id, request.title!!, request.author!!, request.releaseDate!!)
-        whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
+        whenever(adminBookService.update(any(), any(), any(), any()))
             .thenReturn(request.id)
 
         // When
@@ -230,7 +230,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
         val reason = "エラー: ${request.id}"
 
-        whenever(adminBookService.update(any() as Long, any() as String, any() as String, any() as LocalDate))
+        whenever(adminBookService.update(any(), any(), any(), any()))
             .thenThrow(IllegalArgumentException(reason))
 
         // When
@@ -282,7 +282,7 @@ internal class AdminBookControllerTest(
         // Given
         val bookId = 100L
         val reason = "エラー: $bookId"
-        whenever(adminBookService.delete(any() as Long)).thenThrow(IllegalArgumentException(reason))
+        whenever(adminBookService.delete(any())).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
