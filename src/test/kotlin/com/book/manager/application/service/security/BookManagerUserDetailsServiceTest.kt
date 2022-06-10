@@ -3,16 +3,16 @@ package com.book.manager.application.service.security
 import com.book.manager.application.service.AuthenticationService
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 
 internal class BookManagerUserDetailsServiceTest {
@@ -32,7 +32,7 @@ internal class BookManagerUserDetailsServiceTest {
 
         // Given
         val username = "invalidUser"
-        whenever(authenticationService.findAccount(any() as String)).thenReturn(null)
+        whenever(authenticationService.findAccount(any())).thenReturn(null)
 
         // When
         val result = assertThrows<UsernameNotFoundException> {
@@ -51,7 +51,7 @@ internal class BookManagerUserDetailsServiceTest {
         // Given
         val userName = "moyomoyo"
         val account = Account(100L, "test@exmaple.com", "pass", userName, RoleType.USER)
-        whenever(authenticationService.findAccount(any() as String)).thenReturn(account)
+        whenever(authenticationService.findAccount(any())).thenReturn(account)
 
         // When
         val result = bookManagerUserDetailsService.loadUserByUsername(userName) as BookManagerUserDetails

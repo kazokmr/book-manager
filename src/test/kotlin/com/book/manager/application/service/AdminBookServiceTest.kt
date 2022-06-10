@@ -3,16 +3,16 @@ package com.book.manager.application.service
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.repository.BookRepository
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.time.LocalDate
 
 internal class AdminBookServiceTest {
@@ -45,7 +45,7 @@ internal class AdminBookServiceTest {
     fun `register when book has already been existed then throw Exception`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
+        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
 
         // When
         val result = assertThrows<IllegalArgumentException> {
@@ -53,7 +53,7 @@ internal class AdminBookServiceTest {
         }
 
         // Then
-        verify(bookRepository, times(0)).register(any() as Book)
+        verify(bookRepository, times(0)).register(any())
         assertThat(result.message).isEqualTo("既に存在する書籍ID: ${book.id}")
     }
 
@@ -62,7 +62,7 @@ internal class AdminBookServiceTest {
     fun `delete when book is no null then delete the book`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
+        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
 
         // When
         val result = adminBookService.delete(book.id)
@@ -77,13 +77,13 @@ internal class AdminBookServiceTest {
     fun `delete when book is not exist then throw Exception`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
+        whenever(bookRepository.findWithRental(any())).thenReturn(null)
 
         // When
         val result = assertThrows<IllegalArgumentException> { adminBookService.delete(book.id) }
 
         // Then
-        verify(bookRepository, times(0)).delete(any() as Long)
+        verify(bookRepository, times(0)).delete(any())
         assertThat(result.message).isEqualTo("存在しない書籍ID: ${book.id}")
     }
 
@@ -92,13 +92,13 @@ internal class AdminBookServiceTest {
     fun `update when book is exists then update the book`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(BookWithRental(book, null))
+        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
 
         // When
         val result = adminBookService.update(book.id, "test", "author", LocalDate.now())
 
         // Then
-        verify(bookRepository).update(any() as Long, any() as String, any() as String, any() as LocalDate)
+        verify(bookRepository).update(any(), any(), any(), any())
         assertThat(result).isEqualTo(book.id)
     }
 
@@ -107,7 +107,7 @@ internal class AdminBookServiceTest {
     fun `update when book is not exist then throw Exception`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
+        whenever(bookRepository.findWithRental(any())).thenReturn(null)
 
         // When
         val result = assertThrows<IllegalArgumentException> {
@@ -115,7 +115,7 @@ internal class AdminBookServiceTest {
         }
 
         // Then
-        verify(bookRepository, times(0)).update(any() as Long, any() as String, any() as String, any() as LocalDate)
+        verify(bookRepository, times(0)).update(any(), any(), any(), any())
         assertThat(result.message).isEqualTo("存在しない書籍ID: ${book.id}")
     }
 }

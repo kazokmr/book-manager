@@ -5,11 +5,11 @@ import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.presentation.controller.AdminBookController
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -44,7 +44,7 @@ internal class SecurityConfigTest(@Autowired val mockMvc: MockMvc) {
         val role = RoleType.USER
 
         val account = Account(1, email, passwordEncoder.encode(pass), "test", role)
-        whenever(authenticationService.findAccount(any() as String)).thenReturn(account)
+        whenever(authenticationService.findAccount(any())).thenReturn(account)
 
         // When
         mockMvc
@@ -68,7 +68,7 @@ internal class SecurityConfigTest(@Autowired val mockMvc: MockMvc) {
         val role = RoleType.USER
         val account =
             Account(1, email, passwordEncoder.encode(pass), "test", role)
-        whenever(authenticationService.findAccount(any() as String)).thenReturn(account)
+        whenever(authenticationService.findAccount(any())).thenReturn(account)
 
         // When
         mockMvc
@@ -87,7 +87,7 @@ internal class SecurityConfigTest(@Autowired val mockMvc: MockMvc) {
     fun `formLogin when account does not exist then failure authentication`() {
 
         // Given
-        whenever(authenticationService.findAccount(any() as String)).thenReturn(null)
+        whenever(authenticationService.findAccount(any())).thenReturn(null)
 
         // When
         mockMvc
