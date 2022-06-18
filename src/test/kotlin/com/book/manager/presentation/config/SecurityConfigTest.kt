@@ -2,10 +2,10 @@ package com.book.manager.presentation.config
 
 import com.book.manager.application.service.AuthenticationService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
+import com.book.manager.application.service.security.BookManagerUserDetailsService
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.presentation.controller.AdminBookController
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -13,6 +13,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -23,8 +24,9 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(controllers = [AdminBookController::class])
 @ContextConfiguration(classes = [SecurityConfig::class])
+@Import(BookManagerUserDetailsService::class)
+@WebMvcTest(controllers = [AdminBookController::class])
 internal class SecurityConfigTest(@Autowired val mockMvc: MockMvc) {
 
     @Autowired
@@ -33,7 +35,6 @@ internal class SecurityConfigTest(@Autowired val mockMvc: MockMvc) {
     @MockBean
     private lateinit var authenticationService: AuthenticationService
 
-    @Disabled
     @Test
     @DisplayName("ユーザー名とパスワードが一致すればログイン認証に成功する")
     fun `formLogin when account exists then success authentication`() {
