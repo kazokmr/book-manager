@@ -39,8 +39,8 @@ dependencies {
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.0")
     implementation("redis.clients:jedis")
-    implementation("io.grpc:grpc-kotlin-stub:1.2.1")
-    implementation("io.grpc:grpc-netty:1.46.0")
+    implementation("io.grpc:grpc-kotlin-stub:1.3.0")
+    implementation("io.grpc:grpc-netty:1.47.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:4.7.0")
     runtimeOnly("org.postgresql:postgresql")
     mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.1")
@@ -52,9 +52,9 @@ dependencies {
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.2")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
     testImplementation("org.dbunit:dbunit:2.7.3")
-    testImplementation("org.testcontainers:testcontainers:1.17.1")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.1")
-    testImplementation("org.testcontainers:postgresql:1.17.1")
+    testImplementation("org.testcontainers:testcontainers:1.17.2")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.2")
+    testImplementation("org.testcontainers:postgresql:1.17.2")
 }
 
 configurations {
