@@ -6,13 +6,14 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.0"
-    kotlin("plugin.spring") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.spring") version "1.7.10"
     id("org.springframework.boot") version "2.7.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.arenagod.gradle.MybatisGenerator") version "1.4"
     id("jacoco")
-    id("com.google.protobuf") version "0.8.18"
+    id("com.google.protobuf") version "0.8.19"
+    id("idea")
 }
 
 group = "com.book.manager"
@@ -40,6 +41,8 @@ dependencies {
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.0")
     implementation("redis.clients:jedis")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
+    implementation("io.grpc:grpc-protobuf:1.47.0")
+    implementation("com.google.protobuf:protobuf-kotlin:3.21.1")
     implementation("io.grpc:grpc-netty:1.47.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:4.7.0")
     runtimeOnly("org.postgresql:postgresql")
