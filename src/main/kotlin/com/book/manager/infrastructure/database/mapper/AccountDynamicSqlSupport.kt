@@ -5,18 +5,31 @@ package com.book.manager.infrastructure.database.mapper
 
 import com.book.manager.domain.enum.RoleType
 import java.sql.JDBCType
-import org.mybatis.dynamic.sql.SqlTable
+import org.mybatis.dynamic.sql.AliasableSqlTable
+import org.mybatis.dynamic.sql.util.kotlin.elements.column
 
 object AccountDynamicSqlSupport {
-    object Account : SqlTable("public.account") {
-        val id = column<Long>("id", JDBCType.BIGINT)
+    val account = Account()
 
-        val email = column<String>("email", JDBCType.VARCHAR)
+    val id = account.id
 
-        val password = column<String>("password", JDBCType.VARCHAR)
+    val email = account.email
 
-        val name = column<String>("name", JDBCType.VARCHAR)
+    val password = account.password
 
-        val roleType = column<RoleType>("role_type", JDBCType.VARCHAR, "org.apache.ibatis.type.EnumTypeHandler")
+    val name = account.name
+
+    val roleType = account.roleType
+
+    class Account : AliasableSqlTable<Account>("public.account", ::Account) {
+        val id = column<Long>(name = "id", jdbcType = JDBCType.BIGINT)
+
+        val email = column<String>(name = "email", jdbcType = JDBCType.VARCHAR)
+
+        val password = column<String>(name = "password", jdbcType = JDBCType.VARCHAR)
+
+        val name = column<String>(name = "name", jdbcType = JDBCType.VARCHAR)
+
+        val roleType = column<RoleType>(name = "role_type", jdbcType = JDBCType.VARCHAR, typeHandler = "org.apache.ibatis.type.EnumTypeHandler")
     }
 }

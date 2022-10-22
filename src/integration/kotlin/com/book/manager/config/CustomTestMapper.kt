@@ -10,12 +10,12 @@ import com.book.manager.infrastructure.database.mapper.BookMapper
 import com.book.manager.infrastructure.database.mapper.RentalMapper
 import com.book.manager.infrastructure.database.mapper.delete
 import com.book.manager.infrastructure.database.mapper.insertMultiple
-import com.book.manager.infrastructure.database.record.AccountRecord
-import com.book.manager.infrastructure.database.record.BookRecord
-import com.book.manager.infrastructure.database.record.RentalRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestComponent
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import com.book.manager.infrastructure.database.record.Account as RecordAccount
+import com.book.manager.infrastructure.database.record.Book as RecordBook
+import com.book.manager.infrastructure.database.record.Rental as RecordRental
 
 @TestComponent
 class CustomTestMapper {
@@ -37,19 +37,19 @@ class CustomTestMapper {
 
     fun createAccount(accountList: List<Account>) {
         accountList
-            .map { AccountRecord(it.id, it.email, it.password.encode(), it.name, it.roleType) }
+            .map { RecordAccount(it.id, it.email, it.password.encode(), it.name, it.roleType) }
             .forEach { accountMapper.insertRecord(it) }
     }
 
     fun createBook(bookList: List<Book>) {
         bookList
-            .map { BookRecord(it.id, it.title, it.author, it.releaseDate) }
+            .map { RecordBook(it.id, it.title, it.author, it.releaseDate) }
             .let { bookMapper.insertMultiple(it) }
     }
 
     fun createRental(rentalList: List<Rental>) {
         rentalList
-            .map { RentalRecord(it.bookId, it.accountId, it.rentalDatetime, it.rentalDatetime) }
+            .map { RecordRental(it.bookId, it.accountId, it.rentalDatetime, it.rentalDatetime) }
             .let { rentalMapper.insertMultiple(it) }
     }
 

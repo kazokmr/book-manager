@@ -5,7 +5,7 @@ package com.book.manager.infrastructure.database.record
 
 import com.book.manager.domain.enum.RoleType
 
-data class AccountRecord(
+data class Account(
     var id: Long? = null,
     var email: String? = null,
     var password: String? = null,

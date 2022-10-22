@@ -11,10 +11,10 @@ import com.book.manager.infrastructure.database.mapper.insert
 import com.book.manager.infrastructure.database.mapper.select
 import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
 import com.book.manager.infrastructure.database.mapper.updateByPrimaryKeySelective
-import com.book.manager.infrastructure.database.record.BookRecord
-import com.book.manager.infrastructure.database.record.BookWithRentalRecord
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
+import com.book.manager.infrastructure.database.record.Book as RecordBook
+import com.book.manager.infrastructure.database.record.BookWithRental as RecordBookWithRental
 
 @Repository
 class BookRepositoryImpl(
@@ -30,15 +30,15 @@ class BookRepositoryImpl(
     override fun register(book: Book): Int = bookMapper.insert(toRecord(book))
 
     override fun update(id: Long, title: String?, author: String?, releaseDate: LocalDate?): Int =
-        bookMapper.updateByPrimaryKeySelective(BookRecord(id, title, author, releaseDate))
+        bookMapper.updateByPrimaryKeySelective(RecordBook(id, title, author, releaseDate))
 
     override fun delete(id: Long): Int = bookMapper.deleteByPrimaryKey(id)
 
-    private fun toRecord(model: Book): BookRecord {
-        return BookRecord(model.id, model.title, model.author, model.releaseDate)
+    private fun toRecord(model: Book): RecordBook {
+        return RecordBook(model.id, model.title, model.author, model.releaseDate)
     }
 
-    private fun toModel(record: BookWithRentalRecord): BookWithRental {
+    private fun toModel(record: RecordBookWithRental): BookWithRental {
         val book = Book(
             record.id!!,
             record.title!!,
