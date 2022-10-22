@@ -13,13 +13,13 @@ import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mybatis.dynamic.sql.exception.InvalidSqlException
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
-import org.springframework.jdbc.BadSqlGrammarException
 import org.springframework.test.context.TestExecutionListeners
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import java.time.LocalDate
@@ -199,7 +199,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
     fun `update when book will not be updated any properties then update any columns`() {
 
         // Then
-        assertThrows<BadSqlGrammarException> {
+        assertThrows<InvalidSqlException> {
             bookRepository.update(1L, null, null, null)
         }
     }

@@ -1,7 +1,7 @@
 package com.book.manager.infrastructure.database.mapper
 
 import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
-import com.book.manager.infrastructure.database.record.BookWithRentalRecord
+import com.book.manager.infrastructure.database.record.BookWithRental
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
@@ -45,7 +45,7 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     fun `select when there is only one book with renting then return list has a element`() {
 
         // Given
-        val expectedRecord = BookWithRentalRecord(
+        val expectedRecord = BookWithRental(
             100,
             "Kotlin入門",
             "ことりん太郎",
@@ -78,7 +78,7 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     fun `select when there is only one book without renting then return list has a element`() {
 
         // Given
-        val expectedRecord = BookWithRentalRecord(
+        val expectedRecord = BookWithRental(
             100,
             "Kotlin入門",
             "ことりん太郎",
@@ -109,19 +109,19 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
         // Given
         val rentalDateTime = LocalDateTime.of(2021, 1, 24, 21, 1, 41)
 
-        val expectedList = listOf<BookWithRentalRecord>(
-            BookWithRentalRecord(
+        val expectedList = listOf<BookWithRental>(
+            BookWithRental(
                 100, "Kotlin入門", "ことりん太郎", LocalDate.of(1950, 10, 1)
             ),
-            BookWithRentalRecord(
+            BookWithRental(
                 200, "Java入門", "じゃば太郎", LocalDate.of(2005, 8, 29),
                 2, rentalDateTime, rentalDateTime.plusDays(14)
             ),
-            BookWithRentalRecord(
+            BookWithRental(
                 300, "Spring入門", "すぷりんぐ太郎", LocalDate.of(2001, 3, 21),
                 10, rentalDateTime, rentalDateTime.plusDays(14)
             ),
-            BookWithRentalRecord(
+            BookWithRental(
                 400, "Kotlin実践", "ことりん太郎", LocalDate.of(2020, 1, 25)
             )
         )
@@ -156,7 +156,7 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
         // Given
         val bookId = 200L
         val rentalDateTime = LocalDateTime.of(2021, 1, 24, 21, 1, 41)
-        val expected = BookWithRentalRecord(
+        val expected = BookWithRental(
             bookId, "Java入門", "じゃば太郎", LocalDate.of(2005, 8, 29),
             2, rentalDateTime, rentalDateTime.plusDays(14)
         )
@@ -175,7 +175,7 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
 
         // Given
         val bookId = 400L
-        val expected = BookWithRentalRecord(bookId, "Kotlin実践", "ことりん太郎", LocalDate.of(2020, 1, 25))
+        val expected = BookWithRental(bookId, "Kotlin実践", "ことりん太郎", LocalDate.of(2020, 1, 25))
 
         // When
         val result = mapper.selectByPrimaryKey(bookId)

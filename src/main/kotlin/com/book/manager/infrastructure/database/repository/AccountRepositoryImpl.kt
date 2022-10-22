@@ -6,15 +6,15 @@ import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport
 import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
 import com.book.manager.infrastructure.database.mapper.selectOne
-import com.book.manager.infrastructure.database.record.AccountRecord
 import org.springframework.stereotype.Repository
+import com.book.manager.infrastructure.database.record.Account as RecordAccount
 
 @Repository
 class AccountRepositoryImpl(private val mapper: AccountMapper) : AccountRepository {
 
     override fun findByEmail(email: String): Account? {
         val record = mapper.selectOne {
-            where { AccountDynamicSqlSupport.Account.email isEqualTo email }
+            where { AccountDynamicSqlSupport.account.email isEqualTo email }
         }
         return record?.let { toModel(it) }
     }
@@ -23,7 +23,7 @@ class AccountRepositoryImpl(private val mapper: AccountMapper) : AccountReposito
         return mapper.selectByPrimaryKey(id)?.let { toModel(it) }
     }
 
-    private fun toModel(record: AccountRecord): Account {
+    private fun toModel(record: RecordAccount): Account {
         return Account(
             record.id!!,
             record.email!!,

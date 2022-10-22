@@ -5,7 +5,6 @@ import com.book.manager.domain.model.Account
 import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.delete
-import com.book.manager.infrastructure.database.record.AccountRecord
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.context.annotation.Import
+import com.book.manager.infrastructure.database.record.Account as RecordAccount
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -37,16 +37,10 @@ internal class AccountRepositoryImplTest : TestContainerDataRegistry() {
      */
     @BeforeEach
     internal fun setUp() {
-
-        val initAccount1 = AccountRecord(1, "admin@example.com", "passpass", "admin", RoleType.ADMIN)
-        val initAccount2 = AccountRecord(2, "user@example.com", "passpass", "user", RoleType.USER)
-        val initAccount3 = AccountRecord(999, "admin2@example.com", "passpass", "admin2", RoleType.ADMIN)
-        val initAccount4 = AccountRecord(8888, "user2@example.com", "passpass", "user2", RoleType.USER)
-
-        accountMapper.insertRecord(initAccount1)
-        accountMapper.insertRecord(initAccount2)
-        accountMapper.insertRecord(initAccount3)
-        accountMapper.insertRecord(initAccount4)
+        accountMapper.insertRecord(RecordAccount(1, "admin@example.com", "passpass", "admin", RoleType.ADMIN))
+        accountMapper.insertRecord(RecordAccount(2, "user@example.com", "passpass", "user", RoleType.USER))
+        accountMapper.insertRecord(RecordAccount(999, "admin2@example.com", "passpass", "admin2", RoleType.ADMIN))
+        accountMapper.insertRecord(RecordAccount(8888, "user2@example.com", "passpass", "user2", RoleType.USER))
     }
 
     @AfterEach

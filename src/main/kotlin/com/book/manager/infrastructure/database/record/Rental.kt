@@ -5,7 +5,7 @@ package com.book.manager.infrastructure.database.record
 
 import java.time.LocalDateTime
 
-data class RentalRecord(
+data class Rental(
     var bookId: Long? = null,
     var accountId: Long? = null,
     var rentalDatetime: LocalDateTime? = null,
