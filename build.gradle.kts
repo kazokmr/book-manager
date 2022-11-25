@@ -57,8 +57,8 @@ dependencies {
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.1")
     implementation("com.google.protobuf:protobuf-kotlin:3.21.9")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
-    implementation("io.grpc:grpc-netty:1.50.2")
-    implementation("io.grpc:grpc-protobuf:1.50.2")
+    implementation("io.grpc:grpc-netty:1.51.0")
+    implementation("io.grpc:grpc-protobuf:1.51.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:4.9.0")
     runtimeOnly("org.postgresql:postgresql:42.5.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.5")
@@ -69,9 +69,9 @@ dependencies {
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.2")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
     testImplementation("org.dbunit:dbunit:2.7.3")
-    testImplementation("org.testcontainers:testcontainers:1.17.5")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.5")
-    testImplementation("org.testcontainers:postgresql:1.17.5")
+    testImplementation("org.testcontainers:testcontainers:1.17.6")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
+    testImplementation("org.testcontainers:postgresql:1.17.6")
 }
 
 configurations {
