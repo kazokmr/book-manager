@@ -11,16 +11,16 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializer
 import org.springframework.security.jackson2.SecurityJackson2Modules
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession
 
-// Redisでセッション管理を有効にする(application.yamlで session-storetype = redis としているのでこの設定は見ていない)
-//@EnableRedisHttpSession
+@EnableRedisHttpSession
 @Configuration
 class HttpSessionConfig {
 
-    @Value("\${spring.redis.host}")
+    @Value("\${spring.data.redis.host}")
     val redisHostName = "localhost"
 
-    @Value("\${spring.redis.port}")
+    @Value("\${spring.data.redis.port}")
     val redisPort = 6379
 
     // Redis ClientのLettuceを利用するためのコネクション
@@ -30,11 +30,10 @@ class HttpSessionConfig {
 
     // Redisのセッション情報をシリアライズ処理(com.fasterxml.jackson.databind.J)
     @Bean
-    fun springSessionDefaultRedisSerializer(): RedisSerializer<Any> =
-        Jackson2JsonRedisSerializer(Any::class.java).apply {
-            val objectMapper = ObjectMapper()
-            objectMapper.registerModules(SecurityJackson2Modules.getModules(this.javaClass.classLoader))
-            objectMapper.addMixIn(BookManagerUserDetails::class.java, BookManagerUserMixin::class.java)
-            setObjectMapper(objectMapper)
-        }
+    fun springSessionDefaultRedisSerializer(): RedisSerializer<Any> {
+        val objectMapper = ObjectMapper()
+        objectMapper.registerModules(SecurityJackson2Modules.getModules(this.javaClass.classLoader))
+        objectMapper.addMixIn(BookManagerUserDetails::class.java, BookManagerUserMixin::class.java)
+        return Jackson2JsonRedisSerializer(objectMapper, Any::class.java)
+    }
 }

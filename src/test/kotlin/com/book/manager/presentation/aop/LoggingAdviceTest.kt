@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.kotlin.any
@@ -33,6 +34,7 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.server.ResponseStatusException
@@ -40,6 +42,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 // Controllerクラスに対するログ出力なのでWebMvcTestとMockUserを付ける
+@ExtendWith(SpringExtension::class)
 @WebMvcTest(controllers = [BookController::class])
 @WithCustomMockUser
 internal class LoggingAdviceTest {

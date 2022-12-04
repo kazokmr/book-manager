@@ -4,6 +4,7 @@ import com.book.manager.application.service.RentalService
 import com.book.manager.application.service.security.BookManagerUserDetails
 import com.book.manager.presentation.form.RentalStartRequest
 import com.book.manager.presentation.form.RentalStartResponse
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
-import javax.validation.Valid
 
 @RestController
 @RequestMapping("rental")

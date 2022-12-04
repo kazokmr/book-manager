@@ -212,6 +212,8 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     fun TestRestTemplate.login(user: String, pass: String): ResponseEntity<String> {
 
+        restTemplate.getForEntity("$baseUri/csrf_token", String::class.java)
+
         val loginForm = LinkedMultiValueMap<String, String>().apply {
             add("email", user)
             add("pass", pass)

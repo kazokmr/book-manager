@@ -6,16 +6,18 @@ import com.book.manager.presentation.handler.BookManagerAuthenticationEntryPoint
 import com.book.manager.presentation.handler.BookManagerAuthenticationFailureHandler
 import com.book.manager.presentation.handler.BookManagerAuthenticationSuccessHandler
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
+@Configuration
 @EnableWebSecurity
 class SecurityConfig {
 
@@ -25,22 +27,28 @@ class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
-        http.authorizeHttpRequests { authz ->
-            authz.mvcMatchers("/greeter/**").permitAll()
-                .mvcMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
+        http.authorizeHttpRequests { authorize ->
+            authorize
+                .requestMatchers("/greeter/**", "/csrf_token").permitAll()
+                .requestMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
                 .anyRequest().authenticated()
         }.formLogin { login ->
-            login.loginProcessingUrl("/login").permitAll()
+            login
+                .loginProcessingUrl("/login").permitAll()
                 .usernameParameter("email")
                 .passwordParameter("pass")
                 .successHandler(BookManagerAuthenticationSuccessHandler())
                 .failureHandler(BookManagerAuthenticationFailureHandler())
+        }.logout {
+            it.logoutUrl("/logout")
+            it.logoutSuccessHandler(HttpStatusReturningLogoutSuccessHandler())
+            it.invalidateHttpSession(true)
+            it.deleteCookies("SESSION")
         }.exceptionHandling { ex ->
-            ex.authenticationEntryPoint(BookManagerAuthenticationEntryPoint())
+            ex
+                .authenticationEntryPoint(BookManagerAuthenticationEntryPoint())
                 .accessDeniedHandler(BookManagerAccessDeniedHandler())
-        }.csrf { csrf ->
-            csrf.ignoringAntMatchers("/login")
-                .csrfTokenRepository(CookieCsrfTokenRepository())
+        }.csrf {
         }.cors { cors ->
             cors.configurationSource(corsConfigurationSource())
         }
