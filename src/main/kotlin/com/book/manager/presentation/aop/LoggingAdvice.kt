@@ -1,6 +1,7 @@
 package com.book.manager.presentation.aop
 
 import com.book.manager.application.service.security.BookManagerUserDetails
+import com.book.manager.presentation.controller.CsrfTokenController
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.aspectj.lang.JoinPoint
@@ -25,6 +26,10 @@ class LoggingAdvice {
 
     @Before("execution(* com.book.manager.presentation.controller..*.*(..))")
     fun beforeLog(joinPoint: JoinPoint) {
+        // 認証前に呼ばれるコントローラは何もしない
+        if (joinPoint.target.javaClass == CsrfTokenController::class.java) {
+            return
+        }
         val account = SecurityContextHolder.getContext().authentication.principal as BookManagerUserDetails
         logger.info("Start: ${joinPoint.signature} accountId=${account.id}")
         logger.info("Class: ${joinPoint.target.javaClass}")
@@ -35,12 +40,20 @@ class LoggingAdvice {
 
     @After("execution(* com.book.manager.presentation.controller..*.*(..))")
     fun afterLog(joinPoint: JoinPoint) {
+        // 認証前に呼ばれるコントローラは何もしない
+        if (joinPoint.target.javaClass == CsrfTokenController::class.java) {
+            return
+        }
         val account = SecurityContextHolder.getContext().authentication.principal as BookManagerUserDetails
         logger.info("End: ${joinPoint.signature} accountId=${account.id}")
     }
 
     @Around("execution(* com.book.manager.presentation.controller..*.*(..))")
     fun aroundLog(joinPoint: ProceedingJoinPoint): Any? {
+        // 認証前に呼ばれるコントローラは何もしない
+        if (joinPoint.target.javaClass == CsrfTokenController::class.java) {
+            return joinPoint.proceed()
+        }
         val account = SecurityContextHolder.getContext().authentication.principal as BookManagerUserDetails
         logger.info("Start Proceed: ${joinPoint.signature} accountId=${account.id}")
 

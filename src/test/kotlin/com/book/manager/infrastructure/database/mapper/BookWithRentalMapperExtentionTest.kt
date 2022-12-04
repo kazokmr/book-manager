@@ -109,7 +109,7 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
         // Given
         val rentalDateTime = LocalDateTime.of(2021, 1, 24, 21, 1, 41)
 
-        val expectedList = listOf<BookWithRental>(
+        val expectedList = listOf(
             BookWithRental(
                 100, "Kotlin入門", "ことりん太郎", LocalDate.of(1950, 10, 1)
             ),

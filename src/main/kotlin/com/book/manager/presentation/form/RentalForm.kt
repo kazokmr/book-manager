@@ -1,8 +1,8 @@
 package com.book.manager.presentation.form
 
 import com.book.manager.domain.model.Rental
+import jakarta.validation.constraints.Min
 import java.time.LocalDateTime
-import javax.validation.constraints.Min
 
 data class RentalStartRequest(
     @field:Min(value = 1, message = "書籍IDには1以上の数値を入れてください。")

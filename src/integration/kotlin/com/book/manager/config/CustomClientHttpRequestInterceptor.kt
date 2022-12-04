@@ -13,30 +13,41 @@ private val logger: Logger = LogManager.getLogger(CustomClientHttpRequestInterce
 
 class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
 
-    private var cookies = mutableMapOf<String, HttpCookie>()
+    private var sessionId = ""
+    private var csrfToken = ""
 
+    // 認証エラーとならないようにセッションIDとCSRFトークンをリクエストにセットする
     override fun intercept(
         request: HttpRequest,
         body: ByteArray,
         execution: ClientHttpRequestExecution
     ): ClientHttpResponse {
 
-        val cookiesForRequest = cookies.values.map { it.toString() }.toList()
-        logger.info("Using cookies: $cookiesForRequest")
-        request.headers.addAll(HttpHeaders.COOKIE, cookiesForRequest)
+        if (sessionId != "") {
+            logger.info("Set Cookie SESSION: $sessionId")
+            request.headers.add(HttpHeaders.COOKIE, "SESSION=$sessionId")
+        }
 
-        val csrfToken = cookies.filter { it.key == "XSRF-TOKEN" }.map { it.value.value }.firstOrNull()
-        logger.info("Using csrf-token: $csrfToken")
-        request.headers["X-XSRF-TOKEN"] = csrfToken
+        if (csrfToken != "") {
+            logger.info("Set Request Header X-CSRF-TOKEN: $csrfToken")
+            request.headers["X-CSRF-TOKEN"] = csrfToken
+        }
 
         logger.info("Request: uri=${request.uri}, headers=${request.headers}, body=${String(body)}")
         val response = execution.execute(request, body)
         logger.info("Response: status=${response.statusCode}")
 
-        val cookiesFromResponse = response.headers[HttpHeaders.SET_COOKIE]?.flatMap { HttpCookie.parse(it) }
-        logger.info("Extracted cookies from response: $cookiesFromResponse")
-        cookiesFromResponse?.forEach { cookies[it.name] = it }
+        val sessionByCookie = response.headers[HttpHeaders.SET_COOKIE]?.flatMap { HttpCookie.parse(it) }
+            ?.firstOrNull { it.name == "SESSION" }
+        if (sessionByCookie != null) {
+            logger.info("Extracted cookie SESSION: $sessionByCookie")
+            sessionId = sessionByCookie.value
+        }
 
+        if (response.headers.containsKey("_csrf")) {
+            logger.info("Extracted CSRF-TOKEN from response: ${response.headers["_csrf"]?.get(0)}")
+            csrfToken = response.headers["_csrf"]?.get(0).toString()
+        }
         return response
     }
 }

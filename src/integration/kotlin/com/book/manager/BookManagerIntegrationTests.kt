@@ -63,13 +63,15 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @BeforeEach
     internal fun setUp() {
+        testMapper.initDefaultAccounts()
         baseUri = "http://localhost:$port"
         restTemplate = TestRestTemplate(builder)
-        testMapper.initDefaultAccounts()
+        restTemplate.getForEntity("$baseUri/csrf_token", String::class.java)
     }
 
     @AfterEach
     internal fun tearDown() {
+        restTemplate.exchange(RequestEntity.post("$baseUri/logout").build(), Any::class.java)
         testMapper.clearAllData()
     }
 
