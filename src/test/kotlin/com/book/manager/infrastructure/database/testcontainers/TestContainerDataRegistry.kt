@@ -34,8 +34,8 @@ abstract class TestContainerDataRegistry {
             registry.add("spring.datasource.url", database::getJdbcUrl)
             registry.add("spring.datasource.username", database::getUsername)
             registry.add("spring.datasource.password", database::getPassword)
-            registry.add("spring.redis.host", redis::getHost)
-            registry.add("spring.redis.port", redis::getFirstMappedPort)
+            registry.add("spring.data.redis.host", redis::getHost)
+            registry.add("spring.data.redis.port", redis::getFirstMappedPort)
         }
     }
 }
