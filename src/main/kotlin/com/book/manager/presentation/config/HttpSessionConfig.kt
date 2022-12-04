@@ -28,12 +28,11 @@ class HttpSessionConfig {
     fun redisConnectionFactory(): LettuceConnectionFactory =
         LettuceConnectionFactory(RedisStandaloneConfiguration(redisHostName, redisPort))
 
-    // Redisのセッション情報をシリアライズ処理(com.fasterxml.jackson.databind.J)
+    // Redisのセッション情報をシリアライズする
     @Bean
-    fun springSessionDefaultRedisSerializer(): RedisSerializer<Any> {
-        val objectMapper = ObjectMapper()
-        objectMapper.registerModules(SecurityJackson2Modules.getModules(this.javaClass.classLoader))
-        objectMapper.addMixIn(BookManagerUserDetails::class.java, BookManagerUserMixin::class.java)
-        return Jackson2JsonRedisSerializer(objectMapper, Any::class.java)
-    }
+    fun springSessionDefaultRedisSerializer(): RedisSerializer<Any> =
+        ObjectMapper().apply {
+            registerModules(SecurityJackson2Modules.getModules(this.javaClass.classLoader))
+            addMixIn(BookManagerUserDetails::class.java, BookManagerUserMixin::class.java)
+        }.let { Jackson2JsonRedisSerializer(it, Any::class.java) }
 }
