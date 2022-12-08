@@ -27,30 +27,27 @@ class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
-        http.authorizeHttpRequests { authorize ->
-            authorize
-                .requestMatchers("/greeter/**", "/csrf_token").permitAll()
-                .requestMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
-                .anyRequest().authenticated()
-        }.formLogin { login ->
-            login
-                .loginProcessingUrl("/login").permitAll()
-                .usernameParameter("email")
-                .passwordParameter("pass")
-                .successHandler(BookManagerAuthenticationSuccessHandler())
-                .failureHandler(BookManagerAuthenticationFailureHandler())
+        http.authorizeHttpRequests {
+            it.requestMatchers("/greeter/**", "/csrf_token").permitAll()
+            it.requestMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
+            it.anyRequest().authenticated()
+        }.formLogin {
+            it.loginProcessingUrl("/login").permitAll()
+            it.usernameParameter("email")
+            it.passwordParameter("pass")
+            it.successHandler(BookManagerAuthenticationSuccessHandler())
+            it.failureHandler(BookManagerAuthenticationFailureHandler())
         }.logout {
             it.logoutUrl("/logout")
             it.logoutSuccessHandler(HttpStatusReturningLogoutSuccessHandler())
             it.invalidateHttpSession(true)
             it.deleteCookies("SESSION")
-        }.exceptionHandling { ex ->
-            ex
-                .authenticationEntryPoint(BookManagerAuthenticationEntryPoint())
-                .accessDeniedHandler(BookManagerAccessDeniedHandler())
+        }.exceptionHandling {
+            it.authenticationEntryPoint(BookManagerAuthenticationEntryPoint())
+            it.accessDeniedHandler(BookManagerAccessDeniedHandler())
         }.csrf {
-        }.cors { cors ->
-            cors.configurationSource(corsConfigurationSource())
+        }.cors {
+            it.configurationSource(corsConfigurationSource())
         }
         return http.build()
     }

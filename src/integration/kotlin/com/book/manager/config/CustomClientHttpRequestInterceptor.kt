@@ -15,6 +15,7 @@ class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
 
     private var sessionId = ""
     private var csrfToken = ""
+    private var csrfHeader = ""
 
     // 認証エラーとならないようにセッションIDとCSRFトークンをリクエストにセットする
     override fun intercept(
@@ -29,8 +30,8 @@ class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
         }
 
         if (csrfToken != "") {
-            logger.info("Set Request Header X-CSRF-TOKEN: $csrfToken")
-            request.headers["X-CSRF-TOKEN"] = csrfToken
+            logger.info("Set Request Header $csrfHeader: $csrfToken")
+            request.headers[csrfHeader] = csrfToken
         }
 
         logger.info("Request: uri=${request.uri}, headers=${request.headers}, body=${String(body)}")
@@ -47,6 +48,10 @@ class CustomClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
         if (response.headers.containsKey("_csrf")) {
             logger.info("Extracted CSRF-TOKEN from response: ${response.headers["_csrf"]?.get(0)}")
             csrfToken = response.headers["_csrf"]?.get(0).toString()
+        }
+        if (response.headers.containsKey("_csrf_header")) {
+            logger.info("Extracted CSRF-HEADER from response: ${response.headers["_csrf_header"]?.get(0)}")
+            csrfHeader = response.headers["_csrf_header"]?.get(0).toString()
         }
         return response
     }
