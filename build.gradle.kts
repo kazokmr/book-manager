@@ -38,8 +38,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis:3.0.1")
     implementation("org.springframework.session:spring-session-data-redis:3.0.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1")
