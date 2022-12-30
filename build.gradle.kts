@@ -2,9 +2,9 @@ import com.google.protobuf.gradle.id
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.22"
-    kotlin("plugin.spring") version "1.7.22"
-    id("org.springframework.boot") version "3.0.0"
+    kotlin("jvm") version "1.8.0"
+    kotlin("plugin.spring") version "1.8.0"
+    id("org.springframework.boot") version "3.0.1"
     id("io.spring.dependency-management") version "1.1.0"
     id("com.thinkimi.gradle.MybatisGenerator") version "2.4"
     id("jacoco")
@@ -29,38 +29,31 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    // Spring Bootの現在のバージョンが依存しているsnakeyamlに脆弱性があったのでバージョンを上げる
-    set("snakeyaml.version", "1.33")
-}
-
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web:3.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-log4j2:3.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-security:3.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-aop:3.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-validation:3.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-web:3.0.1")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2:3.0.1")
+    implementation("org.springframework.boot:spring-boot-starter-security:3.0.1")
+    implementation("org.springframework.boot:spring-boot-starter-aop:3.0.1")
+    implementation("org.springframework.boot:spring-boot-starter-validation:3.0.1")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.0.1")
     implementation("org.springframework.session:spring-session-data-redis:3.0.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.22")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.22")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.1")
-    implementation("com.google.protobuf:protobuf-kotlin:3.21.9")
+    implementation("com.google.protobuf:protobuf-kotlin:3.21.12")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
     implementation("io.grpc:grpc-netty:1.51.0")
     implementation("io.grpc:grpc-protobuf:1.51.0")
-    implementation("io.github.lognet:grpc-spring-boot-starter:4.9.0")
+    implementation("io.github.lognet:grpc-spring-boot-starter:4.9.1")
     runtimeOnly("org.postgresql:postgresql:42.5.1")
-    testImplementation("org.springframework.boot:spring-boot-starter-test:3.0.0")
-    testImplementation("org.springframework.security:spring-security-test:6.0.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.0.1")
+    testImplementation("org.springframework.security:spring-security-test:6.0.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
-    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.0")
+    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.1")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
     testImplementation("org.dbunit:dbunit:2.7.3")
     testImplementation("org.testcontainers:testcontainers:1.17.6")
