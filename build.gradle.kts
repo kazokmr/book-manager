@@ -29,17 +29,23 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement{
+    imports{
+        mavenBom("org.testcontainers:testcontainers-bom:1.17.6")
+    }
+}
+
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web:3.0.2")
-    implementation("org.springframework.boot:spring-boot-starter-log4j2:3.0.2")
-    implementation("org.springframework.boot:spring-boot-starter-security:3.0.2")
-    implementation("org.springframework.boot:spring-boot-starter-aop:3.0.2")
-    implementation("org.springframework.boot:spring-boot-starter-validation:3.0.2")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.0.2")
-    implementation("org.springframework.session:spring-session-data-redis:3.0.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.session:spring-session-data-redis")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.1")
     implementation("com.google.protobuf:protobuf-kotlin:3.21.12")
@@ -47,18 +53,18 @@ dependencies {
     implementation("io.grpc:grpc-netty:1.52.1")
     implementation("io.grpc:grpc-protobuf:1.52.1")
     implementation("io.github.lognet:grpc-spring-boot-starter:5.0.0")
-    runtimeOnly("org.postgresql:postgresql:42.5.3")
-    testImplementation("org.springframework.boot:spring-boot-starter-test:3.0.2")
-    testImplementation("org.springframework.security:spring-security-test:6.0.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.assertj:assertj-core:3.24.2")
+    runtimeOnly("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.assertj:assertj-core")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.1")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
     testImplementation("org.dbunit:dbunit:2.7.3")
-    testImplementation("org.testcontainers:testcontainers:1.17.6")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
-    testImplementation("org.testcontainers:postgresql:1.17.6")
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
 }
 
 configurations {
