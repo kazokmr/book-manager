@@ -29,8 +29,8 @@ repositories {
     mavenCentral()
 }
 
-dependencyManagement{
-    imports{
+dependencyManagement {
+    imports {
         mavenBom("org.testcontainers:testcontainers-bom:1.17.6")
     }
 }
@@ -54,6 +54,7 @@ dependencies {
     implementation("io.github.lognet:grpc-spring-boot-starter:5.0.0")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.1")
