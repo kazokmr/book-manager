@@ -1,9 +1,9 @@
 package com.book.manager
 
+import com.book.manager.config.CustomExchangeFilterFunction
 import com.book.manager.config.CustomJsonConverter
 import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.config.CustomTestMapper
-import com.book.manager.config.IntegrationTestConfiguration
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
@@ -12,9 +12,9 @@ import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
-import org.assertj.core.api.Assertions.assertThat
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.SoftAssertions
-import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -25,29 +25,24 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
-import org.springframework.http.ResponseEntity
+import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.LinkedMultiValueMap
-import java.net.URI
+import org.springframework.web.reactive.function.BodyInserters
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Import(IntegrationTestConfiguration::class, CustomTestConfiguration::class, CustomTestMapper::class)
+@Import(CustomExchangeFilterFunction::class, CustomTestConfiguration::class, CustomTestMapper::class)
 internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @Autowired
-    private lateinit var builder: RestTemplateBuilder
+    private lateinit var exchangeFilter: CustomExchangeFilterFunction
 
     @Autowired
     private lateinit var jsonConverter: CustomJsonConverter
@@ -58,20 +53,17 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
     @LocalServerPort
     private var port: Int = 0
 
-    private lateinit var baseUri: String
-    private lateinit var restTemplate: TestRestTemplate
+    private lateinit var webClient: WebTestClient
 
     @BeforeEach
     internal fun setUp() {
         testMapper.initDefaultAccounts()
-        baseUri = "http://localhost:$port"
-        restTemplate = TestRestTemplate(builder)
-        restTemplate.getForEntity("$baseUri/csrf_token", String::class.java)
+        webClient = WebTestClient.bindToServer().filter(exchangeFilter).baseUrl("http://localhost:$port").build()
+        webClient.get().uri("/csrf_token").exchange()
     }
 
     @AfterEach
     internal fun tearDown() {
-        restTemplate.exchange(RequestEntity.post("$baseUri/logout").build(), Any::class.java)
         testMapper.clearAllData()
     }
 
@@ -114,14 +106,15 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @ParameterizedTest(name = "ログインテスト: User => {0}, Status => {2}")
     @MethodSource("users")
+    @DisplayName("ログイン認証テスト")
     fun `login when user is exist then login`(user: String, pass: String, expectedStatus: HttpStatus) {
 
         // Given
         // When
-        val response = restTemplate.login(user, pass)
+        val response = webClient.login(user, pass)
 
         // Then
-        assertThat(response.statusCode).isEqualTo(expectedStatus)
+        response.expectStatus().isEqualTo(expectedStatus)
     }
 
     @Test
@@ -158,16 +151,20 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
         val user = "admin@example.com"
         val pass = "admin"
-        restTemplate.login(user, pass)
+        webClient.login(user, pass)
 
         // When
-        val response = restTemplate.getForEntity("$baseUri/book/list", String::class.java)
+        val response = webClient.get()
+            .uri("/book/list")
+            .exchange()
+            .expectBody(String::class.java)
+            .returnResult()
 
         // Then
-        val result = jsonConverter.toObject(response.body, GetBookListResponse::class.java)
+        val result = jsonConverter.toObject(response.responseBody, GetBookListResponse::class.java)
         val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
         SoftAssertions().apply {
-            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.status).isEqualTo(HttpStatus.OK)
             assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
             assertThat(result?.bookList).`as`("登録していない書籍は含まれていないこと").doesNotContain(bookInfoNone)
         }.assertAll()
@@ -175,6 +172,7 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @ParameterizedTest(name = "書籍を登録する: user => {0}, registeredStatus => {3}, getStatus => {5}")
     @MethodSource("dataOfRegister")
+    @DisplayName("書籍を登録する")
     fun `when book is register then get this`(
         user: String,
         pass: String,
@@ -185,46 +183,49 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         expectedBookDetail: GetBookDetailResponse?
     ) {
         // Given
-        restTemplate.login(user, pass)
+        webClient.login(user, pass)
 
         // When
-        val httpHeaders = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val jsonObject = JSONObject().apply {
-            put("id", book.id)
-            put("title", book.title)
-            put("author", book.author)
-            put("release_date", book.releaseDate.format(DateTimeFormatter.ISO_DATE))
-        }
+        val jsonObject = jacksonObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(book)
 
-        val postRequest = HttpEntity<String>(jsonObject.toString(), httpHeaders)
-        val postResponse = restTemplate.postForEntity("$baseUri/admin/book/register", postRequest, String::class.java)
-        val registeredBook = jsonConverter.toObject(postResponse.body, AdminBookResponse::class.java)
+        val postResponse = webClient
+            .post()
+            .uri("/admin/book/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(jsonObject)
+            .exchange()
+            .expectBody<String>()
+            .returnResult()
+        val registeredBook = jsonConverter.toObject(postResponse.responseBody, AdminBookResponse::class.java)
 
         // Then
-        val response = restTemplate.getForEntity("$baseUri/book/detail/${book.id}", String::class.java)
-        val result = jsonConverter.toObject(response.body, GetBookDetailResponse::class.java)
+        val response = webClient.get().uri("/book/detail/${book.id}")
+            .exchange()
+            .expectBody<String>()
+            .returnResult()
+        val result = jsonConverter.toObject(response.responseBody, GetBookDetailResponse::class.java)
 
         SoftAssertions().apply {
-            assertThat(postResponse.statusCode).isEqualTo(postStatus)
+            assertThat(postResponse.status).isEqualTo(postStatus)
             assertThat(registeredBook).isEqualTo(expectedRegisteredBook)
-            assertThat(response.statusCode).isEqualTo(getStatus)
+            assertThat(response.status).isEqualTo(getStatus)
             assertThat(result).isEqualTo(expectedBookDetail)
         }.assertAll()
     }
 
-    fun TestRestTemplate.login(user: String, pass: String): ResponseEntity<String> {
+    fun WebTestClient.login(user: String, pass: String): WebTestClient.ResponseSpec {
 
         val loginForm = LinkedMultiValueMap<String, String>().apply {
             add("email", user)
             add("pass", pass)
         }
 
-        val request = RequestEntity
-            .post(URI.create("$baseUri/login"))
+        return webClient
+            .post()
+            .uri("/login")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .accept(MediaType.TEXT_HTML)
-            .body(loginForm)
-
-        return restTemplate.exchange(request, String::class.java)
+            .body(BodyInserters.fromFormData(loginForm))
+            .exchange()
     }
 }
