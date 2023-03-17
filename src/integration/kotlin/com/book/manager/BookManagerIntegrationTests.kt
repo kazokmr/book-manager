@@ -12,7 +12,7 @@ import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
-import com.fasterxml.jackson.databind.ObjectMapper
+import org.assertj.core.api.Assertions.*
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -28,6 +28,7 @@ import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.LinkedMultiValueMap
@@ -58,7 +59,14 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
     @BeforeEach
     internal fun setUp() {
         testMapper.initDefaultAccounts()
-        webClient = WebTestClient.bindToServer().filter(exchangeFilter).baseUrl("http://localhost:$port").build()
+        webClient = WebTestClient
+            .bindToServer()
+            .baseUrl("http://localhost:$port")
+            .filter(exchangeFilter)
+            .codecs {
+                it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(jsonConverter.objectMapper()))
+            }
+            .build()
         webClient.get().uri("/csrf_token").exchange()
     }
 
@@ -111,10 +119,10 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
         // Given
         // When
-        val response = webClient.login(user, pass)
+        val response = webClient.login(user, pass).expectBody<String>().returnResult()
 
         // Then
-        response.expectStatus().isEqualTo(expectedStatus)
+        assertThat(response.status).isEqualTo(expectedStatus)
     }
 
     @Test
@@ -154,19 +162,19 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         webClient.login(user, pass)
 
         // When
-        val response = webClient.get()
+        val response = webClient
+            .get()
             .uri("/book/list")
             .exchange()
-            .expectBody(String::class.java)
+            .expectBody<GetBookListResponse>()
             .returnResult()
 
         // Then
-        val result = jsonConverter.toObject(response.responseBody, GetBookListResponse::class.java)
         val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
         SoftAssertions().apply {
             assertThat(response.status).isEqualTo(HttpStatus.OK)
-            assertThat(result?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
-            assertThat(result?.bookList).`as`("登録していない書籍は含まれていないこと").doesNotContain(bookInfoNone)
+            assertThat(response.responseBody?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
+            assertThat(response.responseBody?.bookList).`as`("登録していない書籍は含まれていないこと").doesNotContain(bookInfoNone)
         }.assertAll()
     }
 
@@ -186,7 +194,7 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         webClient.login(user, pass)
 
         // When
-        val objectMapper = ObjectMapper()
+        val objectMapper = jsonConverter.objectMapper()
         val jsonObject = objectMapper.createObjectNode().apply {
             put("id", book.id)
             put("title", book.title)
@@ -200,21 +208,25 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(jsonObject)
             .exchange()
-            .expectBody<String>()
+            .expectBody<AdminBookResponse>()
             .returnResult()
-        val registeredBook = jsonConverter.toObject(postResponse.responseBody, AdminBookResponse::class.java)
 
         // Then
-        val response = webClient.get().uri("/book/detail/${book.id}")
+        val getResponse = webClient
+            .get()
+            .uri("/book/detail/${book.id}")
             .exchange()
             .expectBody<String>()
             .returnResult()
-        val result = jsonConverter.toObject(response.responseBody, GetBookDetailResponse::class.java)
+
+        // 登録できないケースではGetBookDetailResponseのプロパティがNon-Nullのため `expectBody<GetBookDetailResponse>()` で変換すると例外が発生する、
+        // このため専用の変換処理を使ってNullを返すようにしている
+        val result = jsonConverter.toObject(getResponse.responseBody, GetBookDetailResponse::class.java)
 
         SoftAssertions().apply {
             assertThat(postResponse.status).isEqualTo(postStatus)
-            assertThat(registeredBook).isEqualTo(expectedRegisteredBook)
-            assertThat(response.status).isEqualTo(getStatus)
+            assertThat(postResponse.responseBody).isEqualTo(expectedRegisteredBook)
+            assertThat(getResponse.status).isEqualTo(getStatus)
             assertThat(result).isEqualTo(expectedBookDetail)
         }.assertAll()
     }

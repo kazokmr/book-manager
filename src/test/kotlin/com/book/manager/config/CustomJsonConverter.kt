@@ -20,7 +20,7 @@ class CustomJsonConverter {
 
     fun <T> toJson(obj: T): String = objectMapper().writeValueAsString(obj)
 
-    private fun objectMapper() = ObjectMapper().apply {
+    fun objectMapper() = ObjectMapper().apply {
         registerKotlinModule()
         registerModule(JavaTimeModule())
         propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
