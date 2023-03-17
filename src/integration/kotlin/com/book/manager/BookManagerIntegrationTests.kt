@@ -12,8 +12,7 @@ import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -35,6 +34,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -186,7 +186,13 @@ internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
         webClient.login(user, pass)
 
         // When
-        val jsonObject = jacksonObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(book)
+        val objectMapper = ObjectMapper()
+        val jsonObject = objectMapper.createObjectNode().apply {
+            put("id", book.id)
+            put("title", book.title)
+            put("author", book.author)
+            put("release_date", book.releaseDate.format(DateTimeFormatter.ISO_DATE))
+        }.let { objectMapper.writeValueAsString(it) }
 
         val postResponse = webClient
             .post()
