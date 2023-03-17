@@ -4,6 +4,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 
@@ -11,21 +12,21 @@ import org.testcontainers.utility.DockerImageName
 abstract class TestContainerDataRegistry {
 
     companion object {
+        @Container
         @JvmStatic
-        val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:14-alpine")).apply {
+        val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:latest")).apply {
             withDatabaseName("test")
             withUsername("user")
             withPassword("pass")
             withEnv("POSTGRES_INITDB_ARGS", "--encoding=UTF-8 --no-locale")
             withEnv("TZ", "Asia/Tokyo")
             withInitScript("initdb/schema.sql")
-            start()
         }
 
+        @Container
         @JvmStatic
-        val redis: GenericContainer<*> = GenericContainer<Nothing>(DockerImageName.parse("redis:7-alpine")).apply {
+        val redis: GenericContainer<*> = GenericContainer<Nothing>(DockerImageName.parse("redis:latest")).apply {
             withExposedPorts(6379)
-            start()
         }
 
         @DynamicPropertySource
