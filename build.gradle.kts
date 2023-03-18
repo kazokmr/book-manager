@@ -25,6 +25,19 @@ jacoco {
     toolVersion = "0.8.8"
 }
 
+sourceSets {
+    create("intTest") {
+        compileClasspath += main.get().output + test.get().output
+        runtimeClasspath += main.get().output + test.get().output
+    }
+}
+
+val intTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+configurations["intTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
+
 repositories {
     mavenCentral()
 }
@@ -47,14 +60,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.1")
-    implementation("com.google.protobuf:protobuf-kotlin:3.22.0")
+    implementation("com.google.protobuf:protobuf-kotlin:3.22.2")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
     implementation("io.grpc:grpc-netty:1.53.0")
     implementation("io.grpc:grpc-protobuf:1.53.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:5.0.0")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.1")
@@ -63,6 +75,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    intTestImplementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 configurations {
@@ -98,28 +111,11 @@ tasks.withType<JacocoReport> {
     }
 }
 
-val itTestName = "integration"
-
-sourceSets {
-    create(itTestName) {
-        compileClasspath += main.get().output + test.get().output
-        runtimeClasspath += main.get().output + test.get().output
-    }
-}
-
-configurations {
-    getByName("${itTestName}RuntimeOnly").extendsFrom(configurations.testRuntimeOnly.get())
-}
-
-val integrationImplementation: Configuration by configurations.getting {
-    extendsFrom(configurations.testImplementation.get())
-}
-
-val integrationTest = task<Test>("${itTestName}Test") {
+val integrationTest = task<Test>("integrationTest") {
     description = "Runs integration tests."
     group = "verification"
-    testClassesDirs = sourceSets.getByName(itTestName).output.classesDirs
-    classpath = sourceSets.getByName(itTestName).runtimeClasspath
+    testClassesDirs = sourceSets["intTest"].output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
     shouldRunAfter("test")
 }
 
