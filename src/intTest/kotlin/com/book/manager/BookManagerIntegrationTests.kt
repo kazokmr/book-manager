@@ -2,8 +2,8 @@ package com.book.manager
 
 import com.book.manager.config.CustomExchangeFilterFunction
 import com.book.manager.config.CustomJsonConverter
-import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.config.CustomTestMapper
+import com.book.manager.config.IntegrationTestConfiguration
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
@@ -39,7 +39,7 @@ import java.time.format.DateTimeFormatter
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Import(CustomExchangeFilterFunction::class, CustomTestConfiguration::class, CustomTestMapper::class)
+@Import(IntegrationTestConfiguration::class)
 internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
 
     @Autowired
