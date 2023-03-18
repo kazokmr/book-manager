@@ -7,5 +7,11 @@ import org.springframework.context.annotation.Bean
 class IntegrationTestConfiguration {
 
     @Bean
-    fun customRestTemplateCustomizer(): CustomRestTemplateCustomizer = CustomRestTemplateCustomizer()
+    fun exchangeFilter(): CustomExchangeFilterFunction = CustomExchangeFilterFunction()
+
+    @Bean
+    fun testMapper(): CustomTestMapper = CustomTestMapper()
+
+    @Bean
+    fun jsonConverter(): CustomJsonConverter = CustomJsonConverter()
 }
