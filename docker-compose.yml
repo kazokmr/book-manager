@@ -28,6 +28,7 @@ services:
       dockerfile: ./docker/backend/Dockerfile
     ports:
       - "8080:8080"
+      - "8081:8081"
     depends_on:
       - db
       - redis
