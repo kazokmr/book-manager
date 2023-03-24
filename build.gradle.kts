@@ -72,6 +72,7 @@ dependencies {
     implementation("io.grpc:grpc-protobuf:1.53.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:5.0.0")
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
