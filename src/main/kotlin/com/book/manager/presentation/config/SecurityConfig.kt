@@ -28,7 +28,7 @@ class SecurityConfig {
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
         http.authorizeHttpRequests {
-            it.requestMatchers("/greeter/**", "/csrf_token").permitAll()
+            it.requestMatchers("/greeter/**", "/csrf_token", "/actuator/**").permitAll()
             it.requestMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
             it.anyRequest().authenticated()
         }.formLogin {
