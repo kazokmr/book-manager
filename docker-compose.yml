@@ -21,6 +21,18 @@ services:
     container_name: redis
     volumes:
       - redis_data:/data
+
+  backend:
+    build:
+      context: ./
+      dockerfile: ./docker/backend/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+    container_name: backend
+
 volumes:
   postgresql_data:
   redis_data:
