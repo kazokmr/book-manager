@@ -2,16 +2,27 @@ services:
   prometheus:
     image: prom/prometheus
     container_name: prometheus
-    ports:
-      - "9090:9090"
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+  tempo:
+    image: grafana/tempo
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yml" ]
+    volumes:
+      - ./config/tempo.yml:/etc/tempo.yml
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"   # tempo
+      - "9411:9411"   # zipkin
   grafana:
     image: grafana/grafana
     container_name: grafana
-    ports:
-      - "3000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
+    ports:
+      - "3000:3000"
 volumes:
   grafana-storage:
+  tempo-data:
