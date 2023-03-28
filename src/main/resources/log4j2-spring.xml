@@ -2,14 +2,15 @@
 <configuration>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="${spring:logging.pattern.console}"/>
-        </Console>
-        <!-- logファイルへ出力する場合は以下を有効にする -->
-        <RollingFile name="RollingFile"
-                     fileName="./logs/spring-boot-logger-log4j2.log"
-                     filePattern="./logs/$${date:yyyy-MM}/spring-boot-log4j2-%d{-dd-MMMM-yyyy}-%i.log.gz">
             <PatternLayout>
-                <pattern>%d{ISO8601_OFFSET_DATE_TIME_HHCMM} %-5level[${spring:spring.application.name},%X{traceId},%X{spanId}] [%t] %C: %m%n</pattern>
+                <pattern>${sys:CONSOLE_LOG_PATTERN}</pattern>
+            </PatternLayout>
+        </Console>
+        <RollingFile name="RollingFile"
+                     fileName="./logs/app.log"
+                     filePattern="./logs/$${date:yyyy-MM}/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <pattern>${sys:FILE_LOG_PATTERN}</pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10 MB"/>

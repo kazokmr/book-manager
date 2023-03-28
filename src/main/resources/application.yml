@@ -16,7 +16,9 @@ logging:
   level:
     root: info
   pattern:
-    console: "%d{ISO8601_OFFSET_DATE_TIME_HHCMM} %highlight{%-5level}[${spring.application.name:},%X{traceId},%X{spanId}] [%style{%t}{bright,blue}] %style{%C}{bright,yellow}: %m%n"
+    console: "%d{ISO8601_OFFSET_DATE_TIME_HHCMM} %highlight{${logging.pattern.level}} [%style{%t}{bright,blue}] %style{%C}{bright,yellow}: %m%n"
+    file: "%d{ISO8601_OFFSET_DATE_TIME_HHCMM} ${logging.pattern.level} [%t] %C: %m%n"
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 server:
   error:
     include-message: always
