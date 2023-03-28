@@ -10,9 +10,13 @@ spring:
       port: 6379
   jackson:
     property-naming-strategy: SNAKE_CASE
+  application:
+    name: "book-manager"
 logging:
   level:
     root: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level}[${spring.application.name:},%X{traceId},%X{spanId}] [%style{%t}{bright,blue}] %style{%C}{bright,yellow}: %m%n"
 server:
   error:
     include-message: always
