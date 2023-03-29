@@ -16,9 +16,13 @@ logging:
   level:
     root: info
   pattern:
-    console: "%d{ISO8601_OFFSET_DATE_TIME_HHCMM} %highlight{${logging.pattern.level}} [%style{%t}{bright,blue}] %style{%C}{bright,yellow}: %m%n"
-    file: "%d{ISO8601_OFFSET_DATE_TIME_HHCMM} ${logging.pattern.level} [%t] %C: %m%n"
+    console: "%d{${logging.pattern.dateformat}} %highlight{${logging.pattern.level}} [%style{%t}{bright,blue}] %style{%C}{bright,yellow}: %m%n"
+    file: "%d{${logging.pattern.dateformat}} ${logging.pattern.level} [%t] %C: %m%n"
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+    dateformat: yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+  file:
+    path: ./logs
+    name: app.log
 server:
   error:
     include-message: always

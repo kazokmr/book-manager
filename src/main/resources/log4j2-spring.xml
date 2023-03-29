@@ -7,8 +7,8 @@
             </PatternLayout>
         </Console>
         <RollingFile name="RollingFile"
-                     fileName="./logs/app.log"
-                     filePattern="./logs/$${date:yyyy-MM}/app-%d{yyyy-MM-dd}-%i.log.gz">
+                     fileName="${sys:LOG_PATH}/${sys:LOG_FILE}"
+                     filePattern="${sys:LOG_PATH}/$${date:yyyy-MM}/${sys:LOG_FILE}-%d{yyyy-MM-dd}-%i.gz">
             <PatternLayout>
                 <pattern>${sys:FILE_LOG_PATTERN}</pattern>
             </PatternLayout>
