@@ -37,5 +37,8 @@ out/
 .vscode/
 
 ### logs
-/logs/**/*.log
-/logs/**/*.gz
+*.log
+*.gz
+
+### env
+.env

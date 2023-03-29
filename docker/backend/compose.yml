@@ -5,37 +5,55 @@ services:
       dockerfile: ./docker/backend/app/Dockerfile
     container_name: backend
     hostname: backend.app
+    environment:
+      TZ: Asia/Tokyo
+    volumes:
+      - app-logs:/app/logs
+    networks:
+      - app
+      - db_external
+      - redis_external
+      - datasources_external  # otel-exporter-zipkin で Tempoにアクセスするため
     ports:
       - "8080:8080"
       - "8081:8081"
-    depends_on:
-      - db
-      - redis
-
-  db:
-    build:
-      context: ../../
-      dockerfile: ./docker/backend/postgresql/Dockerfile
-    container_name: db_postgresql
-    hostname: backend.db
-    ports:
-      - "5432:5432"
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    command: [ "-config.file=/etc/promtail.yml" ]
     environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --no-locale"
       TZ: Asia/Tokyo
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis
-    container_name: redis
-    hostname: backend.redis
+      - ./config/promtail.yml:/etc/promtail.yml
+      - app-logs:/var/logs
+    networks:
+      - agent
+      - app
+      - datasources_external
     ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
+      - "9080:9080"
 volumes:
-  postgresql_data:
-  redis_data:
+  app-logs:
+    driver: local
+networks:
+  # アプリのネットワーク。ホストから http:localhost:8080 にアクセスするため公開
+  app:
+    driver: bridge
+    internal: false
+    name: app_network
+  # DBとRedisのネットワーク
+  db_external:
+    external: true
+    name: db_network
+  redis_external:
+    external: true
+    name: redis_network
+  # Grafana Agent のネットワーク
+  agent:
+    driver: bridge
+    internal: true
+    name: agent_network
+  # GrafanaのDataSourceネットワークに接続定義
+  datasources_external:
+    external: true
+    name: datasources_network
