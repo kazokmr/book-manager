@@ -2,8 +2,6 @@ package com.book.manager.presentation.aop
 
 import com.book.manager.application.service.security.BookManagerUserDetails
 import com.book.manager.presentation.controller.CsrfTokenController
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.After
@@ -12,13 +10,14 @@ import org.aspectj.lang.annotation.AfterThrowing
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
+import org.slf4j.LoggerFactory
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
-//private val logger = LoggerFactory.getLogger(LoggingAdvice::class.java)
-private val logger: Logger = LogManager.getLogger(LoggingAdvice::class.java)
+private val logger: org.slf4j.Logger = LoggerFactory.getLogger(LoggingAdvice::class.java)
+//private val logger: Logger = LogManager.getLogger(LoggingAdvice::class.java)
 
 @Aspect
 @Component

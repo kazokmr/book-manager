@@ -1,0 +1,40 @@
+services:
+  db:
+    build:
+      context: ../../
+      dockerfile: ./docker/database/postgresql/Dockerfile
+    container_name: db_postgresql
+    hostname: backend.db
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --no-locale"
+      TZ: Asia/Tokyo
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    networks:
+      - db
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis
+    container_name: redis
+    hostname: backend.redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - redis
+    ports:
+      - "6379:6379"
+volumes:
+  postgresql_data:
+  redis_data:
+networks:
+  # DBとRedisのネットワーク。アプリからアクセスする
+  db:
+    driver: bridge
+    internal: false
+    name: db_network
+  redis:
+    driver: bridge
+    internal: false
+    name: redis_network

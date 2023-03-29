@@ -1,0 +1,59 @@
+services:
+  backend:
+    build:
+      context: ../../
+      dockerfile: ./docker/backend/app/Dockerfile
+    container_name: backend
+    hostname: backend.app
+    environment:
+      TZ: Asia/Tokyo
+    volumes:
+      - app-logs:/app/logs
+    networks:
+      - app
+      - db_external
+      - redis_external
+      - datasources_external  # otel-exporter-zipkin で Tempoにアクセスするため
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    command: [ "-config.file=/etc/promtail.yml" ]
+    environment:
+      TZ: Asia/Tokyo
+    volumes:
+      - ./config/promtail.yml:/etc/promtail.yml
+      - app-logs:/var/logs
+    networks:
+      - agent
+      - app
+      - datasources_external
+    ports:
+      - "9080:9080"
+volumes:
+  app-logs:
+    driver: local
+networks:
+  # アプリのネットワーク。ホストから http:localhost:8080 にアクセスするため公開
+  app:
+    driver: bridge
+    internal: false
+    name: app_network
+  # DBとRedisのネットワーク
+  db_external:
+    external: true
+    name: db_network
+  redis_external:
+    external: true
+    name: redis_network
+  # Grafana Agent のネットワーク
+  agent:
+    driver: bridge
+    internal: true
+    name: agent_network
+  # GrafanaのDataSourceネットワークに接続定義
+  datasources_external:
+    external: true
+    name: datasources_network

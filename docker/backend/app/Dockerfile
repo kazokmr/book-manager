@@ -8,4 +8,5 @@ FROM openjdk:19-slim-bullseye
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build /app/build/libs/book-manager-0.0.1-SNAPSHOT.jar /app/book-manager.jar
+ENV TZ="Asia/Tokyo"
 ENTRYPOINT ["java", "-jar", "/app/book-manager.jar", "--spring.profiles.active=docker"]

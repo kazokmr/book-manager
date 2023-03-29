@@ -2,27 +2,26 @@
 <configuration>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout
-                    pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level}[%style{%t}{bright,blue}] %style{%C}{bright,yellow}: %m%n"/>
-        </Console>
-        <!-- logファイルへ出力する場合は以下を有効にする -->
-        <!--<RollingFile name="RollingFile"
-                     fileName="./logs/spring-boot-logger-log4j2.log"
-                     filePattern="./logs/$${date:yyyy-MM}/spring-boot-log4j2-%d{-dd-MMMM-yyyy}-%i.log.gz">
             <PatternLayout>
-                <pattern>%d %p %C [%t] %m%n</pattern>
+                <pattern>${sys:CONSOLE_LOG_PATTERN}</pattern>
+            </PatternLayout>
+        </Console>
+        <RollingFile name="RollingFile"
+                     fileName="${sys:LOG_PATH}/${sys:LOG_FILE}"
+                     filePattern="${sys:LOG_PATH}/$${date:yyyy-MM}/${sys:LOG_FILE}-%d{yyyy-MM-dd}-%i.gz">
+            <PatternLayout>
+                <pattern>${sys:FILE_LOG_PATTERN}</pattern>
             </PatternLayout>
             <Policies>
-                <OnStartupTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="10 MB"/>
                 <TimeBasedTriggeringPolicy/>
             </Policies>
-        </RollingFile>-->
+        </RollingFile>
     </Appenders>
     <Loggers>
-        <Root level="info">
+        <Root level="${spring:logging.level.root}">
             <AppenderRef ref="Console"/>
-            <!--            <AppenderRef ref="RollingFile"/>-->
+            <AppenderRef ref="RollingFile"/>
         </Root>
         <!-- 例) com.book.manager パッケージ以下で、traceレベルのログを出力するときは以下を有効にする -->
         <!--        <Logger name="com.book.manager" level="trace"/>-->

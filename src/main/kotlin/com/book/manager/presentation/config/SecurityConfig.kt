@@ -5,6 +5,7 @@ import com.book.manager.presentation.handler.BookManagerAccessDeniedHandler
 import com.book.manager.presentation.handler.BookManagerAuthenticationEntryPoint
 import com.book.manager.presentation.handler.BookManagerAuthenticationFailureHandler
 import com.book.manager.presentation.handler.BookManagerAuthenticationSuccessHandler
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -30,6 +31,7 @@ class SecurityConfig {
         http.authorizeHttpRequests {
             it.requestMatchers("/greeter/**", "/csrf_token").permitAll()
             it.requestMatchers("/admin/**").hasAuthority(RoleType.ADMIN.toString())
+            it.requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
             it.anyRequest().authenticated()
         }.formLogin {
             it.loginProcessingUrl("/login").permitAll()
