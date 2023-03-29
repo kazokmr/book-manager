@@ -1,7 +1,7 @@
 package com.book.manager.config
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ClientResponse
@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.ExchangeFunction
 import reactor.core.publisher.Mono
 
-private val logger: Logger = LogManager.getLogger(CustomExchangeFilterFunction::class)
+private val logger: Logger = LoggerFactory.getLogger(CustomExchangeFilterFunction::class.java)
 
 class CustomExchangeFilterFunction : ExchangeFilterFunction {
 
