@@ -18,7 +18,7 @@ logging:
   pattern:
     console: "%d{${logging.pattern.dateformat}} %highlight{${logging.pattern.level}} [%style{%t}{bright,blue}] %style{%C}{bright,yellow}: %m%n"
     file: "%d{${logging.pattern.dateformat}} ${logging.pattern.level} [%t] %C: %m%n"
-    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+    level: "%5p [${spring.application.name:},%X{traceId},%X{spanId}]"
     dateformat: yyyy-MM-dd'T'HH:mm:ss.SSSXXX
   file:
     path: ./logs
