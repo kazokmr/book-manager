@@ -11,11 +11,13 @@ import com.book.manager.infrastructure.database.mapper.insert
 import com.book.manager.infrastructure.database.mapper.select
 import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
 import com.book.manager.infrastructure.database.mapper.updateByPrimaryKeySelective
+import io.micrometer.observation.annotation.Observed
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
 import com.book.manager.infrastructure.database.record.Book as RecordBook
 import com.book.manager.infrastructure.database.record.BookWithRental as RecordBookWithRental
 
+@Observed
 @Repository
 class BookRepositoryImpl(
     private val bookWithRentalMapper: BookWithRentalMapper,

@@ -4,12 +4,14 @@ import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.domain.repository.BookRepository
 import com.book.manager.domain.repository.RentalRepository
+import io.micrometer.observation.annotation.Observed
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 private const val RENTAL_TERM_DAYS = 14L
 
+@Observed
 @Service
 class RentalService(
     private val accountRepository: AccountRepository,

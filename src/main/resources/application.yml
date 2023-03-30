@@ -35,6 +35,8 @@ management:
         include:
           - health
           - prometheus
+          - info
+          - metrics
   endpoint:
     health:
       show-details: always

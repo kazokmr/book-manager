@@ -5,6 +5,7 @@ import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
+import io.micrometer.observation.annotation.Observed
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
+@Observed
 @RestController
 @RequestMapping("admin/book")
 @CrossOrigin

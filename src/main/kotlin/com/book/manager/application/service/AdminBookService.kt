@@ -2,10 +2,12 @@ package com.book.manager.application.service
 
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.repository.BookRepository
+import io.micrometer.observation.annotation.Observed
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
+@Observed
 @Service
 class AdminBookService(private val bookRepository: BookRepository) {
 

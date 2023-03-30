@@ -4,6 +4,7 @@ import com.book.manager.application.service.RentalService
 import com.book.manager.application.service.security.BookManagerUserDetails
 import com.book.manager.presentation.form.RentalStartRequest
 import com.book.manager.presentation.form.RentalStartResponse
+import io.micrometer.observation.annotation.Observed
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
+@Observed
 @RestController
 @RequestMapping("rental")
 @CrossOrigin
