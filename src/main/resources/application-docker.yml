@@ -35,6 +35,8 @@ management:
         include:
           - health
           - prometheus
+          - info
+          - metrics
   endpoint:
     health:
       show-details: always
@@ -44,3 +46,11 @@ management:
   zipkin:
     tracing:
       endpoint: http://tempo:9411
+  metrics:
+    tags:
+      application: book-manger
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
