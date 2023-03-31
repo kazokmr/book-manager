@@ -1,5 +1,5 @@
 services:
-  backend:
+  app:
     build:
       context: ../../
       dockerfile: ./docker/backend/app/Dockerfile

@@ -48,7 +48,7 @@ management:
       endpoint: http://tempo:9411
   metrics:
     tags:
-      application: book-manger
+      application: app
     distribution:
       percentiles-histogram:
         http:
