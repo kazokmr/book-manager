@@ -2,10 +2,13 @@ services:
   prometheus:
     image: prom/prometheus
     container_name: prometheus
+    command:
+      - --enable-feature=exemplar-storage
+      - --config.file=/etc/prometheus/prometheus.yml
     environment:
       TZ: Asia/Tokyo
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
       - datasource
     ports:
@@ -17,7 +20,7 @@ services:
     environment:
       TZ: Asia/Tokyo
     volumes:
-      - ./config/tempo.yml:/etc/tempo.yml
+      - ./config/tempo.yml:/etc/tempo.yml:ro
       - tempo-data:/tmp/tempo
     networks:
       - datasource
@@ -31,7 +34,7 @@ services:
     environment:
       TZ: Asia/Tokyo
     volumes:
-      - ./config/loki-config.yml:/etc/config/loki-config.yml
+      - ./config/loki-config.yml:/etc/config/loki-config.yml:ro
     networks:
       - datasource
     ports:
@@ -43,6 +46,7 @@ services:
       TZ: Asia/Tokyo
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
     networks:
       - grafana
       - datasource

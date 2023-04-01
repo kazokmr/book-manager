@@ -1,16 +1,24 @@
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
+  log_level: "info"
 
 positions:
   filename: /tmp/positions.yml
 
 clients:
-  - url: http://loki:3100/loki/api/v1/push
+  - url: http://host.docker.internal:3100/loki/api/v1/push
 
 scrape_configs:
   - job_name: app
     pipeline_stages:
+      - regex:
+          expression: "^(?P<timestamp>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}\\+\\d{2}:\\d{2})\\s+(?P<level>\\w+)\\s+\\[(?P<app>[\\w-]+),(?P<trace_id>[\\w-]*),(?P<span_id>[\\w-]*)\\]\\s+\\[(?P<thread>[\\w-]+)\\]\\s+(?P<classname>[\\w.-]*):\\s+(?P<message>.*)$"
+      - labels:
+          level:
+          app:
+          trace_id:
+          span_id:
     static_configs:
       - targets:
           - localhost

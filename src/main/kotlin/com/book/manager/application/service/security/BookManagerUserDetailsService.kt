@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.node.MissingNode
+import io.micrometer.observation.annotation.Observed
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.userdetails.UserDetails
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service
 import java.io.Serial
 
 @Service
+@Observed
 class BookManagerUserDetailsService(private val authenticationService: AuthenticationService) : UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails =

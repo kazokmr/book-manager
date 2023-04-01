@@ -15,7 +15,7 @@ class CustomExchangeFilterFunction : ExchangeFilterFunction {
 
     private var sessionId = ""
     private var csrfToken = ""
-    private var csrfHeader = ""
+    private var csrfHeader = "X-CSRF-TOKEN"
 
     override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
 

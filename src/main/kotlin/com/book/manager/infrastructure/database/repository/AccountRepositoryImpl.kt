@@ -6,9 +6,11 @@ import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport
 import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.selectByPrimaryKey
 import com.book.manager.infrastructure.database.mapper.selectOne
+import io.micrometer.observation.annotation.Observed
 import org.springframework.stereotype.Repository
 import com.book.manager.infrastructure.database.record.Account as RecordAccount
 
+@Observed
 @Repository
 class AccountRepositoryImpl(private val mapper: AccountMapper) : AccountRepository {
 
