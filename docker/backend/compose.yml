@@ -13,7 +13,7 @@ services:
       - app
       - db_external
       - redis_external
-#      - datasources_external  # otel-exporter-zipkin で Tempoにアクセスするため
+    #      - datasources_external  # otel-exporter-zipkin で Tempoにアクセスするため
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -31,9 +31,11 @@ services:
     networks:
       - agent
       - app
+      - db_external
+      - redis_external
       - datasources_external
     ports:
-      - "9080:9080"
+      - "12345:12345"
       - "9411"     # zipkin receiver for Backend
 #  promtail:
 #    image: grafana/promtail
