@@ -13,18 +13,20 @@ services:
       - app
       - db_external
       - redis_external
-      - datasources_external  # otel-exporter-zipkin で Tempoにアクセスするため
+#      - datasources_external  # otel-exporter-zipkin で Tempoにアクセスするため
     ports:
       - "8080:8080"
       - "8081:8081"
-  promtail:
-    image: grafana/promtail
-    container_name: promtail
-    command: [ "-config.file=/etc/promtail.yml" ]
+  grafana-agent:
+    image: grafana/agent
+    container_name: grafana-agent
+    command:
+      - --config.file=/etc/agent/agent.yml
     environment:
       TZ: Asia/Tokyo
     volumes:
-      - ./config/promtail.yml:/etc/promtail.yml:ro
+      - ./agent/agent.yml:/etc/agent/agent.yml:lo
+      - agent-store:/etc/agent/data
       - app-logs:/var/logs
     networks:
       - agent
@@ -32,9 +34,26 @@ services:
       - datasources_external
     ports:
       - "9080:9080"
+      - "9411"     # zipkin receiver for Backend
+#  promtail:
+#    image: grafana/promtail
+#    container_name: promtail
+#    command: [ "-config.file=/etc/promtail.yml" ]
+#    environment:
+#      TZ: Asia/Tokyo
+#    volumes:
+#      - ./config/promtail.yml:/etc/promtail.yml:ro
+#      - app-logs:/var/logs
+#    networks:
+#      - agent
+#      - app
+#      - datasources_external
+#    ports:
+#      - "9080:9080"
 volumes:
   app-logs:
     driver: local
+  agent-store:
 networks:
   # アプリのネットワーク。ホストから http:localhost:8080 にアクセスするため公開
   app:

@@ -1,9 +1,9 @@
 server:
   http_listen_port: 3200
 
-distributor:
-  receivers:
-    zipkin:
+#distributor:
+#  receivers:
+#    zipkin:
 
 storage:
   trace:

@@ -45,7 +45,8 @@ management:
       probability: 1.0
   zipkin:
     tracing:
-      endpoint: http://tempo:9411
+      #      endpoint: http://tempo:9411
+      endpoint: http://grafana-agent:9411
   metrics:
     tags:
       application: app
