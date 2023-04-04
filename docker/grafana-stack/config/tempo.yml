@@ -1,8 +1,11 @@
 server:
   http_listen_port: 3200
 
-#distributor:
-#  receivers:
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
 #    zipkin:
 
 storage:
