@@ -1,18 +1,17 @@
 services:
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    command:
-      - --enable-feature=exemplar-storage
-      - --config.file=/etc/prometheus/prometheus.yml
+  mimir:
+    image: grafana/mimir
+    container_name: mimir
+    command: [ "-config.file=/etc/mimir.yml" ]
     environment:
       TZ: Asia/Tokyo
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/mimir.yml:/etc/mimir.yml:ro
+      - mimir-storage:/tmp/mimir
     networks:
       - datasource
     ports:
-      - "9090:9090"
+      - "9009:9009"
   tempo:
     image: grafana/tempo
     container_name: tempo
@@ -26,7 +25,7 @@ services:
       - datasource
     ports:
       - "3200:3200"   # tempo
-      - "9411:9411"   # zipkin
+      - "4317:4317"   # for Grafana Agent exports via gRPC using OTLP
   loki:
     image: grafana/loki
     container_name: loki
@@ -54,6 +53,7 @@ services:
       - "3000:3000"
 volumes:
   grafana-storage:
+  mimir-storage:
   tempo-data:
 networks:
   # Grafanaのネットワーク
@@ -61,7 +61,7 @@ networks:
     driver: bridge
     internal: false
     name: grafana_network
-  # GrafanaのDataSources(Prometheus, Tempo, Loki)のネットワーク。SpringBootActuator と GrafanaAgentからアクセスするために公開
+  # GrafanaのDataSources(Prometheus, Mimir, Tempo, Loki)のネットワーク。SpringBootActuator と GrafanaAgentからアクセスするために公開
   datasource:
     driver: bridge
     internal: false

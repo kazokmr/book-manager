@@ -1,16 +1,16 @@
 apiVersion: 1
 
 datasources:
-  - name: Prometheus
+  - name: Prometheus(Mimir)
     type: prometheus
     access: proxy
-    url: http://host.docker.internal:9090
+    url: http://host.docker.internal:9009/prometheus
     editable: false
     jsonData:
       httpMethod: POST
       manageAlerts: true
-      prometheusType: Prometheus
-      prometheusVersion: 2.43.0
+      prometheusType: Mimir
+      prometheusVersion: 2.7.x
       exemplarTraceIdDestinations:
         - datasourceUid: Tempo
           name: trace_id
@@ -31,7 +31,7 @@ datasources:
         filterByTraceID: true
         filterBYSpanID: false
       serviceMap:
-        datasourceUid: 'Prometheus'
+        datasourceUid: 'Prometheus(Mimir)'
       search:
         hide: false
       nodeGraph:
