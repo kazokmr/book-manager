@@ -2,8 +2,8 @@ import com.google.protobuf.gradle.id
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    kotlin("plugin.spring") version "1.8.10"
+    kotlin("jvm") version "1.8.20"
+    kotlin("plugin.spring") version "1.8.20"
     id("org.springframework.boot") version "3.0.5"
     id("io.spring.dependency-management") version "1.1.0"
     id("com.thinkimi.gradle.MybatisGenerator") version "2.4"
@@ -68,8 +68,8 @@ dependencies {
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.1")
     implementation("com.google.protobuf:protobuf-kotlin:3.22.2")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
-    implementation("io.grpc:grpc-netty:1.53.0")
-    implementation("io.grpc:grpc-protobuf:1.53.0")
+    implementation("io.grpc:grpc-netty:1.54.0")
+    implementation("io.grpc:grpc-protobuf:1.54.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:5.0.0")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
@@ -139,11 +139,11 @@ mybatisGenerator {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.21.6"
+        artifact = "com.google.protobuf:protoc:3.22.2"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.50.2"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.54.0"
         }
         id("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:1.3.0:jdk8@jar"
@@ -157,4 +157,8 @@ protobuf {
             }
         }
     }
+}
+
+tasks.named("extractIncludeIntTestProto") {
+    dependsOn("compileKotlin")
 }
