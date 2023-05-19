@@ -1,5 +1,6 @@
 package com.book.manager.infrastructure.database.testcontainers
 
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
@@ -13,8 +14,9 @@ abstract class TestContainerDataRegistry {
 
     companion object {
         @Container
+        @ServiceConnection
         @JvmStatic
-        val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:latest")).apply {
+        val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres").withTag("latest")).apply {
             withDatabaseName("test")
             withUsername("user")
             withPassword("pass")
@@ -24,18 +26,17 @@ abstract class TestContainerDataRegistry {
         }
 
         @Container
+        @ServiceConnection
         @JvmStatic
-        val redis: GenericContainer<*> = GenericContainer<Nothing>(DockerImageName.parse("redis:latest")).apply {
-            withExposedPorts(6379)
-        }
+        val redis: GenericContainer<*> =
+            GenericContainer<Nothing>(DockerImageName.parse("redis").withTag("latest")).apply {
+                withExposedPorts(6379)
+            }
 
         @DynamicPropertySource
         @JvmStatic
         fun setUp(registry: DynamicPropertyRegistry) {
-            registry.add("spring.datasource.url", database::getJdbcUrl)
-            registry.add("spring.datasource.username", database::getUsername)
-            registry.add("spring.datasource.password", database::getPassword)
-            registry.add("spring.data.redis.host", redis::getHost)
+            // FIXME: RedisのportだけはDynamicPropertySourceで定義しないとアクセスしてくれない
             registry.add("spring.data.redis.port", redis::getFirstMappedPort)
         }
     }
