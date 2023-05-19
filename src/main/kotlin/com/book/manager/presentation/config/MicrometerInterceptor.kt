@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component
 )
 @Component
 class MicrometerInterceptor(private val observationRegistry: ObservationRegistry) : Interceptor {
-    override fun intercept(invocation: Invocation): Any {
+    override fun intercept(invocation: Invocation): Any? {
         val mappedStatement = invocation.args[0] as MappedStatement
         return Observation.createNotStarted("mybatis.query", observationRegistry)
             .lowCardinalityKeyValue("id", mappedStatement.id)

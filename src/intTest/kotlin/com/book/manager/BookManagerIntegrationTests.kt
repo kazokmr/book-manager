@@ -7,7 +7,6 @@ import com.book.manager.config.IntegrationTestConfiguration
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
-import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
@@ -40,7 +39,7 @@ import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration::class)
-internal class BookManagerIntegrationTests : TestContainerDataRegistry() {
+internal class BookManagerIntegrationTests {
 
     @Autowired
     private lateinit var exchangeFilter: CustomExchangeFilterFunction

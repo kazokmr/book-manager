@@ -1,7 +1,7 @@
 package com.book.manager.presentation.handler
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -39,15 +39,15 @@ class BookManagerExceptionHandler : ResponseEntityExceptionHandler() {
         request: WebRequest
     ): ResponseEntity<Any>? {
         val body = when (val cause = ex.cause) {
-            is MissingKotlinParameterException -> {
-                cause.path.joinToString(",") { it.fieldName }
-                    .let { mapOf(Pair("入力パラメータがありません", it)) }
-            }
-
             is InvalidFormatException -> {
                 cause.path.joinToString(",") {
                     "type of ${it.fieldName} should be ${cause.targetType}. but value was ${cause.value}"
                 }.let { mapOf(Pair("入力パラメータの型が一致しません", it)) }
+            }
+
+            is MismatchedInputException -> {
+                cause.path.joinToString(",") { it.fieldName }
+                    .let { mapOf(Pair("入力パラメータがありません", it)) }
             }
 
             else -> mapOf(Pair("予期せぬエラー ${cause?.javaClass?.name}", ex.localizedMessage))
