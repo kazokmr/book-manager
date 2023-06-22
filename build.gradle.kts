@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
-    id("org.springframework.boot") version "3.1.0"
+    id("org.springframework.boot") version "3.1.1"
     id("io.spring.dependency-management") version "1.1.0"
     id("com.thinkimi.gradle.MybatisGenerator") version "2.4"
     id("jacoco")
@@ -58,13 +58,13 @@ dependencies {
     implementation("org.springframework.session:spring-session-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1")
-    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.4.1")
-    implementation("com.google.protobuf:protobuf-kotlin:3.22.2")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2")
+    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.0")
+    implementation("com.google.protobuf:protobuf-kotlin:3.22.3")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
-    implementation("io.grpc:grpc-netty:1.54.0")
-    implementation("io.grpc:grpc-protobuf:1.54.0")
-    implementation("io.github.lognet:grpc-spring-boot-starter:5.0.0")
+    implementation("io.grpc:grpc-netty:1.56.0")
+    implementation("io.grpc:grpc-protobuf:1.56.0")
+    implementation("io.github.lognet:grpc-spring-boot-starter:5.1.2")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("io.micrometer:micrometer-tracing-bridge-otel")
@@ -72,8 +72,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
-    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.2")
     testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
     testImplementation("org.dbunit:dbunit:2.7.3")
     testImplementation("org.testcontainers:testcontainers")
@@ -132,11 +132,11 @@ mybatisGenerator {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.22.2"
+        artifact = "com.google.protobuf:protoc:3.22.3"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.54.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.56.0"
         }
         id("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:1.3.0:jdk8@jar"
