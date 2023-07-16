@@ -2,13 +2,13 @@ import com.google.protobuf.gradle.id
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.22"
-    kotlin("plugin.spring") version "1.8.22"
+    kotlin("jvm") version "1.9.0"
+    kotlin("plugin.spring") version "1.9.0"
     id("org.springframework.boot") version "3.1.1"
     id("io.spring.dependency-management") version "1.1.0"
     id("com.thinkimi.gradle.MybatisGenerator") version "2.4"
     id("jacoco")
-    id("com.google.protobuf") version "0.9.2"
+    id("com.google.protobuf") version "0.9.4"
     id("idea")
 }
 
@@ -22,7 +22,7 @@ kotlin {
 }
 
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.10"
 }
 
 sourceSets {
@@ -60,11 +60,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.0")
-    implementation("com.google.protobuf:protobuf-kotlin:3.22.3")
+    implementation("com.google.protobuf:protobuf-kotlin:3.23.4")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
-    implementation("io.grpc:grpc-netty:1.56.0")
-    implementation("io.grpc:grpc-protobuf:1.56.0")
-    implementation("io.github.lognet:grpc-spring-boot-starter:5.1.2")
+    implementation("io.grpc:grpc-netty:1.56.1")
+    implementation("io.grpc:grpc-protobuf:1.56.1")
+    implementation("io.github.lognet:grpc-spring-boot-starter:5.1.3")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("io.micrometer:micrometer-tracing-bridge-otel")
@@ -132,7 +132,7 @@ mybatisGenerator {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.22.3"
+        artifact = "com.google.protobuf:protoc:3.22.4"
     }
     plugins {
         id("grpc") {
