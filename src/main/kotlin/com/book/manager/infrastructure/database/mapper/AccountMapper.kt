@@ -9,68 +9,34 @@ import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport.
 import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport.name
 import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport.password
 import com.book.manager.infrastructure.database.mapper.AccountDynamicSqlSupport.roleType
-import org.apache.ibatis.annotations.Insert
-import org.apache.ibatis.annotations.Mapper
-import org.apache.ibatis.annotations.Param
-import org.apache.ibatis.annotations.Result
-import org.apache.ibatis.annotations.ResultMap
-import org.apache.ibatis.annotations.Results
-import org.apache.ibatis.annotations.SelectProvider
-import org.apache.ibatis.type.EnumTypeHandler
+import com.book.manager.infrastructure.database.record.Account
+import com.github.onozaty.mybatis.pg.type.pgenum.PgEnumTypeHandler
+import org.apache.ibatis.annotations.*
 import org.apache.ibatis.type.JdbcType
 import org.mybatis.dynamic.sql.select.render.SelectStatementProvider
 import org.mybatis.dynamic.sql.util.SqlProviderAdapter
-import org.mybatis.dynamic.sql.util.kotlin.CountCompleter
-import org.mybatis.dynamic.sql.util.kotlin.DeleteCompleter
-import org.mybatis.dynamic.sql.util.kotlin.KotlinUpdateBuilder
-import org.mybatis.dynamic.sql.util.kotlin.SelectCompleter
-import org.mybatis.dynamic.sql.util.kotlin.UpdateCompleter
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.countFrom
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.deleteFrom
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insert
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.insertMultiple
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectDistinct
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectList
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.selectOne
-import org.mybatis.dynamic.sql.util.kotlin.mybatis3.update
+import org.mybatis.dynamic.sql.util.kotlin.*
+import org.mybatis.dynamic.sql.util.kotlin.mybatis3.*
 import org.mybatis.dynamic.sql.util.mybatis3.CommonCountMapper
 import org.mybatis.dynamic.sql.util.mybatis3.CommonDeleteMapper
 import org.mybatis.dynamic.sql.util.mybatis3.CommonInsertMapper
 import org.mybatis.dynamic.sql.util.mybatis3.CommonUpdateMapper
-import com.book.manager.infrastructure.database.record.Account as RecordAccount
 
 @Mapper
-interface AccountMapper : CommonCountMapper, CommonDeleteMapper, CommonInsertMapper<RecordAccount>, CommonUpdateMapper {
-    @SelectProvider(type = SqlProviderAdapter::class, method = "select")
-    @Results(
-        id = "AccountResult", value = [
-            Result(column = "id", property = "id", jdbcType = JdbcType.BIGINT, id = true),
-            Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
-            Result(column = "password", property = "password", jdbcType = JdbcType.VARCHAR),
-            Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
-            Result(
-                column = "role_type",
-                property = "roleType",
-                typeHandler = EnumTypeHandler::class,
-                jdbcType = JdbcType.VARCHAR
-            )
-        ]
-    )
-    fun selectMany(selectStatement: SelectStatementProvider): List<RecordAccount>
+interface AccountMapper : CommonCountMapper, CommonDeleteMapper, CommonInsertMapper<Account>, CommonUpdateMapper {
+    @SelectProvider(type=SqlProviderAdapter::class, method="select")
+    @Results(id="AccountResult", value = [
+        Result(column="id", property="id", jdbcType=JdbcType.BIGINT, id=true),
+        Result(column="email", property="email", jdbcType=JdbcType.VARCHAR),
+        Result(column="password", property="password", jdbcType=JdbcType.VARCHAR),
+        Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+        Result(column="role_type", property="roleType", typeHandler=PgEnumTypeHandler::class, jdbcType=JdbcType.VARCHAR)
+    ])
+    fun selectMany(selectStatement: SelectStatementProvider): List<Account>
 
-    @SelectProvider(type = SqlProviderAdapter::class, method = "select")
+    @SelectProvider(type=SqlProviderAdapter::class, method="select")
     @ResultMap("AccountResult")
-    fun selectOne(selectStatement: SelectStatementProvider): RecordAccount?
-
-    @Insert(
-        """
-        INSERT INTO account
-            (id, email, password, name, role_type)
-        VALUES
-            (#{account.id}, #{account.email}, #{account.password}, #{account.name}, #{account.roleType.name}::role_type) 
-        """
-    )
-    fun insertRecord(@Param("account") account: RecordAccount): Int
+    fun selectOne(selectStatement: SelectStatementProvider): Account?
 }
 
 fun AccountMapper.count(completer: CountCompleter) =
@@ -84,7 +50,7 @@ fun AccountMapper.deleteByPrimaryKey(id_: Long) =
         where { id isEqualTo id_ }
     }
 
-fun AccountMapper.insert(row: RecordAccount) =
+fun AccountMapper.insert(row: Account) =
     insert(this::insert, row, account) {
         map(id) toProperty "id"
         map(email) toProperty "email"
@@ -93,7 +59,7 @@ fun AccountMapper.insert(row: RecordAccount) =
         map(roleType) toProperty "roleType"
     }
 
-fun AccountMapper.insertMultiple(records: Collection<RecordAccount>) =
+fun AccountMapper.insertMultiple(records: Collection<Account>) =
     insertMultiple(this::insertMultiple, records, account) {
         map(id) toProperty "id"
         map(email) toProperty "email"
@@ -102,10 +68,10 @@ fun AccountMapper.insertMultiple(records: Collection<RecordAccount>) =
         map(roleType) toProperty "roleType"
     }
 
-fun AccountMapper.insertMultiple(vararg records: RecordAccount) =
+fun AccountMapper.insertMultiple(vararg records: Account) =
     insertMultiple(records.toList())
 
-fun AccountMapper.insertSelective(row: RecordAccount) =
+fun AccountMapper.insertSelective(row: Account) =
     insert(this::insert, row, account) {
         map(id).toPropertyWhenPresent("id", row::id)
         map(email).toPropertyWhenPresent("email", row::email)
@@ -133,7 +99,7 @@ fun AccountMapper.selectByPrimaryKey(id_: Long) =
 fun AccountMapper.update(completer: UpdateCompleter) =
     update(this::update, account, completer)
 
-fun KotlinUpdateBuilder.updateAllColumns(row: RecordAccount) =
+fun KotlinUpdateBuilder.updateAllColumns(row: Account) =
     apply {
         set(id) equalToOrNull row::id
         set(email) equalToOrNull row::email
@@ -142,7 +108,7 @@ fun KotlinUpdateBuilder.updateAllColumns(row: RecordAccount) =
         set(roleType) equalToOrNull row::roleType
     }
 
-fun KotlinUpdateBuilder.updateSelectiveColumns(row: RecordAccount) =
+fun KotlinUpdateBuilder.updateSelectiveColumns(row: Account) =
     apply {
         set(id) equalToWhenPresent row::id
         set(email) equalToWhenPresent row::email
@@ -151,7 +117,7 @@ fun KotlinUpdateBuilder.updateSelectiveColumns(row: RecordAccount) =
         set(roleType) equalToWhenPresent row::roleType
     }
 
-fun AccountMapper.updateByPrimaryKey(row: RecordAccount) =
+fun AccountMapper.updateByPrimaryKey(row: Account) =
     update {
         set(email) equalToOrNull row::email
         set(password) equalToOrNull row::password
@@ -160,7 +126,7 @@ fun AccountMapper.updateByPrimaryKey(row: RecordAccount) =
         where { id isEqualTo row.id!! }
     }
 
-fun AccountMapper.updateByPrimaryKeySelective(row: RecordAccount) =
+fun AccountMapper.updateByPrimaryKeySelective(row: Account) =
     update {
         set(email) equalToWhenPresent row::email
         set(password) equalToWhenPresent row::password

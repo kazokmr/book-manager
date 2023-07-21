@@ -5,6 +5,7 @@ import com.book.manager.domain.model.Account
 import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.infrastructure.database.mapper.AccountMapper
 import com.book.manager.infrastructure.database.mapper.delete
+import com.book.manager.infrastructure.database.mapper.insert
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
@@ -40,10 +41,10 @@ internal class AccountRepositoryImplTest : TestContainerDataRegistry() {
      */
     @BeforeEach
     internal fun setUp() {
-        accountMapper.insertRecord(RecordAccount(1, "admin@example.com", "passpass", "admin", RoleType.ADMIN))
-        accountMapper.insertRecord(RecordAccount(2, "user@example.com", "passpass", "user", RoleType.USER))
-        accountMapper.insertRecord(RecordAccount(999, "admin2@example.com", "passpass", "admin2", RoleType.ADMIN))
-        accountMapper.insertRecord(RecordAccount(8888, "user2@example.com", "passpass", "user2", RoleType.USER))
+        accountMapper.insert(RecordAccount(1, "admin@example.com", "passpass", "admin", RoleType.ADMIN))
+        accountMapper.insert(RecordAccount(2, "user@example.com", "passpass", "user", RoleType.USER))
+        accountMapper.insert(RecordAccount(999, "admin2@example.com", "passpass", "admin2", RoleType.ADMIN))
+        accountMapper.insert(RecordAccount(8888, "user2@example.com", "passpass", "user2", RoleType.USER))
     }
 
     @AfterEach

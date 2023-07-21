@@ -60,6 +60,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.0")
+    implementation("com.github.onozaty:mybatis-postgresql-typehandlers:1.0.2")
     implementation("com.google.protobuf:protobuf-kotlin:3.23.4")
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
     implementation("io.grpc:grpc-netty:1.56.1")
@@ -125,8 +126,8 @@ mybatisGenerator {
     verbose = true
     configFile = "$projectDir/src/main/resources/generatorConfig.xml"
     dependencies {
-        mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.1")
-        mybatisGenerator("org.postgresql:postgresql:42.5.0")
+        mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.2")
+        mybatisGenerator("org.postgresql:postgresql:42.6.0")
     }
 }
 

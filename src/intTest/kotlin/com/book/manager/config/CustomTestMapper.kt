@@ -5,11 +5,7 @@ import com.book.manager.domain.model.Account
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.model.Rental
-import com.book.manager.infrastructure.database.mapper.AccountMapper
-import com.book.manager.infrastructure.database.mapper.BookMapper
-import com.book.manager.infrastructure.database.mapper.RentalMapper
-import com.book.manager.infrastructure.database.mapper.delete
-import com.book.manager.infrastructure.database.mapper.insertMultiple
+import com.book.manager.infrastructure.database.mapper.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestComponent
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -38,7 +34,7 @@ class CustomTestMapper {
     fun createAccount(accountList: List<Account>) {
         accountList
             .map { RecordAccount(it.id, it.email, it.password.encode(), it.name, it.roleType) }
-            .forEach { accountMapper.insertRecord(it) }
+            .forEach { accountMapper.insert(it) }
     }
 
     fun createBook(bookList: List<Book>) {
