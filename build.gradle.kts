@@ -17,7 +17,7 @@ version = "0.0.1-SNAPSHOT"
 
 kotlin {
     jvmToolchain {
-        this.languageVersion.set(JavaLanguageVersion.of(19))
+        this.languageVersion.set(JavaLanguageVersion.of(20))
     }
 }
 
