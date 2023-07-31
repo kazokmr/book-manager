@@ -6,7 +6,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.0"
     id("org.springframework.boot") version "3.1.1"
     id("io.spring.dependency-management") version "1.1.0"
-    id("com.thinkimi.gradle.MybatisGenerator") version "2.4"
+    id("com.qqviaja.gradle.MybatisGenerator") version "2.5"
     id("jacoco")
     id("com.google.protobuf") version "0.9.4"
     id("idea")
