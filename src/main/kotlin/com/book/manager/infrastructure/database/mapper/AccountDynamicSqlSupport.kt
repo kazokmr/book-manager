@@ -4,9 +4,9 @@
 package com.book.manager.infrastructure.database.mapper
 
 import com.book.manager.domain.enum.RoleType
-import java.sql.JDBCType
 import org.mybatis.dynamic.sql.AliasableSqlTable
 import org.mybatis.dynamic.sql.util.kotlin.elements.column
+import java.sql.JDBCType
 
 object AccountDynamicSqlSupport {
     val account = Account()
@@ -30,6 +30,6 @@ object AccountDynamicSqlSupport {
 
         val name = column<String>(name = "name", jdbcType = JDBCType.VARCHAR)
 
-        val roleType = column<RoleType>(name = "role_type", jdbcType = JDBCType.VARCHAR, typeHandler = "org.apache.ibatis.type.EnumTypeHandler")
+        val roleType = column<RoleType>(name = "role_type", jdbcType = JDBCType.VARCHAR, typeHandler = "com.github.onozaty.mybatis.pg.type.pgenum.PgEnumTypeHandler")
     }
 }

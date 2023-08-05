@@ -19,7 +19,7 @@
         <javaClientGenerator targetPackage="com.book.manager.infrastructure.database.mapper"
                              targetProject="src/main/kotlin"/>
         <table tableName="%" schema="public">
-            <columnOverride column="role_type" typeHandler="org.apache.ibatis.type.EnumTypeHandler"
+            <columnOverride column="role_type" typeHandler="com.github.onozaty.mybatis.pg.type.pgenum.PgEnumTypeHandler"
                             javaType="com.book.manager.domain.enum.RoleType"/>
         </table>
     </context>

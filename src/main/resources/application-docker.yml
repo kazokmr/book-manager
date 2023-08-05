@@ -54,3 +54,6 @@ management:
         http:
           server:
             requests: true
+mybatis:
+  configuration:
+    default-enum-type-handler: com.github.onozaty.mybatis.pg.type.pgenum.PgEnumTypeHandler
