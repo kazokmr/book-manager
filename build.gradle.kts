@@ -27,8 +27,18 @@ jacoco {
 
 sourceSets {
     create("intTest") {
+        java {
+            setSrcDirs(listOf("src/intTest"))
+        }
         compileClasspath += main.get().output + test.get().output
         runtimeClasspath += main.get().output + test.get().output
+    }
+}
+
+idea {
+    module {
+        testSources.from(sourceSets["intTest"].kotlin.srcDirs)
+        testResources.from(sourceSets["intTest"].resources.srcDirs)
     }
 }
 
