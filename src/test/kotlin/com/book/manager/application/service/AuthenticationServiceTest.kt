@@ -4,24 +4,24 @@ import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.repository.AccountRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@ExtendWith(MockitoExtension::class)
 internal class AuthenticationServiceTest {
 
-    private lateinit var accountRepository: AccountRepository
+    @InjectMocks
     private lateinit var authenticationService: AuthenticationService
 
-    @BeforeEach
-    internal fun setUp() {
-        accountRepository = mock()
-        authenticationService = AuthenticationService(accountRepository)
-    }
+    @Mock
+    private lateinit var accountRepository: AccountRepository
 
     @Test
     @DisplayName("EmailでDB検索を行うこと")

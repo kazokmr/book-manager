@@ -4,26 +4,26 @@ import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
 import com.book.manager.domain.repository.BookRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@ExtendWith(MockitoExtension::class)
 internal class BookServiceTest {
 
-    private lateinit var bookRepository: BookRepository
+    @InjectMocks
     private lateinit var bookService: BookService
 
-    @BeforeEach
-    internal fun setUp() {
-        bookRepository = mock()
-        bookService = BookService(bookRepository)
-    }
+    @Mock
+    private lateinit var bookRepository: BookRepository
 
     @Test
     @DisplayName("書籍リストがあればリストを返す")

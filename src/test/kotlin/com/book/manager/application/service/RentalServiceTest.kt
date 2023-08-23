@@ -14,32 +14,37 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@ExtendWith(MockitoExtension::class)
 internal class RentalServiceTest {
 
-    private lateinit var accountRepository: AccountRepository
-    private lateinit var bookRepository: BookRepository
-    private lateinit var rentalRepository: RentalRepository
-
+    @InjectMocks
     private lateinit var rentalService: RentalService
+
+    @Mock
+    private lateinit var accountRepository: AccountRepository
+
+    @Mock
+    private lateinit var bookRepository: BookRepository
+
+    @Mock
+    private lateinit var rentalRepository: RentalRepository
 
     private lateinit var account: Account
     private lateinit var book: Book
 
     @BeforeEach
     internal fun setUp() {
-        accountRepository = mock()
-        bookRepository = mock()
-        rentalRepository = mock()
-        rentalService = RentalService(accountRepository, bookRepository, rentalRepository)
-
         account = Account(100, "test@example.com", "pass", "kotlin", RoleType.USER)
         book = Book(100, "Kotlin入門", "コトリン太郎", LocalDate.now())
     }

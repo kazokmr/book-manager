@@ -8,23 +8,31 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
 
+@ExtendWith(MockitoExtension::class)
 internal class AdminBookServiceTest {
 
-    private lateinit var bookRepository: BookRepository
+    @InjectMocks
     private lateinit var adminBookService: AdminBookService
+
+    @Mock
+    private lateinit var bookRepository: BookRepository
+
     private lateinit var book: Book
 
     @BeforeEach
     internal fun setUp() {
-        bookRepository = mock()
-        adminBookService = AdminBookService(bookRepository)
+//        bookRepository = mock()
+//        adminBookService = AdminBookService(bookRepository)
         book = Book(100, "title", "hogehoge", LocalDate.now())
     }
 
