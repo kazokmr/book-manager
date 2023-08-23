@@ -31,8 +31,6 @@ internal class AdminBookServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-//        bookRepository = mock()
-//        adminBookService = AdminBookService(bookRepository)
         book = Book(100, "title", "hogehoge", LocalDate.now())
     }
 
