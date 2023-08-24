@@ -13,20 +13,10 @@ import org.apache.logging.log4j.core.LogEvent
 import org.apache.logging.log4j.core.LoggerContext
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.*
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.reset
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -34,7 +24,6 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.server.ResponseStatusException
@@ -42,7 +31,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 // Controllerクラスに対するログ出力なのでWebMvcTestとMockUserを付ける
-@ExtendWith(SpringExtension::class)
 @WebMvcTest(controllers = [BookController::class])
 @WithCustomMockUser
 internal class LoggingAdviceTest {
