@@ -13,7 +13,6 @@ import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mybatis.dynamic.sql.exception.InvalidSqlException
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,11 +21,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.test.context.TestExecutionListeners
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import java.time.LocalDate
 
-@ExtendWith(SpringExtension::class)
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(value = [BookRepositoryImpl::class, DataSourceConfig::class])

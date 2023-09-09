@@ -17,9 +17,6 @@ abstract class TestContainerDataRegistry {
         @ServiceConnection
         @JvmStatic
         val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres").withTag("latest")).apply {
-            withDatabaseName("test")
-            withUsername("user")
-            withPassword("pass")
             withEnv("POSTGRES_INITDB_ARGS", "--encoding=UTF-8 --no-locale")
             withEnv("TZ", "Asia/Tokyo")
             withInitScript("initdb/schema.sql")

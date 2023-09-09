@@ -8,7 +8,6 @@ import com.book.manager.domain.model.Account
 import com.book.manager.presentation.controller.AdminBookController
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,14 +19,12 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated
 import org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated
 import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(classes = [SecurityConfig::class, BookManagerUserDetailsService::class])
 @WebMvcTest(controllers = [AdminBookController::class])
+@ContextConfiguration(classes = [SecurityConfig::class, BookManagerUserDetailsService::class])
 internal class SecurityConfigTest(@Autowired val mockMvc: MockMvc) {
 
     @Autowired
