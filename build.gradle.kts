@@ -2,22 +2,21 @@ import com.google.protobuf.gradle.id
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.10"
-    kotlin("plugin.spring") version "1.9.10"
-    id("org.springframework.boot") version "3.1.2"
-    id("io.spring.dependency-management") version "1.1.0"
+    kotlin("jvm") version "1.9.20"
+    kotlin("plugin.spring") version "1.9.20"
+    id("org.springframework.boot") version "3.1.5"
+    id("io.spring.dependency-management") version "1.1.3"
     id("com.qqviaja.gradle.MybatisGenerator") version "2.5"
     id("jacoco")
     id("com.google.protobuf") version "0.9.4"
     id("idea")
 }
-
 group = "com.book.manager"
 version = "0.0.1-SNAPSHOT"
 
 kotlin {
     jvmToolchain {
-        this.languageVersion.set(JavaLanguageVersion.of(20))
+        this.languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 

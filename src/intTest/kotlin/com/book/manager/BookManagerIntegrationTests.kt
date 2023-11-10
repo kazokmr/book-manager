@@ -11,7 +11,7 @@ import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -209,6 +209,7 @@ internal class BookManagerIntegrationTests {
             .exchange()
             .expectBody<AdminBookResponse>()
             .returnResult()
+
 
         // Then
         val getResponse = webClient

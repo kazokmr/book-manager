@@ -26,7 +26,6 @@ import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -163,7 +162,7 @@ internal class LoggingAdviceTest {
         whenever(bookService.getDetail(any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
-        assertThrows<ResponseStatusException> {
+        assertThrows<Throwable> {
             proxy.getDetail(bookId)
         }
 

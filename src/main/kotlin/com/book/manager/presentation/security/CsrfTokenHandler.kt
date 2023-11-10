@@ -6,8 +6,7 @@ import org.springframework.security.web.csrf.CsrfToken
 
 class CsrfTokenHandler(val request: HttpServletRequest, val response: HttpServletResponse) {
 
-    fun setToken() {
-        val csrfToken = request.getAttribute("_csrf") as CsrfToken
+    fun setToken(csrfToken: CsrfToken) {
         response.setHeader("_csrf", csrfToken.token)
         response.setHeader("_csrf_header", csrfToken.headerName)
     }
