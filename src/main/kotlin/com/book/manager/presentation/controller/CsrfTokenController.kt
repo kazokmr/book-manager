@@ -4,6 +4,7 @@ import com.book.manager.presentation.security.CsrfTokenHandler
 import io.micrometer.observation.annotation.Observed
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -14,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController
 class CsrfTokenController {
 
     @GetMapping("/csrf_token")
-    fun csrfToken(request: HttpServletRequest, response: HttpServletResponse): String {
-        CsrfTokenHandler(request, response).setToken()
+    fun csrfToken(request: HttpServletRequest, response: HttpServletResponse, csrfToken: CsrfToken): String {
+        CsrfTokenHandler(request, response).setToken(csrfToken)
         return "Send Token!"
     }
 }
