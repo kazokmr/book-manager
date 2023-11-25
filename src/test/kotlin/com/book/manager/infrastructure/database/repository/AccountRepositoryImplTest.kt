@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.test.context.jdbc.Sql
 
 @MybatisTest
+@ImportTestcontainers(TestContainerDataRegistry::class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql("Account.sql")
-internal class AccountRepositoryImplTest : TestContainerDataRegistry() {
+internal class AccountRepositoryImplTest {
 
     @Autowired
     private lateinit var accountMapper: AccountMapper

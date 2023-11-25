@@ -13,6 +13,7 @@ import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.DataClassRowMapper
 import org.springframework.jdbc.core.JdbcTemplate
@@ -20,9 +21,10 @@ import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDateTime
 
 @MybatisTest
+@ImportTestcontainers(TestContainerDataRegistry::class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Sql("Rental.sql")
-internal class RentalRepositoryImplTest : TestContainerDataRegistry() {
+internal class RentalRepositoryImplTest {
 
     @Autowired
     private lateinit var rentalMapper: RentalMapper
