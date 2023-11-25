@@ -2,10 +2,10 @@ import com.google.protobuf.gradle.id
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.spring") version "1.9.20"
-    id("org.springframework.boot") version "3.1.5"
-    id("io.spring.dependency-management") version "1.1.3"
+    kotlin("jvm") version "1.9.21"
+    kotlin("plugin.spring") version "1.9.21"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.1.4"
     id("com.qqviaja.gradle.MybatisGenerator") version "2.5"
     id("jacoco")
     id("com.google.protobuf") version "0.9.4"
@@ -21,7 +21,7 @@ kotlin {
 }
 
 jacoco {
-    toolVersion = "0.8.10"
+    toolVersion = "0.8.11"
 }
 
 sourceSets {
@@ -67,7 +67,7 @@ dependencies {
     implementation("org.springframework.session:spring-session-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.0")
     implementation("com.github.onozaty:mybatis-postgresql-typehandlers:1.0.2")
     implementation("com.google.protobuf:protobuf-kotlin:3.23.4")
@@ -83,9 +83,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
-    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.2")
-    testImplementation("com.github.springtestdbunit:spring-test-dbunit:1.3.0")
-    testImplementation("org.dbunit:dbunit:2.7.3")
+    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")

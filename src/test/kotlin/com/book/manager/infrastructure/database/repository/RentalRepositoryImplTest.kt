@@ -2,15 +2,10 @@ package com.book.manager.infrastructure.database.repository
 
 import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.RentalRepository
-import com.book.manager.infrastructure.database.dbunit.CsvDataSetLoader
-import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
+import com.book.manager.infrastructure.database.mapper.RentalMapper
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
-import com.github.springtestdbunit.DbUnitTestExecutionListener
-import com.github.springtestdbunit.annotation.DatabaseSetup
-import com.github.springtestdbunit.annotation.DbUnitConfiguration
-import com.github.springtestdbunit.annotation.ExpectedDatabase
-import com.github.springtestdbunit.assertion.DatabaseAssertionMode.NON_STRICT_UNORDERED
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.SoftAssertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -18,26 +13,34 @@ import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
-import org.springframework.context.annotation.Import
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.dao.DuplicateKeyException
-import org.springframework.test.context.TestExecutionListeners
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+import org.springframework.jdbc.core.DataClassRowMapper
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDateTime
 
 @MybatisTest
+@ImportTestcontainers(TestContainerDataRegistry::class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import(value = [RentalRepositoryImpl::class, DataSourceConfig::class])
-@DbUnitConfiguration(dataSetLoader = CsvDataSetLoader::class)
-@TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
-internal class RentalRepositoryImplTest : TestContainerDataRegistry() {
+@Sql("Rental.sql")
+internal class RentalRepositoryImplTest {
 
     @Autowired
+    private lateinit var rentalMapper: RentalMapper
+
     private lateinit var rentalRepository: RentalRepository
+
+    @Autowired
+    private lateinit var jdbcTemplate: JdbcTemplate
+
+    @BeforeEach
+    fun setUp() {
+        rentalRepository = RentalRepositoryImpl(rentalMapper)
+    }
 
     @Test
     @DisplayName("Rentalテーブルへの登録")
-    @DatabaseSetup("/test-data/rental/init-data")
-    @ExpectedDatabase("/test-data/rental/after-start-rental", assertionMode = NON_STRICT_UNORDERED)
     fun `startRental when star renting then register Rental table`() {
 
         //Given
@@ -50,15 +53,32 @@ internal class RentalRepositoryImplTest : TestContainerDataRegistry() {
 
         // When
         val registeredCount = rentalRepository.startRental(rental)
+        val resultList = jdbcTemplate.query(
+            "SELECT book_id,account_id,rental_datetime,return_deadline FROM rental ORDER BY book_id ",
+            DataClassRowMapper(Rental::class.java)
+        )
 
         // Then
-        assertThat(registeredCount).isEqualTo(1)
+        SoftAssertions().apply {
+            assertThat(registeredCount).isEqualTo(1)
+            assertThat(resultList).hasSize(3)
+            assertThat(resultList[0].bookId).isEqualTo(1)
+            assertThat(resultList[0].accountId).isEqualTo(528)
+            assertThat(resultList[0].rentalDatetime).isEqualTo(LocalDateTime.of(2021, 6, 1, 12, 0, 0, 0))
+            assertThat(resultList[0].returnDeadline).isEqualTo(LocalDateTime.of(2021, 6, 14, 12, 0, 0, 0))
+            assertThat(resultList[1].bookId).isEqualTo(100)
+            assertThat(resultList[1].accountId).isEqualTo(222)
+            assertThat(resultList[1].rentalDatetime).isEqualTo(LocalDateTime.of(2021, 6, 29, 0, 0, 0, 0))
+            assertThat(resultList[1].returnDeadline).isEqualTo(LocalDateTime.of(2021, 7, 12, 0, 0, 0, 0))
+            assertThat(resultList[2].bookId).isEqualTo(999)
+            assertThat(resultList[2].accountId).isEqualTo(74)
+            assertThat(resultList[2].rentalDatetime).isEqualTo(LocalDateTime.of(2021, 6, 29, 12, 0, 0, 0))
+            assertThat(resultList[2].returnDeadline).isEqualTo(LocalDateTime.of(2021, 7, 12, 12, 0, 0, 0))
+        }.assertAll()
     }
 
     @Test
     @DisplayName("登録済みの書籍IDがあれば、Rentalテーブルに登録しない")
-    @DatabaseSetup("/test-data/rental/init-data")
-    @ExpectedDatabase("/test-data/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
     fun `startRental when bookId has already been rent then is not registering Rental Table`() {
 
         // Given
@@ -77,8 +97,6 @@ internal class RentalRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("Rentalテーブルからレコードを削除する")
-    @DatabaseSetup("/test-data/rental/init-data")
-    @ExpectedDatabase("/test-data/rental/after-end-rental", assertionMode = NON_STRICT_UNORDERED)
     fun `endRental when rental is exist then delete`() {
 
         // Given
@@ -86,15 +104,24 @@ internal class RentalRepositoryImplTest : TestContainerDataRegistry() {
 
         // When
         val deleteCount = rentalRepository.endRental(bookId)
+        val resultList = jdbcTemplate.query(
+            "SELECT book_id,account_id,rental_datetime,return_deadline FROM rental ORDER BY book_id ",
+            DataClassRowMapper(Rental::class.java)
+        )
 
         // Then
-        assertThat(deleteCount).isEqualTo(1)
+        SoftAssertions().apply {
+            assertThat(deleteCount).isEqualTo(1)
+            assertThat(resultList).hasSize(1)
+            assertThat(resultList[0].bookId).isEqualTo(1)
+            assertThat(resultList[0].accountId).isEqualTo(528)
+            assertThat(resultList[0].rentalDatetime).isEqualTo(LocalDateTime.of(2021, 6, 1, 12, 0, 0, 0))
+            assertThat(resultList[0].returnDeadline).isEqualTo(LocalDateTime.of(2021, 6, 14, 12, 0, 0, 0))
+        }.assertAll()
     }
 
     @Test
     @DisplayName("Rental情報が登録されていなければ削除しない")
-    @DatabaseSetup("/test-data/rental/init-data")
-    @ExpectedDatabase("/test-data/rental/after-no-update", assertionMode = NON_STRICT_UNORDERED)
     fun `endRental when recode is not exist then does not delete`() {
 
         // Given
@@ -102,8 +129,23 @@ internal class RentalRepositoryImplTest : TestContainerDataRegistry() {
 
         // When
         val count = rentalRepository.endRental(bookId)
+        val resultList = jdbcTemplate.query(
+            "SELECT book_id,account_id,rental_datetime,return_deadline FROM rental ORDER BY book_id",
+            DataClassRowMapper(Rental::class.java)
+        )
 
         // Then
-        assertThat(count).isEqualTo(0)
+        SoftAssertions().apply {
+            assertThat(count).isEqualTo(0)
+            assertThat(resultList).hasSize(2)
+            assertThat(resultList[0].bookId).isEqualTo(1)
+            assertThat(resultList[0].accountId).isEqualTo(528)
+            assertThat(resultList[0].rentalDatetime).isEqualTo(LocalDateTime.of(2021, 6, 1, 12, 0, 0, 0))
+            assertThat(resultList[0].returnDeadline).isEqualTo(LocalDateTime.of(2021, 6, 14, 12, 0, 0, 0))
+            assertThat(resultList[1].bookId).isEqualTo(999)
+            assertThat(resultList[1].accountId).isEqualTo(74)
+            assertThat(resultList[1].rentalDatetime).isEqualTo(LocalDateTime.of(2021, 6, 29, 12, 0, 0, 0))
+            assertThat(resultList[1].returnDeadline).isEqualTo(LocalDateTime.of(2021, 7, 12, 12, 0, 0, 0))
+        }.assertAll()
     }
 }
