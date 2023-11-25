@@ -2,14 +2,12 @@ package com.book.manager.infrastructure.database.repository
 
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.repository.BookRepository
-import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
+import com.book.manager.infrastructure.database.mapper.BookMapper
+import com.book.manager.infrastructure.database.mapper.BookWithRentalMapper
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
-import com.github.springtestdbunit.DbUnitTestExecutionListener
-import com.github.springtestdbunit.annotation.DatabaseSetup
-import com.github.springtestdbunit.annotation.ExpectedDatabase
-import com.github.springtestdbunit.assertion.DatabaseAssertionMode.NON_STRICT_UNORDERED
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -18,38 +16,68 @@ import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
-import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
-import org.springframework.test.context.TestExecutionListeners
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import(value = [BookRepositoryImpl::class, DataSourceConfig::class])
-@TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Autowired
+    private lateinit var rentalMapper: BookWithRentalMapper
+
+    @Autowired
+    private lateinit var bookMapper: BookMapper
+
     private lateinit var bookRepository: BookRepository
+
+    @BeforeEach
+    internal fun setUp() {
+        bookRepository = BookRepositoryImpl(rentalMapper, bookMapper)
+    }
 
     @Test
     @DisplayName("書籍が複数冊あれば全て検索すること")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
-    @ExpectedDatabase("/test-data/book/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @Sql("MultiBooks.sql")
     fun `findAllWithRental when there are many books then get all books`() {
 
         // When
-        val resultList = bookRepository.findAllWithRental()
+        val resultList =
+            bookRepository.findAllWithRental().stream().sorted { o1, o2 -> o1.book.id.compareTo(o2.book.id) }.toList()
 
         // Then
-        assertThat(resultList.count()).`as`("4冊検索されること").isEqualTo(4)
+        SoftAssertions().apply {
+            assertThat(resultList.count()).`as`("4冊検索されること").isEqualTo(4)
+            assertThat(resultList[0].book.id).isEqualTo(1)
+            assertThat(resultList[0].book.title).isEqualTo("Kotlin入門")
+            assertThat(resultList[0].book.author).isEqualTo("コトリン")
+            assertThat(resultList[0].book.releaseDate).isEqualTo(LocalDate.of(2020, 6, 29))
+            assertThat(resultList[0].rental).isNull()
+            assertThat(resultList[1].book.id).isEqualTo(2)
+            assertThat(resultList[1].book.title).isEqualTo("Spring入門")
+            assertThat(resultList[1].book.author).isEqualTo("スプリング")
+            assertThat(resultList[1].book.releaseDate).isEqualTo(LocalDate.of(2020, 1, 1))
+            assertThat(resultList[1].rental?.accountId).isEqualTo(528)
+            assertThat(resultList[1].rental?.rentalDatetime).isEqualTo(LocalDateTime.of(2021, 6, 28, 16, 28, 0, 0))
+            assertThat(resultList[1].rental?.returnDeadline).isEqualTo(LocalDateTime.of(2021, 7, 12, 0, 0, 0, 0))
+            assertThat(resultList[2].book.id).isEqualTo(3)
+            assertThat(resultList[2].book.title).isEqualTo("Java入門")
+            assertThat(resultList[2].book.author).isEqualTo("ジャヴァ")
+            assertThat(resultList[2].book.releaseDate).isEqualTo(LocalDate.of(2000, 1, 1))
+            assertThat(resultList[2].rental).isNull()
+            assertThat(resultList[3].book.id).isEqualTo(4)
+            assertThat(resultList[3].book.title).isEqualTo("Scala入門")
+            assertThat(resultList[3].book.author).isEqualTo("スカラ")
+            assertThat(resultList[3].book.releaseDate).isEqualTo(LocalDate.of(2001, 1, 1))
+            assertThat(resultList[3].rental).isNull()
+        }.assertAll()
     }
 
     @Test
     @DisplayName("書籍が１冊だけならその１冊だけ検索すること")
-    @DatabaseSetup("/test-data/book/initSingleRecord.xml")
-    @ExpectedDatabase("/test-data/book/expectedSingleRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @Sql("SingleBook.sql")
     fun `findAllWithRental when there is a book then get one`() {
 
         // When
@@ -61,7 +89,6 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("書籍が無ければ空のリストが検索されること")
-    @DatabaseSetup("/test-data/book/initNoRecord.xml")
     fun `findAllWIthRental when there is no books then get employ list`() {
 
         // When
@@ -74,8 +101,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("貸出されていない登録されている書籍が検索できる")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
-    @ExpectedDatabase("/test-data/book/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @Sql("MultiBooks.sql")
     fun `findWithRental when book is exist and is not rent then get one without rental`() {
 
         // When
@@ -88,8 +114,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("貸出されていて登録されている書籍が検索できる")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
-    @ExpectedDatabase("/test-data/book/expectedMultiRecord.xml", assertionMode = NON_STRICT_UNORDERED)
+    @Sql("MultiBooks.sql")
     fun `findWithRental when book is exist and is rent then get one with rental`() {
 
         // When
@@ -102,7 +127,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("書籍を登録する")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `register when a book is not registered yet then register it`() {
 
         // Given
@@ -127,7 +152,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("既にIDが登録済みの書籍は登録できない")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `register when a book has already registered then will not register it`() {
 
         // When
@@ -141,7 +166,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("既存IDを持つ書籍情報のプロパティを更新する")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `update when book id has already been registered then update its properties`() {
 
         // Given
@@ -168,7 +193,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("変更したプロパティだけが更新されること")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `update when book will be updated some properties then update only their updated properties`() {
 
         // Given
@@ -195,7 +220,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("プロパティを何も変更しなければ更新されないこと")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `update when book will not be updated any properties then update any columns`() {
 
         // Then
@@ -206,7 +231,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("存在しない書籍IDなら更新されないこと")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `update when book id is not exist then book will not be updated`() {
 
         // Given
@@ -226,7 +251,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("書籍を削除する")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `delete when book is exist then delete it`() {
 
         // Given
@@ -245,7 +270,7 @@ internal class BookRepositoryImplTest : TestContainerDataRegistry() {
 
     @Test
     @DisplayName("登録されていない書籍を削除しても削除できないこと")
-    @DatabaseSetup("/test-data/book/initMultiRecord.xml")
+    @Sql("MultiBooks.sql")
     fun `delete when book will be deleted without registration then number of delete is zero`() {
 
         // Given
