@@ -1,10 +1,7 @@
 package com.book.manager.infrastructure.database.mapper
 
-import com.book.manager.infrastructure.database.dbunit.DataSourceConfig
 import com.book.manager.infrastructure.database.record.BookWithRental
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
-import com.github.springtestdbunit.DbUnitTestExecutionListener
-import com.github.springtestdbunit.annotation.DatabaseSetup
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.DisplayName
@@ -12,16 +9,12 @@ import org.junit.jupiter.api.Test
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.context.annotation.Import
-import org.springframework.test.context.TestExecutionListeners
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(value = [DataSourceConfig::class])
-@TestExecutionListeners(listeners = [DependencyInjectionTestExecutionListener::class, DbUnitTestExecutionListener::class])
 internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() {
 
     @Autowired
@@ -29,7 +22,6 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
 
     @Test
     @DisplayName("書籍が0件なら空のリストを返す")
-    @DatabaseSetup("/test-data/book-with-rental/init-data/no-book.xml")
     fun `select when there are no books then return empty list`() {
 
         // When
@@ -40,8 +32,8 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     }
 
     @Test
+    @Sql("BookWithRental.sql")
     @DisplayName("書籍が1件で貸出中なら、貸出情報を含んだ書籍リストを1件返す")
-    @DatabaseSetup("/test-data/book-with-rental/init-data/single-data-with-rental.xml")
     fun `select when there is only one book with renting then return list has a element`() {
 
         // Given
@@ -73,8 +65,8 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     }
 
     @Test
+    @Sql("BookWithoutRental.sql")
     @DisplayName("書籍が1件で貸出されていなければ、貸出情報を含まない書籍リストを1件返す")
-    @DatabaseSetup("/test-data/book-with-rental/init-data/single-data-without-rental.xml")
     fun `select when there is only one book without renting then return list has a element`() {
 
         // Given
@@ -102,8 +94,8 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     }
 
     @Test
+    @Sql("BooksWithRental.sql")
     @DisplayName("書籍が複数件ありその内の幾つかが貸出中のリストを返す")
-    @DatabaseSetup("/test-data/book-with-rental/init-data/multi-data.xml")
     fun `select when there are some books with renting then return list`() {
 
         // Given
@@ -134,8 +126,8 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     }
 
     @Test
+    @Sql("BooksWithRental.sql")
     @DisplayName("IDに該当する書籍が無ければNullを返す")
-    @DatabaseSetup("/test-data/book-with-rental/init-data/multi-data.xml")
     fun `selectByPrimaryKey when there is no book with specified id then return null`() {
 
         // Given
@@ -149,8 +141,8 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     }
 
     @Test
+    @Sql("BooksWithRental.sql")
     @DisplayName("IDに該当する書籍があり貸出中なら、その書籍情報を返す")
-    @DatabaseSetup("/test-data/book-with-rental/init-data/multi-data.xml")
     fun `selectByPrimaryKey when there is a book with specified id and it has been renting then return this`() {
 
         // Given
@@ -169,8 +161,8 @@ internal class BookWithRentalMapperExtensionsTest : TestContainerDataRegistry() 
     }
 
     @Test
+    @Sql("BooksWithRental.sql")
     @DisplayName("IDに該当する書籍があり貸出されていなければ、その書籍情報を返す")
-    @DatabaseSetup("/test-data/book-with-rental/init-data/multi-data.xml")
     fun `selectByPrimaryKey when there is a book with specified id and it has not been renting then return this`() {
 
         // Given
