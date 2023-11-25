@@ -4,49 +4,30 @@ import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.infrastructure.database.mapper.AccountMapper
-import com.book.manager.infrastructure.database.mapper.delete
-import com.book.manager.infrastructure.database.mapper.insert
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
-import org.springframework.context.annotation.Import
-import com.book.manager.infrastructure.database.record.Account as RecordAccount
+import org.springframework.test.context.jdbc.Sql
 
 @MybatisTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import(value = [AccountRepositoryImpl::class])
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql("Account.sql")
 internal class AccountRepositoryImplTest : TestContainerDataRegistry() {
-
-    @Autowired
-    private lateinit var accountRepository: AccountRepository
 
     @Autowired
     private lateinit var accountMapper: AccountMapper
 
-    /*
-    accountテーブルはEnum型で作成したRoleTypeを持っており、DBUnitからPostgresqlDriver経由でのInsert文でエラーとなって
-    登録できない。
-    なので、Mapperを使って、SetUpメソッドで登録し、tearDownメソッドで削除する方法を利用する
-     */
+    private lateinit var accountRepository: AccountRepository
+
     @BeforeEach
     internal fun setUp() {
-        accountMapper.insert(RecordAccount(1, "admin@example.com", "passpass", "admin", RoleType.ADMIN))
-        accountMapper.insert(RecordAccount(2, "user@example.com", "passpass", "user", RoleType.USER))
-        accountMapper.insert(RecordAccount(999, "admin2@example.com", "passpass", "admin2", RoleType.ADMIN))
-        accountMapper.insert(RecordAccount(8888, "user2@example.com", "passpass", "user2", RoleType.USER))
-    }
-
-    @AfterEach
-    internal fun tearDown() {
-        accountMapper.delete { allRows() }
+        accountRepository = AccountRepositoryImpl(accountMapper)
     }
 
     @Test
