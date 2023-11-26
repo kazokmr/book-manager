@@ -17,11 +17,9 @@ import java.time.LocalDateTime
 @MybatisTest
 @ImportTestcontainers(TestContainerDataRegistry::class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-internal class BookWithRentalMapperExtensionsTest {
-
-    @Autowired
-    private lateinit var mapper: BookWithRentalMapper
-
+internal class BookWithRentalMapperExtensionsTest(
+    @Autowired private val mapper: BookWithRentalMapper
+) {
     @Test
     @DisplayName("書籍が0件なら空のリストを返す")
     fun `select when there are no books then return empty list`() {

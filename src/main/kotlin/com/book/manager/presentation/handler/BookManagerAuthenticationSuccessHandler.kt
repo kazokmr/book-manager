@@ -14,7 +14,8 @@ class BookManagerAuthenticationSuccessHandler : AuthenticationSuccessHandler {
         authentication: Authentication
     ) {
         response.status = HttpServletResponse.SC_OK
-        // 認証でセッションが書き換わるのでCSRFトークンも更新する
-        CsrfTokenHandler(request, response).setToken(request.getAttribute("_csrf") as CsrfToken)
+        // 認証でセッションが書き換わるのでCSRFトークンもロードしなおす
+        val csrfToken = request.getAttribute("_csrf") as CsrfToken
+        CsrfTokenHandler(request, response).setToken(csrfToken)
     }
 }

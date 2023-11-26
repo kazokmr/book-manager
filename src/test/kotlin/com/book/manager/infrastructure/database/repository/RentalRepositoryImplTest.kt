@@ -24,15 +24,12 @@ import java.time.LocalDateTime
 @ImportTestcontainers(TestContainerDataRegistry::class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Sql("Rental.sql")
-internal class RentalRepositoryImplTest {
-
-    @Autowired
-    private lateinit var rentalMapper: RentalMapper
+internal class RentalRepositoryImplTest(
+    @Autowired private val rentalMapper: RentalMapper,
+    @Autowired private val jdbcTemplate: JdbcTemplate
+) {
 
     private lateinit var rentalRepository: RentalRepository
-
-    @Autowired
-    private lateinit var jdbcTemplate: JdbcTemplate
 
     @BeforeEach
     fun setUp() {
