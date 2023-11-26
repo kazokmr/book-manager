@@ -3,7 +3,6 @@ package com.book.manager.presentation.controller
 import com.book.manager.application.service.AdminBookService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.config.CustomJsonConverter
-import com.book.manager.config.CustomTestConfiguration
 import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
 import com.book.manager.presentation.form.AdminBookResponse
@@ -17,7 +16,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -28,15 +26,15 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [AdminBookController::class])
-@Import(CustomTestConfiguration::class)
 @WithCustomMockUser(roleType = RoleType.ADMIN)
 internal class AdminBookControllerTest(
     @Autowired private val mockMvc: MockMvc,
-    @Autowired private val jsonConverter: CustomJsonConverter
 ) {
 
     @MockBean
     private lateinit var adminBookService: AdminBookService
+
+    private val jsonConverter: CustomJsonConverter = CustomJsonConverter()
 
     @Test
     @DisplayName("書籍を登録する")

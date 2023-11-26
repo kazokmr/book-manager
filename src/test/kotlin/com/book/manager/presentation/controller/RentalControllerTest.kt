@@ -3,15 +3,10 @@ package com.book.manager.presentation.controller
 import com.book.manager.application.service.RentalService
 import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.config.CustomJsonConverter
-import com.book.manager.config.CustomTestConfiguration
-import com.book.manager.domain.enum.RoleType
-import com.book.manager.domain.model.Account
-import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.Rental
 import com.book.manager.presentation.form.RentalStartRequest
 import com.book.manager.presentation.form.RentalStartResponse
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -19,7 +14,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -28,39 +22,29 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.server.ResponseStatusException
 import java.nio.charset.StandardCharsets
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @WebMvcTest(controllers = [RentalController::class])
-@Import(CustomTestConfiguration::class)
 @WithCustomMockUser
 internal class RentalControllerTest(
     @Autowired private val mockMvc: MockMvc,
-    @Autowired private val jsonConverter: CustomJsonConverter
 ) {
 
     @MockBean
     private lateinit var rentalService: RentalService
 
-    private lateinit var account: Account
-    private lateinit var book: Book
-
-    @BeforeEach
-    internal fun setUp() {
-        account = Account(1000L, "test@example.com", "pass", "test", RoleType.USER)
-        book = Book(1L, "title", "author", LocalDate.now())
-    }
+    private val jsonConverter: CustomJsonConverter = CustomJsonConverter()
 
     @Test
     @DisplayName("書籍の貸出し")
     fun `startRental when a book can be rent then start rental`() {
 
         // Given
-        val request = RentalStartRequest(book.id)
+        val request = RentalStartRequest(1)
         val json = jsonConverter.toJson(request)
 
         val rentalDate = LocalDateTime.now()
-        val rental = Rental(book.id, account.id, rentalDate, rentalDate.plusDays(14))
+        val rental = Rental(1, 1000, rentalDate, rentalDate.plusDays(14))
         whenever(rentalService.startRental(any() as Long, any() as Long)).thenReturn(rental)
 
         // When
@@ -88,9 +72,9 @@ internal class RentalControllerTest(
     fun `startRental when book can not be rent then throw BadRequest`() {
 
         // Given
-        val request = RentalStartRequest(book.id)
+        val request = RentalStartRequest(1)
         val json = jsonConverter.toJson(request)
-        val reason = "エラー: bookId ${book.id} accountId ${account.id}"
+        val reason = "エラー: bookId 1 accountId 1000"
         whenever(rentalService.startRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
@@ -178,7 +162,7 @@ internal class RentalControllerTest(
         val resultContent =
             mockMvc
                 .perform(
-                    delete("/rental/end/${book.id}")
+                    delete("/rental/end/1")
                         .with(csrf().asHeader())
                 )
                 .andExpect(status().isNoContent)
@@ -195,14 +179,14 @@ internal class RentalControllerTest(
     fun `endRental when an account is not exist then throw BadRequest`() {
 
         // Given
-        val reason = "エラー: bookId ${book.id} accountId ${account.id}"
+        val reason = "エラー: bookId 1 accountId 1000"
         whenever(rentalService.endRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException(reason))
 
         // When
         val exception =
             mockMvc
                 .perform(
-                    delete("/rental/end/${book.id}")
+                    delete("/rental/end/1")
                         .with(csrf().asHeader())
                 )
                 .andExpect(status().isBadRequest)
