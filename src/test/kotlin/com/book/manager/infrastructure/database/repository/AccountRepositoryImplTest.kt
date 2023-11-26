@@ -37,7 +37,13 @@ internal class AccountRepositoryImplTest(
 
         // Given
         val accountId = 1L
-        val expectedAccount = Account(accountId, "admin@example.com", "passpass", "admin", RoleType.ADMIN)
+        val expectedAccount = Account(
+            accountId,
+            "admin@example.com",
+            "\$2a\$10\$tfo0VzAuHTeAWu043QWYjOfnH5tvcLRrma/VEZM1JNoCKDx1.voMm",
+            "admin",
+            RoleType.ADMIN
+        )
 
         // When
         val resultAccount = accountRepository.findById(accountId)
@@ -72,7 +78,13 @@ internal class AccountRepositoryImplTest(
     fun `findByEmail when account is exist then find by Email`() {
 
         // Given
-        val expectedAccount = Account(8888, "user2@example.com", "passpass", "user2", RoleType.USER)
+        val expectedAccount = Account(
+            8888,
+            "user2@example.com",
+            "\$2a\$10\$tfo0VzAuHTeAWu043QWYjOfnH5tvcLRrma/VEZM1JNoCKDx1.voMm",
+            "user2",
+            RoleType.USER
+        )
 
         // When
         val account = accountRepository.findByEmail(expectedAccount.email)
