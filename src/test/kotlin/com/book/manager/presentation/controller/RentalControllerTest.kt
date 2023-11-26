@@ -35,8 +35,8 @@ import java.time.LocalDateTime
 @Import(CustomTestConfiguration::class)
 @WithCustomMockUser
 internal class RentalControllerTest(
-    @Autowired val mockMvc: MockMvc,
-    @Autowired val jsonConverter: CustomJsonConverter
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val jsonConverter: CustomJsonConverter
 ) {
 
     @MockBean

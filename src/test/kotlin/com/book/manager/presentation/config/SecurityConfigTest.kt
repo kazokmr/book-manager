@@ -25,10 +25,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(controllers = [AdminBookController::class])
 @ContextConfiguration(classes = [SecurityConfig::class, BookManagerUserDetailsService::class])
-internal class SecurityConfigTest(@Autowired val mockMvc: MockMvc) {
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
+internal class SecurityConfigTest(
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val passwordEncoder: PasswordEncoder
+) {
 
     @MockBean
     private lateinit var authenticationService: AuthenticationService

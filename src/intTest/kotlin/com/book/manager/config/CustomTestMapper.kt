@@ -14,17 +14,11 @@ import com.book.manager.infrastructure.database.record.Book as RecordBook
 import com.book.manager.infrastructure.database.record.Rental as RecordRental
 
 @TestComponent
-class CustomTestMapper {
-
-    @Autowired
-    private lateinit var accountMapper: AccountMapper
-
-    @Autowired
-    private lateinit var bookMapper: BookMapper
-
-    @Autowired
-    private lateinit var rentalMapper: RentalMapper
-
+class CustomTestMapper(
+    @Autowired private val accountMapper: AccountMapper,
+    @Autowired private val bookMapper: BookMapper,
+    @Autowired private val rentalMapper: RentalMapper
+) {
     fun clearAllData() {
         rentalMapper.delete { allRows() }
         bookMapper.delete { allRows() }

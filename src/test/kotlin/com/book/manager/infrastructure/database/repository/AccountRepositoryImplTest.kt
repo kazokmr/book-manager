@@ -20,10 +20,9 @@ import org.springframework.test.context.jdbc.Sql
 @ImportTestcontainers(TestContainerDataRegistry::class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql("Account.sql")
-internal class AccountRepositoryImplTest {
-
-    @Autowired
-    private lateinit var accountMapper: AccountMapper
+internal class AccountRepositoryImplTest(
+    @Autowired private val accountMapper: AccountMapper
+) {
 
     private lateinit var accountRepository: AccountRepository
 

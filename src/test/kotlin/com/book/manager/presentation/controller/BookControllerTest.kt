@@ -32,7 +32,10 @@ import java.time.LocalDateTime
 @WebMvcTest(controllers = [BookController::class])
 @Import(CustomTestConfiguration::class)
 @WithCustomMockUser
-internal class BookControllerTest(@Autowired val mockMvc: MockMvc, @Autowired val jsonConverter: CustomJsonConverter) {
+internal class BookControllerTest(
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val jsonConverter: CustomJsonConverter
+) {
 
     @MockBean
     private lateinit var bookService: BookService

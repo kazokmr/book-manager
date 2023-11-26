@@ -39,17 +39,11 @@ import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration::class)
-internal class BookManagerIntegrationTests {
-
-    @Autowired
-    private lateinit var exchangeFilter: CustomExchangeFilterFunction
-
-    @Autowired
-    private lateinit var jsonConverter: CustomJsonConverter
-
-    @Autowired
-    private lateinit var testMapper: CustomTestMapper
-
+internal class BookManagerIntegrationTests(
+    @Autowired private val exchangeFilter: CustomExchangeFilterFunction,
+    @Autowired private val jsonConverter: CustomJsonConverter,
+    @Autowired private val testMapper: CustomTestMapper
+) {
     @LocalServerPort
     private var port: Int = 0
 
@@ -173,7 +167,8 @@ internal class BookManagerIntegrationTests {
         SoftAssertions().apply {
             assertThat(response.status).isEqualTo(HttpStatus.OK)
             assertThat(response.responseBody?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
-            assertThat(response.responseBody?.bookList).`as`("登録していない書籍は含まれていないこと").doesNotContain(bookInfoNone)
+            assertThat(response.responseBody?.bookList).`as`("登録していない書籍は含まれていないこと")
+                .doesNotContain(bookInfoNone)
         }.assertAll()
     }
 

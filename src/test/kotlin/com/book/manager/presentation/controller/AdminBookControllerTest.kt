@@ -31,8 +31,8 @@ import java.time.LocalDate
 @Import(CustomTestConfiguration::class)
 @WithCustomMockUser(roleType = RoleType.ADMIN)
 internal class AdminBookControllerTest(
-    @Autowired val mockMvc: MockMvc,
-    @Autowired val jsonConverter: CustomJsonConverter
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val jsonConverter: CustomJsonConverter
 ) {
 
     @MockBean

@@ -25,13 +25,10 @@ import java.time.LocalDateTime
 @MybatisTest
 @ImportTestcontainers(TestContainerDataRegistry::class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-internal class BookRepositoryImplTest {
-
-    @Autowired
-    private lateinit var rentalMapper: BookWithRentalMapper
-
-    @Autowired
-    private lateinit var bookMapper: BookMapper
+internal class BookRepositoryImplTest(
+    @Autowired private val rentalMapper: BookWithRentalMapper,
+    @Autowired private val bookMapper: BookMapper
+) {
 
     private lateinit var bookRepository: BookRepository
 

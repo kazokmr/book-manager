@@ -1,5 +1,8 @@
 package com.book.manager.config
 
+import com.book.manager.infrastructure.database.mapper.AccountMapper
+import com.book.manager.infrastructure.database.mapper.BookMapper
+import com.book.manager.infrastructure.database.mapper.RentalMapper
 import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.testcontainers.context.ImportTestcontainers
@@ -13,7 +16,8 @@ class IntegrationTestConfiguration {
     fun exchangeFilter(): CustomExchangeFilterFunction = CustomExchangeFilterFunction()
 
     @Bean
-    fun testMapper(): CustomTestMapper = CustomTestMapper()
+    fun testMapper(accountMapper: AccountMapper, bookMapper: BookMapper, rentalMapper: RentalMapper): CustomTestMapper =
+        CustomTestMapper(accountMapper, bookMapper, rentalMapper)
 
     @Bean
     fun jsonConverter(): CustomJsonConverter = CustomJsonConverter()
