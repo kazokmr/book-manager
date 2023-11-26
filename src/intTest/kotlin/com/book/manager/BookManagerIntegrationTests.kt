@@ -2,60 +2,56 @@ package com.book.manager
 
 import com.book.manager.config.CustomExchangeFilterFunction
 import com.book.manager.config.CustomJsonConverter
-import com.book.manager.config.CustomTestMapper
-import com.book.manager.config.IntegrationTestConfiguration
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
-import com.book.manager.domain.model.Rental
+import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
 import com.book.manager.presentation.form.GetBookListResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Import(IntegrationTestConfiguration::class)
-internal class BookManagerIntegrationTests(
-    @Autowired private val exchangeFilter: CustomExchangeFilterFunction,
-    @Autowired private val jsonConverter: CustomJsonConverter,
-    @Autowired private val testMapper: CustomTestMapper
-) {
+@ImportTestcontainers(TestContainerDataRegistry::class)
+@Sql("Account.sql")
+@Sql(value = ["clear.sql"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+internal class BookManagerIntegrationTests {
+
     @LocalServerPort
     private var port: Int = 0
 
     private lateinit var webClient: WebTestClient
 
+    private val jsonConverter: CustomJsonConverter = CustomJsonConverter()
+
     @BeforeEach
     internal fun setUp() {
-        testMapper.initDefaultAccounts()
         webClient = WebTestClient
             .bindToServer()
             .baseUrl("http://localhost:$port")
-            .filter(exchangeFilter)
+            .filter(CustomExchangeFilterFunction()) // Request/ResponseのカスタムFilter
             .codecs {
                 it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(jsonConverter.objectMapper()))
             }
@@ -63,18 +59,13 @@ internal class BookManagerIntegrationTests(
         webClient.get().uri("/csrf_token").exchange()
     }
 
-    @AfterEach
-    internal fun tearDown() {
-        testMapper.clearAllData()
-    }
-
     companion object {
         @JvmStatic
         fun users(): Stream<Arguments> = Stream.of(
-            Arguments.of("admin@example.com", "admin", HttpStatus.OK),
-            Arguments.of("user@example.com", "user", HttpStatus.OK),
-            Arguments.of("test@example.com", "test", HttpStatus.OK),
-            Arguments.of("none@example.com", "none", HttpStatus.UNAUTHORIZED)
+            Arguments.of("admin@example.com", "password", HttpStatus.OK),
+            Arguments.of("user@example.com", "password", HttpStatus.OK),
+            Arguments.of("test@example.com", "password", HttpStatus.OK),
+            Arguments.of("none@example.com", "password", HttpStatus.UNAUTHORIZED)
         )
 
         @JvmStatic
@@ -85,7 +76,7 @@ internal class BookManagerIntegrationTests(
             return Stream.of(
                 Arguments.of(
                     "admin@example.com",
-                    "admin",
+                    "password",
                     book,
                     HttpStatus.CREATED,
                     expectedRegisteredBook,
@@ -94,7 +85,7 @@ internal class BookManagerIntegrationTests(
                 ),
                 Arguments.of(
                     "user@example.com",
-                    "user",
+                    "password",
                     book,
                     HttpStatus.FORBIDDEN,
                     null,
@@ -120,39 +111,12 @@ internal class BookManagerIntegrationTests(
 
     @Test
     @DisplayName("書籍リストを取得する")
+    @Sql(value = ["Account.sql", "BookWithRental.sql"])
+    @Sql(value = ["clear.sql"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     fun `bookList when list is exist then return them`() {
 
         // Given
-        val bookInfo1 = BookInfo(100, "Kotlin入門", "ことりん太郎", false)
-        val bookInfo2 = BookInfo(200, "Java入門", "じゃば太郎", true)
-        val bookInfo3 = BookInfo(300, "Spring入門", "すぷりんぐ太郎", true)
-        val bookInfo4 = BookInfo(400, "Kotlin実践", "ことりん太郎", false)
-        val bookInfoNone = BookInfo(9999, "未登録書籍", "アノニマス", false)
-
-        val testBookWithRentalList =
-            listOf(
-                BookWithRental(
-                    Book(bookInfo1.id, bookInfo1.title, bookInfo1.author, LocalDate.now()),
-                    null
-                ),
-                BookWithRental(
-                    Book(bookInfo2.id, bookInfo2.title, bookInfo2.author, LocalDate.now()),
-                    Rental(bookInfo2.id, 1000, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
-                ),
-                BookWithRental(
-                    Book(bookInfo3.id, bookInfo3.title, bookInfo3.author, LocalDate.now()),
-                    Rental(bookInfo3.id, 1000, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
-                ),
-                BookWithRental(
-                    Book(bookInfo4.id, bookInfo4.title, bookInfo4.author, LocalDate.now()),
-                    null
-                )
-            )
-        testMapper.createBookWithRental(testBookWithRentalList)
-
-        val user = "admin@example.com"
-        val pass = "admin"
-        webClient.login(user, pass)
+        webClient.login("admin@example.com", "password")
 
         // When
         val response = webClient
@@ -163,12 +127,21 @@ internal class BookManagerIntegrationTests(
             .returnResult()
 
         // Then
-        val expected = GetBookListResponse(listOf(bookInfo1, bookInfo2, bookInfo3, bookInfo4))
+        val expected = GetBookListResponse(
+            listOf(
+                BookInfo(100, "Kotlin入門", "ことりん太郎", false),
+                BookInfo(200, "Java入門", "じゃば太郎", true),
+                BookInfo(300, "Spring入門", "すぷりんぐ太郎", true),
+                BookInfo(400, "Kotlin実践", "ことりん太郎", false),
+            )
+        )
         SoftAssertions().apply {
             assertThat(response.status).isEqualTo(HttpStatus.OK)
             assertThat(response.responseBody?.bookList).containsExactlyInAnyOrderElementsOf(expected.bookList)
             assertThat(response.responseBody?.bookList).`as`("登録していない書籍は含まれていないこと")
-                .doesNotContain(bookInfoNone)
+                .doesNotContain(
+                    BookInfo(9999, "未登録書籍", "アノニマス", false)
+                )
         }.assertAll()
     }
 
@@ -204,7 +177,6 @@ internal class BookManagerIntegrationTests(
             .exchange()
             .expectBody<AdminBookResponse>()
             .returnResult()
-
 
         // Then
         val getResponse = webClient
