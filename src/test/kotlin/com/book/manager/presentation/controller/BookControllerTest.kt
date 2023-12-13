@@ -13,7 +13,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -47,7 +48,7 @@ internal class BookControllerTest(
             BookWithRental(Book(200, "Java入門", "ジャバ太郎", LocalDate.now()), null),
             BookWithRental(Book(300, "Spring入門", "スプリング太郎", LocalDate.now()), null)
         )
-        whenever(bookService.getList()).thenReturn(bookWithRentalList)
+        doReturn(bookWithRentalList).`when`(bookService).getList()
 
         // When
         val resultResponse =
@@ -74,7 +75,7 @@ internal class BookControllerTest(
         val book = Book(100, "Kotlin入門", "コトリン太郎", LocalDate.now())
         val rental = Rental(100, 1000, LocalDateTime.now(), LocalDateTime.now().plusDays(14))
         val bookWithRental = BookWithRental(book, rental)
-        whenever(bookService.getDetail(any() as Long)).thenReturn(bookWithRental)
+        doReturn(bookWithRental).`when`(bookService).getDetail(any())
 
         // When
         val resultResponse =
@@ -101,7 +102,7 @@ internal class BookControllerTest(
 
         // Given
         val reason = "エラー: 100"
-        whenever(bookService.getDetail(any() as Long)).thenThrow(IllegalArgumentException(reason))
+        doThrow(IllegalArgumentException(reason)).`when`(bookService).getDetail(any())
 
         // When
         val exception = mockMvc

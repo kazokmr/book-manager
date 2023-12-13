@@ -13,9 +13,9 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
@@ -51,7 +51,7 @@ internal class AdminBookServiceTest {
     fun `register when book has already been existed then throw Exception`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
+        doReturn(BookWithRental(book, null)).`when`(bookRepository).findWithRental(any())
 
         // When
         val result = assertThrows<IllegalArgumentException> {
@@ -68,7 +68,7 @@ internal class AdminBookServiceTest {
     fun `delete when book is no null then delete the book`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
+        doReturn(BookWithRental(book, null)).`when`(bookRepository).findWithRental(any())
 
         // When
         val result = adminBookService.delete(book.id)
@@ -83,7 +83,7 @@ internal class AdminBookServiceTest {
     fun `delete when book is not exist then throw Exception`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any())).thenReturn(null)
+        doReturn(null).`when`(bookRepository).findWithRental(any())
 
         // When
         val result = assertThrows<IllegalArgumentException> { adminBookService.delete(book.id) }
@@ -98,7 +98,7 @@ internal class AdminBookServiceTest {
     fun `update when book is exists then update the book`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any())).thenReturn(BookWithRental(book, null))
+        doReturn(BookWithRental(book, null)).`when`(bookRepository).findWithRental(any())
 
         // When
         val result = adminBookService.update(book.id, "test", "author", LocalDate.now())
@@ -113,7 +113,7 @@ internal class AdminBookServiceTest {
     fun `update when book is not exist then throw Exception`() {
 
         // Given
-        whenever(bookRepository.findWithRental(any())).thenReturn(null)
+        doReturn(null).`when`(bookRepository).findWithRental(any())
 
         // When
         val result = assertThrows<IllegalArgumentException> {
