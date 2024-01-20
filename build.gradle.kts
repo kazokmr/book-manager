@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
-    id("org.springframework.boot") version "3.2.1"
+    id("org.springframework.boot") version "3.2.2"
     id("io.spring.dependency-management") version "1.1.4"
     id("com.qqviaja.gradle.MybatisGenerator") version "2.5"
     id("jacoco")
@@ -16,7 +16,7 @@ version = "0.0.1-SNAPSHOT"
 
 kotlin {
     jvmToolchain {
-        this.languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -70,11 +70,11 @@ dependencies {
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.0")
     implementation("com.github.onozaty:mybatis-postgresql-typehandlers:1.0.2")
-    implementation("com.google.protobuf:protobuf-kotlin:3.23.4")
-    implementation("io.grpc:grpc-kotlin-stub:1.3.0")
-    implementation("io.grpc:grpc-netty:1.56.1")
-    implementation("io.grpc:grpc-protobuf:1.56.1")
-    implementation("io.github.lognet:grpc-spring-boot-starter:5.1.3")
+    implementation("com.google.protobuf:protobuf-kotlin:3.25.2")
+    implementation("io.grpc:grpc-kotlin-stub:1.4.1")
+    implementation("io.grpc:grpc-netty:1.58.1")
+    implementation("io.grpc:grpc-protobuf:1.61.0")
+    implementation("io.github.lognet:grpc-spring-boot-starter:5.1.5")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("io.micrometer:micrometer-tracing-bridge-otel")
@@ -82,7 +82,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
@@ -133,21 +133,21 @@ mybatisGenerator {
     verbose = true
     configFile = "$projectDir/src/main/resources/generatorConfig.xml"
     dependencies {
-        mybatisGenerator("org.mybatis.generator:mybatis-generator-core:1.4.2")
-        mybatisGenerator("org.postgresql:postgresql:42.6.0")
+        mybatisGenerator("org.mybatis.generator:mybatis-generator-core")
+        mybatisGenerator("org.postgresql:postgresql")
     }
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.22.4"
+        artifact = "com.google.protobuf:protoc:3.25.2"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.56.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.61.0"
         }
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.3.0:jdk8@jar"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.4.1:jdk8@jar"
         }
     }
     generateProtoTasks {
