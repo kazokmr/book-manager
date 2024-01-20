@@ -1,7 +1,6 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.BookService
-import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.config.CustomJsonConverter
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
@@ -18,6 +17,7 @@ import org.mockito.kotlin.doThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -28,7 +28,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @WebMvcTest(controllers = [BookController::class])
-@WithCustomMockUser
+@WithMockUser(authorities = ["USER"])
 internal class BookControllerTest(
     @Autowired private val mockMvc: MockMvc,
 ) {
