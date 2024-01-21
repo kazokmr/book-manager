@@ -12,7 +12,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -37,7 +37,7 @@ internal class BookServiceTest {
         val bookWithRentalB = BookWithRental(bookB, null)
 
         val expected = listOf(bookWithRentalA, bookWithRentalB)
-        whenever(bookRepository.findAllWithRental()).thenReturn(expected)
+        doReturn(expected).`when`(bookRepository).findAllWithRental()
 
         // When
         val result = bookService.getList()
@@ -52,7 +52,7 @@ internal class BookServiceTest {
 
         // Given
         val expected = emptyList<BookWithRental>()
-        whenever(bookRepository.findAllWithRental()).thenReturn(expected)
+        doReturn(expected).`when`(bookRepository).findAllWithRental()
 
         // When
         val result = bookService.getList()
@@ -68,7 +68,7 @@ internal class BookServiceTest {
         // Given
         val book = Book(528, "Kotlin入門", "Kotlin太郎", LocalDate.now())
         val bookWithRental = BookWithRental(book, null)
-        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(bookWithRental)
+        doReturn(bookWithRental).`when`(bookRepository).findWithRental(any())
 
         // When
         val result = bookService.getDetail(book.id)
@@ -83,7 +83,7 @@ internal class BookServiceTest {
 
         // Given
         val bookId = 20L
-        whenever(bookRepository.findWithRental(any() as Long)).thenReturn(null)
+        doReturn(null).`when`(bookRepository).findWithRental(any())
 
         // When
         val result = assertThrows<IllegalArgumentException> { bookService.getDetail(bookId) }

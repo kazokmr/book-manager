@@ -13,8 +13,8 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 
 @ExtendWith(MockitoExtension::class)
@@ -32,7 +32,7 @@ internal class BookManagerUserDetailsServiceTest {
 
         // Given
         val username = "invalidUser"
-        whenever(authenticationService.findAccount(any())).thenReturn(null)
+        doReturn(null).`when`(authenticationService).findAccount(any())
 
         // When
         val result = assertThrows<UsernameNotFoundException> {
@@ -51,7 +51,7 @@ internal class BookManagerUserDetailsServiceTest {
         // Given
         val userName = "moyomoyo"
         val account = Account(100L, "test@exmaple.com", "pass", userName, RoleType.USER)
-        whenever(authenticationService.findAccount(any())).thenReturn(account)
+        doReturn(account).`when`(authenticationService).findAccount(any())
 
         // When
         val result = bookManagerUserDetailsService.loadUserByUsername(userName) as BookManagerUserDetails

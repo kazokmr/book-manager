@@ -11,8 +11,8 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 @ExtendWith(MockitoExtension::class)
 internal class AuthenticationServiceTest {
@@ -44,7 +44,7 @@ internal class AuthenticationServiceTest {
         // Given
         val email = "test@example.com"
         val account = Account(100L, email, "pass", "hogehoge", RoleType.USER)
-        whenever(accountRepository.findByEmail(any())).thenReturn(account)
+        doReturn(account).`when`(accountRepository).findByEmail(any())
 
         // When
         val result = authenticationService.findAccount(email)
@@ -59,7 +59,7 @@ internal class AuthenticationServiceTest {
 
         // Given
         val email = "test@example.com"
-        whenever(accountRepository.findByEmail(any())).thenReturn(null)
+        doReturn(null).`when`(accountRepository).findByEmail(any())
 
         // When
         val result = authenticationService.findAccount(email)

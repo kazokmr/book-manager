@@ -10,7 +10,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -45,7 +46,7 @@ internal class RentalControllerTest(
 
         val rentalDate = LocalDateTime.now()
         val rental = Rental(1, 1000, rentalDate, rentalDate.plusDays(14))
-        whenever(rentalService.startRental(any() as Long, any() as Long)).thenReturn(rental)
+        doReturn(rental).`when`(rentalService).startRental(any(), any())
 
         // When
         val resultResponse =
@@ -75,7 +76,7 @@ internal class RentalControllerTest(
         val request = RentalStartRequest(1)
         val json = jsonConverter.toJson(request)
         val reason = "エラー: bookId 1 accountId 1000"
-        whenever(rentalService.startRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException(reason))
+        doThrow(IllegalArgumentException(reason)).`when`(rentalService).startRental(any(), any())
 
         // When
         val exception =
@@ -180,7 +181,7 @@ internal class RentalControllerTest(
 
         // Given
         val reason = "エラー: bookId 1 accountId 1000"
-        whenever(rentalService.endRental(any() as Long, any() as Long)).thenThrow(IllegalArgumentException(reason))
+        doThrow(IllegalArgumentException(reason)).`when`(rentalService).endRental(any(), any())
 
         // When
         val exception =

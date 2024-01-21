@@ -1,10 +1,9 @@
 package com.book.manager.presentation.controller
 
 import com.book.manager.application.service.AdminBookService
-import com.book.manager.application.service.mockuser.WithCustomMockUser
 import com.book.manager.config.CustomJsonConverter
-import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Book
+import com.book.manager.presentation.config.SecurityConfig
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.RegisterBookRequest
 import com.book.manager.presentation.form.UpdateBookRequest
@@ -12,11 +11,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
@@ -26,7 +28,8 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [AdminBookController::class])
-@WithCustomMockUser(roleType = RoleType.ADMIN)
+@Import(SecurityConfig::class)
+@WithMockUser(authorities = ["ADMIN"])
 internal class AdminBookControllerTest(
     @Autowired private val mockMvc: MockMvc,
 ) {
@@ -45,7 +48,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
 
         val book = Book(request.id, request.title, request.author, request.releaseDate)
-        whenever(adminBookService.register(any())).thenReturn(book)
+        doReturn(book).`when`(adminBookService).register(any())
 
         // When
         val resultResponse =
@@ -76,7 +79,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
         val reason = "エラー: ${request.id}"
 
-        whenever(adminBookService.register(any())).thenThrow(IllegalArgumentException(reason))
+        doThrow(IllegalArgumentException(reason)).`when`(adminBookService).register(any())
 
         // When
         val exception =
@@ -163,7 +166,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
 
         val book = Book(999, "入門", "moyo", LocalDate.of(2018, 4, 19))
-        whenever(adminBookService.register(any())).thenReturn(book)
+        doReturn(book).`when`(adminBookService).register(any())
 
         // When
         val resultResponse =
@@ -194,8 +197,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
 
         val book = Book(request.id, request.title!!, request.author!!, request.releaseDate!!)
-        whenever(adminBookService.update(any(), any(), any(), any()))
-            .thenReturn(request.id)
+        doReturn(request.id).`when`(adminBookService).update(any(), any(), any(), any())
 
         // When
         val resultResponse =
@@ -226,8 +228,7 @@ internal class AdminBookControllerTest(
         val json = jsonConverter.toJson(request)
         val reason = "エラー: ${request.id}"
 
-        whenever(adminBookService.update(any(), any(), any(), any()))
-            .thenThrow(IllegalArgumentException(reason))
+        doThrow(IllegalArgumentException(reason)).`when`(adminBookService).update(any(), any(), any(), any())
 
         // When
         val exception =
@@ -278,7 +279,7 @@ internal class AdminBookControllerTest(
         // Given
         val bookId = 100L
         val reason = "エラー: $bookId"
-        whenever(adminBookService.delete(any())).thenThrow(IllegalArgumentException(reason))
+        doThrow(IllegalArgumentException(reason)).`when`(adminBookService).delete(any())
 
         // When
         val exception =
