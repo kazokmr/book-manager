@@ -19,6 +19,7 @@ abstract class TestContainerDataRegistry {
         val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres").withTag("latest")).apply {
             withEnv("POSTGRES_INITDB_ARGS", "--encoding=UTF-8 --no-locale")
             withEnv("TZ", "Asia/Tokyo")
+            withDatabaseName("book_manager")
             withInitScript("initdb/schema.sql")
         }
 
@@ -33,7 +34,7 @@ abstract class TestContainerDataRegistry {
         @DynamicPropertySource
         @JvmStatic
         fun setUp(registry: DynamicPropertyRegistry) {
-            // FIXME: RedisのportだけはDynamicPropertySourceで定義しないとアクセスしてくれない
+            // GenericContainer には `port` プロパティへのアクセッサが無いため redis.port に `firstMappedPort`プロパティを指定する
             registry.add("spring.data.redis.port", redis::getFirstMappedPort)
         }
     }

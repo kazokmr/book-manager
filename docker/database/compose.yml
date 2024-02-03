@@ -1,8 +1,6 @@
 services:
   db:
-    build:
-      context: ../../
-      dockerfile: ./docker/database/postgresql/Dockerfile
+    image: postgres
     container_name: db_postgresql
     hostname: backend.db
     environment:
@@ -10,6 +8,8 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --no-locale"
       TZ: Asia/Tokyo
     volumes:
+      # 初期化スクリプトを docker-entrypoint-initdb.d に移動して実行させる
+      - ./postgresql/initdb:/docker-entrypoint-initdb.d
       - postgresql_data:/var/lib/postgresql/data
     networks:
       - db
