@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ImportTestcontainers(TestContainerDataRegistry::class)
+@ImportTestcontainers(value = [TestContainerDataRegistry::class])
 @Sql("Account.sql")
 @Sql(value = ["clear.sql"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 internal class BookManagerIntegrationTests {
