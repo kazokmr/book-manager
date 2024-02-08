@@ -4,7 +4,7 @@ import com.book.manager.domain.model.Book
 import com.book.manager.domain.repository.BookRepository
 import com.book.manager.infrastructure.database.mapper.BookMapper
 import com.book.manager.infrastructure.database.mapper.BookWithRentalMapper
-import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
+import com.book.manager.infrastructure.database.testcontainers.DbTestContainerConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +23,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @MybatisTest
-@ImportTestcontainers(TestContainerDataRegistry::class)
+@ImportTestcontainers(DbTestContainerConfiguration::class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 internal class BookRepositoryImplTest(
     @Autowired private val rentalMapper: BookWithRentalMapper,

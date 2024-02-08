@@ -9,30 +9,32 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 
+
 @Testcontainers
-abstract class TestContainerDataRegistry {
+class DbTestContainerConfiguration {
 
     companion object {
+
+        @JvmStatic
         @Container
         @ServiceConnection
-        @JvmStatic
         val database = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres").withTag("latest")).apply {
-            withEnv("POSTGRES_INITDB_ARGS", "--encoding=UTF-8 --no-locale")
-            withEnv("TZ", "Asia/Tokyo")
+            withEnv("postgres_initdb_args", "--encoding=utf-8 --no-locale")
+            withEnv("tz", "asia/tokyo")
             withDatabaseName("book_manager")
             withInitScript("initdb/schema.sql")
         }
 
-        @Container
-        @ServiceConnection
         @JvmStatic
+        @Container
+        @ServiceConnection(name = "redis")
         val redis: GenericContainer<*> =
             GenericContainer<Nothing>(DockerImageName.parse("redis").withTag("latest")).apply {
                 withExposedPorts(6379)
             }
 
-        @DynamicPropertySource
         @JvmStatic
+        @DynamicPropertySource
         fun setUp(registry: DynamicPropertyRegistry) {
             // GenericContainer には `port` プロパティへのアクセッサが無いため redis.port に `firstMappedPort`プロパティを指定する
             registry.add("spring.data.redis.port", redis::getFirstMappedPort)

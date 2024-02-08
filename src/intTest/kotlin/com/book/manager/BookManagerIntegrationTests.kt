@@ -4,7 +4,7 @@ import com.book.manager.config.CustomExchangeFilterFunction
 import com.book.manager.config.CustomJsonConverter
 import com.book.manager.domain.model.Book
 import com.book.manager.domain.model.BookWithRental
-import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
+import com.book.manager.infrastructure.database.testcontainers.DbTestContainerConfiguration
 import com.book.manager.presentation.form.AdminBookResponse
 import com.book.manager.presentation.form.BookInfo
 import com.book.manager.presentation.form.GetBookDetailResponse
@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter
 import java.util.stream.Stream
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ImportTestcontainers(value = [TestContainerDataRegistry::class])
+@ImportTestcontainers(value = [DbTestContainerConfiguration::class])
 @Sql("Account.sql")
 @Sql(value = ["clear.sql"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 internal class BookManagerIntegrationTests {
