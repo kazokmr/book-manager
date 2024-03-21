@@ -2,9 +2,9 @@ import com.google.protobuf.gradle.id
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.spring") version "1.9.22"
-    id("org.springframework.boot") version "3.2.2"
+    kotlin("jvm") version "1.9.23"
+    kotlin("plugin.spring") version "1.9.23"
+    id("org.springframework.boot") version "3.2.4"
     id("io.spring.dependency-management") version "1.1.4"
     id("com.qqviaja.gradle.MybatisGenerator") version "2.5"
     id("jacoco")
@@ -61,7 +61,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     modules {
         module("org.springframework.boot:spring-boot-starter-logging") {
-            replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
+            replacedBy(
+                "org.springframework.boot:spring-boot-starter-log4j2",
+                "Use Log4j2 instead of Logback"
+            )
         }
     }
     implementation("org.springframework.session:spring-session-data-redis")
@@ -117,7 +120,7 @@ tasks.withType<JacocoReport> {
     }
 }
 
-val integrationTest = task<Test>("integrationTest") {
+val integrationTest = tasks.register<Test>("integrationTest") {
     description = "Runs integration tests."
     group = "verification"
     testClassesDirs = sourceSets["intTest"].output.classesDirs
