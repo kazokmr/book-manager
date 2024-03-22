@@ -24,6 +24,8 @@ jacoco {
     toolVersion = "0.8.11"
 }
 
+// 統合テスト用のソースセット "intTest" を作成する
+// intTestCompileOnly, intTestImplementation, intTestRuntimeOnly などのConfigurationが作られる
 sourceSets {
     create("intTest") {
         java {
@@ -34,6 +36,7 @@ sourceSets {
     }
 }
 
+// intelliJで intTestソースセットを認識させる
 idea {
     module {
         testSources.from(sourceSets["intTest"].kotlin.srcDirs)
@@ -41,10 +44,13 @@ idea {
     }
 }
 
+// intTestImplementation に testImplementationの設定内容を引き継ぐ
+// dependenciesで利用するのでオブジェクトで返しておく
 val intTestImplementation: Configuration by configurations.getting {
     extendsFrom(configurations.testImplementation.get())
 }
 
+// intTestRuntimeOnly に testRuntimeOnlyの設定内容を引き継ぐ
 configurations["intTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
 repositories {
@@ -120,6 +126,7 @@ tasks.withType<JacocoReport> {
     }
 }
 
+// IntegrationTestタスクを追加。 checkタスクに含めるので taskオブジェクトを返す
 val integrationTest = tasks.register<Test>("integrationTest") {
     description = "Runs integration tests."
     group = "verification"
