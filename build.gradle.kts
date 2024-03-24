@@ -1,5 +1,6 @@
 import com.epages.restdocs.apispec.gradle.OpenApi3Extension
 import com.google.protobuf.gradle.id
+import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -8,6 +9,7 @@ plugins {
     id("org.springframework.boot") version "3.2.4"
     id("io.spring.dependency-management") version "1.1.4"
     id("com.epages.restdocs-api-spec") version "0.18.2"
+    id("org.asciidoctor.jvm.convert") version "4.0.2"
     id("com.qqviaja.gradle.MybatisGenerator") version "2.5"
     id("jacoco")
     id("com.google.protobuf") version "0.9.4"
@@ -55,6 +57,8 @@ val intTestImplementation: Configuration by configurations.getting {
 // intTestRuntimeOnly に testRuntimeOnlyの設定内容を引き継ぐ
 configurations["intTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
+val asciidoctorExt: Configuration by configurations.creating
+
 repositories {
     mavenCentral()
 }
@@ -101,6 +105,7 @@ dependencies {
     intTestImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("com.epages:restdocs-api-spec-mockmvc:0.19.2")
+    asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
 }
 
 val snippetsDir by extra {
@@ -152,6 +157,17 @@ configure<OpenApi3Extension>{
     title = "sample"
     description = "sample"
     format = "yaml"
+}
+
+tasks.named("test") {
+    outputs.dir(snippetsDir)
+}
+
+tasks.withType<AsciidoctorTask> {
+//    inputs.dir(snippetsDir)
+    sourceDir(snippetsDir)
+    configurations(asciidoctorExt.name)
+    dependsOn("test")
 }
 
 mybatisGenerator {
