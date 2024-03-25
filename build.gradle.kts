@@ -152,7 +152,7 @@ tasks.check {
     dependsOn(integrationTest)
 }
 
-configure<OpenApi3Extension>{
+configure<OpenApi3Extension> {
     setServer("http://localhost:8080")
     title = "sample"
     description = "sample"
@@ -164,8 +164,7 @@ tasks.named("test") {
 }
 
 tasks.withType<AsciidoctorTask> {
-//    inputs.dir(snippetsDir)
-    sourceDir(snippetsDir)
+    inputs.dir(snippetsDir)
     configurations(asciidoctorExt.name)
     dependsOn("test")
 }
