@@ -12,7 +12,9 @@ import org.mockito.kotlin.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -24,10 +26,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delet
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(controllers = [AdminBookController::class])
-@ContextConfiguration(classes = [SecurityConfig::class, BookManagerUserDetailsService::class])
+@ContextConfiguration(classes = [BookManagerUserDetailsService::class])
+@Import(value = [SecurityConfig::class])
 internal class SecurityConfigTest(
-    @Autowired private val mockMvc: MockMvc,
-    @Autowired private val passwordEncoder: PasswordEncoder
+        @Autowired private val mockMvc: MockMvc,
+        @Autowired private val passwordEncoder: PasswordEncoder
 ) {
 
     @MockBean
@@ -47,14 +50,14 @@ internal class SecurityConfigTest(
 
         // When
         mockMvc
-            .perform(
-                formLogin()
-                    .loginProcessingUrl("/login")
-                    .user("email", email)
-                    .password("pass", pass)
-            )
-            .andExpect(authenticated().withUsername(email))
-            .andExpect(status().isOk)
+                .perform(
+                        formLogin()
+                                .loginProcessingUrl("/login")
+                                .user("email", email)
+                                .password("pass", pass)
+                )
+                .andExpect(authenticated().withUsername(email))
+                .andExpect(status().isOk)
     }
 
     @Test
@@ -66,19 +69,19 @@ internal class SecurityConfigTest(
         val pass = "passpass"
         val role = RoleType.USER
         val account =
-            Account(1, email, passwordEncoder.encode(pass), "test", role)
+                Account(1, email, passwordEncoder.encode(pass), "test", role)
         doReturn(account).`when`(authenticationService).findAccount(any())
 
         // When
         mockMvc
-            .perform(
-                formLogin()
-                    .loginProcessingUrl("/login")
-                    .user("email", email)
-                    .password("pass", "invalid")
-            )
-            .andExpect(unauthenticated())
-            .andExpect(status().isUnauthorized)
+                .perform(
+                        formLogin()
+                                .loginProcessingUrl("/login")
+                                .user("email", email)
+                                .password("pass", "invalid")
+                )
+                .andExpect(unauthenticated())
+                .andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -90,27 +93,28 @@ internal class SecurityConfigTest(
 
         // When
         mockMvc
-            .perform(
-                formLogin()
-                    .loginProcessingUrl("/login")
-                    .user("email", "unregister")
-                    .password("pass", "invalid")
-            )
-            .andExpect(unauthenticated())
-            .andExpect(status().isUnauthorized)
+                .perform(
+                        formLogin()
+                                .loginProcessingUrl("/login")
+                                .user("email", "unregister")
+                                .password("pass", "invalid")
+                )
+                .andExpect(unauthenticated())
+                .andExpect(status().isUnauthorized)
     }
 
     @Test
     @DisplayName("認証されていなければアクセスできない")
+    @WithAnonymousUser
     fun `exceptionHandling when account does not authenticate then can not access except login`() {
 
         // When
         mockMvc
-            .perform(
-                delete("/admin/book/delete/100")
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isUnauthorized)
+                .perform(
+                        delete("/admin/book/delete/100")
+                                .with(csrf().asHeader())
+                )
+                .andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -120,10 +124,10 @@ internal class SecurityConfigTest(
 
         // When
         mockMvc
-            .perform(
-                delete("/admin/book/delete/200")
-                    .with(csrf().asHeader())
-            )
-            .andExpect(status().isForbidden)
+                .perform(
+                        delete("/admin/book/delete/200")
+                                .with(csrf().asHeader())
+                )
+                .andExpect(status().isForbidden)
     }
 }

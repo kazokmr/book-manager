@@ -1,10 +1,10 @@
-FROM openjdk:20-slim-bullseye as build
+FROM eclipse-temurin:21 as build
 WORKDIR /app
 COPY . /app
 RUN ./gradlew clean bootJar
 
 
-FROM openjdk:20-slim-bullseye
+FROM gcr.io/distroless/java21-debian12
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build /app/build/libs/book-manager-0.0.1-SNAPSHOT.jar /app/book-manager.jar

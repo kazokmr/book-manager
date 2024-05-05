@@ -3,7 +3,7 @@ package com.book.manager.infrastructure.database.repository
 import com.book.manager.domain.model.Rental
 import com.book.manager.domain.repository.RentalRepository
 import com.book.manager.infrastructure.database.mapper.RentalMapper
-import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
+import com.book.manager.infrastructure.database.testcontainers.DbTestContainerConfiguration
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -21,7 +21,7 @@ import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDateTime
 
 @MybatisTest
-@ImportTestcontainers(TestContainerDataRegistry::class)
+@ImportTestcontainers(DbTestContainerConfiguration::class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Sql("Rental.sql")
 internal class RentalRepositoryImplTest(

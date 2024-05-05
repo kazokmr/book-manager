@@ -4,7 +4,7 @@ import com.book.manager.domain.enum.RoleType
 import com.book.manager.domain.model.Account
 import com.book.manager.domain.repository.AccountRepository
 import com.book.manager.infrastructure.database.mapper.AccountMapper
-import com.book.manager.infrastructure.database.testcontainers.TestContainerDataRegistry
+import com.book.manager.infrastructure.database.testcontainers.DbTestContainerConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +17,7 @@ import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.test.context.jdbc.Sql
 
 @MybatisTest
-@ImportTestcontainers(TestContainerDataRegistry::class)
+@ImportTestcontainers(DbTestContainerConfiguration::class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql("Account.sql")
 internal class AccountRepositoryImplTest(

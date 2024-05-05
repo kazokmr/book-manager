@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -55,7 +54,6 @@ internal class BookControllerTest(
             mockMvc
                 .perform(
                     get("/book/list")
-                        .with(csrf().asHeader())
                 )
                 .andExpect(status().isOk)
                 .andReturn().response
@@ -82,7 +80,6 @@ internal class BookControllerTest(
             mockMvc
                 .perform(
                     get("/book/detail/100")
-                        .with(csrf().asHeader())
                 )
                 .andExpect(status().isOk)
                 .andReturn()
@@ -108,7 +105,6 @@ internal class BookControllerTest(
         val exception = mockMvc
             .perform(
                 get("/book/detail/100")
-                    .with(csrf().asHeader())
             )
             .andExpect(status().isBadRequest)
             .andReturn()
