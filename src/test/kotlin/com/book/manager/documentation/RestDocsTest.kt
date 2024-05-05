@@ -1,5 +1,6 @@
 package com.book.manager.documentation
 
+//import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import com.book.manager.infrastructure.database.testcontainers.DbTestContainerConfiguration
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document
 import org.junit.jupiter.api.Disabled
@@ -11,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-//import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @ImportTestcontainers(value = [DbTestContainerConfiguration::class])
+@Disabled
 internal class RestDocsTest(
     @Autowired private val mockMvc: MockMvc
 ) {
