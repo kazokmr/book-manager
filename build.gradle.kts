@@ -4,9 +4,9 @@ import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "2.0.0"
     kotlin("plugin.spring") version "1.9.23"
-    id("org.springframework.boot") version "3.2.5"
+    id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
     id("com.epages.restdocs-api-spec") version "0.19.2"
     id("org.asciidoctor.jvm.convert") version "4.0.2"
@@ -85,10 +85,10 @@ dependencies {
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.1")
     implementation("com.github.onozaty:mybatis-postgresql-typehandlers:1.0.2")
-    implementation("com.google.protobuf:protobuf-kotlin:4.26.1")
+    implementation("com.google.protobuf:protobuf-kotlin:4.27.0")
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
-    implementation("io.grpc:grpc-netty:1.63.0")
-    implementation("io.grpc:grpc-protobuf:1.63.0")
+    implementation("io.grpc:grpc-netty:1.64.0")
+    implementation("io.grpc:grpc-protobuf:1.64.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:5.1.5")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
@@ -113,7 +113,7 @@ val snippetsDir by extra {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
+    compilerOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 }
