@@ -1,13 +1,14 @@
 import com.epages.restdocs.apispec.gradle.OpenApi3Extension
 import com.google.protobuf.gradle.id
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.0.0"
-    kotlin("plugin.spring") version "1.9.23"
-    id("org.springframework.boot") version "3.3.0"
-    id("io.spring.dependency-management") version "1.1.5"
+    kotlin("plugin.spring") version "2.0.0"
+    id("org.springframework.boot") version "3.3.1"
+    id("io.spring.dependency-management") version "1.1.6"
     id("com.epages.restdocs-api-spec") version "0.19.2"
     id("org.asciidoctor.jvm.convert") version "4.0.2"
     id("com.qqviaja.gradle.MybatisGenerator") version "2.5"
@@ -83,12 +84,12 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3")
-    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.1")
+    implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.2")
     implementation("com.github.onozaty:mybatis-postgresql-typehandlers:1.0.2")
     implementation("com.google.protobuf:protobuf-kotlin:4.27.0")
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
-    implementation("io.grpc:grpc-netty:1.64.0")
-    implementation("io.grpc:grpc-protobuf:1.64.0")
+    implementation("io.grpc:grpc-netty:1.65.0")
+    implementation("io.grpc:grpc-protobuf:1.65.0")
     implementation("io.github.lognet:grpc-spring-boot-starter:5.1.5")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
@@ -97,7 +98,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
@@ -120,6 +121,9 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
+    }
 }
 
 tasks.withType<JacocoReport> {
