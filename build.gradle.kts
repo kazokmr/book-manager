@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.spring") version "2.0.0"
-    id("org.springframework.boot") version "3.3.1"
+    id("org.springframework.boot") version "3.3.2"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.epages.restdocs-api-spec") version "0.19.2"
     id("org.asciidoctor.jvm.convert") version "4.0.2"
