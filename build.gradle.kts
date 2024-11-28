@@ -5,9 +5,9 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.0.20"
-    kotlin("plugin.spring") version "2.0.20"
-    id("org.springframework.boot") version "3.3.4"
+    kotlin("jvm") version "2.1.0"
+    kotlin("plugin.spring") version "2.1.0"
+    id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.epages.restdocs-api-spec") version "0.19.2"
     id("org.asciidoctor.jvm.convert") version "4.0.2"
@@ -21,7 +21,7 @@ version = "0.0.1-SNAPSHOT"
 
 kotlin {
     jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(23)
     }
 }
 
@@ -83,7 +83,7 @@ dependencies {
     implementation("org.springframework.session:spring-session-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4")
     implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.2")
     implementation("com.github.onozaty:mybatis-postgresql-typehandlers:1.0.2")
     implementation("com.google.protobuf:protobuf-kotlin:4.27.0")
@@ -99,7 +99,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
-    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3")
+    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
