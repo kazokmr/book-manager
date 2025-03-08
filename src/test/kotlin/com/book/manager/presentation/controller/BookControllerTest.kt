@@ -16,8 +16,8 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -32,7 +32,7 @@ internal class BookControllerTest(
     @Autowired private val mockMvc: MockMvc,
 ) {
 
-    @MockBean
+    @MockitoBean
     private lateinit var bookService: BookService
 
     private val jsonConverter: CustomJsonConverter = CustomJsonConverter()
