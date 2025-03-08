@@ -19,11 +19,11 @@ import org.mockito.Captor
 import org.mockito.kotlin.*
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.time.LocalDate
@@ -35,7 +35,7 @@ import java.time.format.DateTimeFormatter
 internal class LoggingAdviceTest {
 
     // Controllerテストに必要なMockBean
-    @MockBean
+    @MockitoBean
     private lateinit var bookService: BookService
 
     // AOP(ログ出力)対象クラス
