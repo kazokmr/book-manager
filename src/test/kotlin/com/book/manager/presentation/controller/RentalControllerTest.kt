@@ -14,9 +14,9 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -31,7 +31,7 @@ internal class RentalControllerTest(
     @Autowired private val mockMvc: MockMvc,
 ) {
 
-    @MockBean
+    @MockitoBean
     private lateinit var rentalService: RentalService
 
     private val jsonConverter: CustomJsonConverter = CustomJsonConverter()
