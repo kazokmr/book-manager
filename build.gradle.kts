@@ -32,7 +32,7 @@ jacoco {
 // 統合テスト用のソースセット "intTest" を作成する
 // intTestCompileOnly, intTestImplementation, intTestRuntimeOnly などのConfigurationが作られる
 sourceSets {
-    create("intTest") {
+    register("intTest") {
         java {
             setSrcDirs(listOf("src/intTest"))
         }
